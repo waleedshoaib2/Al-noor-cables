@@ -9,11 +9,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #F8F8F8;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  background-color: #F8F8F8;
 }
 
 /* RTL Support */

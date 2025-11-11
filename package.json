@@ -2,7 +2,6 @@
   "name": "al-noor-cables",
   "version": "1.0.0",
   "description": "Al-Noor Cables Stock and Expense Management System (In-Memory)",
-  "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",

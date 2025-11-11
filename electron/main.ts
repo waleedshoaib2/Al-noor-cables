@@ -29,11 +29,34 @@ function createWindow(): void {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
+    console.log('🔨 Production mode - loading from dist folder');
     const indexPath = join(__dirname, '../dist/index.html');
+    console.log('📄 Index path:', indexPath);
+    console.log('📄 __dirname:', __dirname);
+    
+    // Listen for page load events
+    mainWindow.webContents.once('did-finish-load', () => {
+      console.log('✅ Page finished loading');
+    });
+    
+    mainWindow.webContents.once('did-fail-load', (event, errorCode, errorDescription) => {
+      console.error('❌ Page failed to load:', errorCode, errorDescription);
+    });
+    
+    mainWindow.webContents.once('dom-ready', () => {
+      console.log('✅ DOM ready');
+    });
+    
+    // Try loadFile first (recommended for Electron)
     mainWindow.loadFile(indexPath).catch((err) => {
-      console.error('Failed to load index.html:', err);
-      // Show error to user
+      console.error('❌ Failed to load with loadFile:', err);
+      // Fallback to loadURL
+      const fileUrl = `file://${indexPath.replace(/\\/g, '/')}`;
+      console.log('🔄 Trying loadURL with:', fileUrl);
+      mainWindow?.loadURL(fileUrl).catch((err2) => {
+        console.error('❌ Failed to load with loadURL:', err2);
       mainWindow?.webContents.send('error', 'Failed to load application');
+      });
     });
     
     // Open DevTools in production for debugging (remove in final release)

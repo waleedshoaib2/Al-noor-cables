@@ -5,8 +5,8 @@ export default defineConfig({
   build: {
     outDir: 'dist-electron',
     emptyOutDir: true,
-    target: 'node18', // Target Node.js 18
-    minify: false, // Don't minify for easier debugging
+    target: 'node18',
+    minify: false,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'main.ts'),
@@ -14,11 +14,10 @@ export default defineConfig({
       },
       output: {
         entryFileNames: '[name].js',
-        format: 'es',
+        format: 'cjs', // Use CommonJS for both - works with Electron
       },
       external: [
         'electron',
-        // Node.js built-in modules should be externalized
         'path',
         'url',
         'fs',
@@ -37,7 +36,6 @@ export default defineConfig({
       '@': resolve(__dirname, '../src'),
     },
   },
-  // Tell Vite this is a Node.js build
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
   },

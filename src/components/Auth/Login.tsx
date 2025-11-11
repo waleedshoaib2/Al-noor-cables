@@ -6,11 +6,14 @@ import { Input } from '@/components/Common/Input';
 import logoImage from '../../../alnoor-logo.jpeg';
 
 export default function Login() {
+  console.log('🔐 Login component rendering...');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
+  
+  console.log('🔐 Login component state:', { password, error, loading });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

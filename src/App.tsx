@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Login from './components/Auth/Login';
 import Dashboard from './pages/Dashboard';
 import StockManagement from './pages/StockManagement';
@@ -11,11 +12,37 @@ import Reports from './pages/Reports';
 import MainLayout from './components/Layout/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
-function App() {
+// Component to log current route
+function RouteLogger() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
+  console.log('📍 Current route:', location.pathname);
+  console.log('📍 Location state:', location.state);
+  
+  // Force navigation to /login if not authenticated and not already on /login
+  useEffect(() => {
+    if (!isAuthenticated && location.pathname !== '/login') {
+      console.log('🔄 Redirecting to /login (not authenticated)');
+      navigate('/login', { replace: true });
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
+  
+  return null;
+}
+
+function App() {
+  console.log('📱 App component rendering...');
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  console.log('🔐 Authentication status:', isAuthenticated);
+  console.log('🌐 Window location:', window.location.href);
+  console.log('🌐 Window pathname:', window.location.pathname);
+  console.log('🌐 Window hash:', window.location.hash);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
+      <RouteLogger />
       <Routes>
         <Route
           path="/login"
@@ -129,8 +156,20 @@ function App() {
             )
           }
         />
+        {/* Catch-all route for debugging */}
+        <Route
+          path="*"
+          element={
+            <div>
+              <h1>404 - Route not found</h1>
+              <p>Current path: {window.location.pathname}</p>
+              <p>Is authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
+              {!isAuthenticated && <Navigate to="/login" replace />}
+            </div>
+          }
+        />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
