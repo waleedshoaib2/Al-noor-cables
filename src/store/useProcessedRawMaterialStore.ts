@@ -28,6 +28,7 @@ interface ProcessedRawMaterialState {
   getStockByName: (name: string) => number;
   getTotalStock: () => number;
   getRecentProcessedMaterials: (limit?: number) => ProcessedRawMaterial[];
+  deductStockForProduct: (processedMaterialId: number, quantity: number) => void;
   loadFromStorage: () => void;
   saveToStorage: () => void;
 }
@@ -240,6 +241,25 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
 
   getTotalStock: () => {
     return Object.values(get().stock).reduce((sum, qty) => sum + qty, 0);
+  },
+
+  deductStockForProduct: (processedMaterialId: number, quantity: number) => {
+    set((state) => {
+      const material = state.processedMaterials.find((m) => m.id === processedMaterialId);
+      if (!material) return state;
+
+      const stock = { ...state.stock };
+      stock[material.name] = Math.max(0, (stock[material.name] || 0) - quantity);
+
+      const newState = {
+        processedMaterials: state.processedMaterials,
+        processedMaterialNames: state.processedMaterialNames,
+        stock,
+      };
+
+      saveToStorage(newState.processedMaterials, newState.processedMaterialNames, stock);
+      return newState;
+    });
   },
 
   getRecentProcessedMaterials: (limit = 10) => {

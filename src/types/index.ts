@@ -88,3 +88,43 @@ export interface RawMaterialBatchUsed {
   quantityUsed: number; // in kgs
   materialType: string;
 }
+
+export interface Customer {
+  id: number;
+  name: string;
+  phone?: string;
+  address?: string;
+  details?: string;
+  createdAt: Date;
+}
+
+export interface ProductProduction {
+  id: number;
+  productName: string; // Pre-defined product name (from list of 22)
+  processedMaterialId: number; // Link to processed raw material used
+  processedMaterialBatchId: string;
+  quantity: number; // in foot or bundles
+  unit: 'foot' | 'bundles';
+  date: Date;
+  batchId: string;
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface ProductSale {
+  id: number;
+  saleNo: string;
+  productId: number; // Link to product production
+  customerId: number; // Link to customer
+  quantity: number; // in foot or bundles
+  unit: 'foot' | 'bundles';
+  unitPrice: number;
+  totalAmount: number;
+  discount: number;
+  finalAmount: number;
+  purchaseDate: Date;
+  address?: string;
+  details?: string;
+  notes?: string;
+  createdAt: Date;
+}

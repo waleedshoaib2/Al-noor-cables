@@ -16,6 +16,8 @@ export function clearAllStorage() {
   const knownKeys = [
     'raw-material-storage',
     'processed-raw-material-storage',
+    'product-storage',
+    'customer-storage',
   ];
   
   // Clear known keys
