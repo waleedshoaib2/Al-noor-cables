@@ -19,8 +19,6 @@ export default function ProcessedRawMaterials() {
     (state) => state.deleteProcessedMaterial
   );
   const restoreStock = useRawMaterialStore((state) => state.restoreStock);
-  const getStockByName = useProcessedRawMaterialStore((state) => state.getStockByName);
-  const getTotalStock = useProcessedRawMaterialStore((state) => state.getTotalStock);
   const processedMaterialNames = useProcessedRawMaterialStore(
     (state) => state.processedMaterialNames
   );
@@ -46,10 +44,17 @@ export default function ProcessedRawMaterials() {
     if (window.confirm(t('deleteConfirm', 'processedMaterial'))) {
       const material = processedMaterials.find((m) => m.id === id);
       if (material) {
-        // Restore raw material stock
-        if (material.rawMaterialBatchesUsed && material.rawMaterialBatchesUsed.length > 0) {
+        // Check if this is the only material in the batch
+        const batchMaterials = processedMaterials.filter(
+          (m) => m.batchId === material.batchId && m.date.getTime() === material.date.getTime()
+        );
+        
+        // Only restore raw material stock if deleting the entire batch
+        // (i.e., this is the last or only material in the batch)
+        if (batchMaterials.length === 1 && material.rawMaterialBatchesUsed && material.rawMaterialBatchesUsed.length > 0) {
           restoreStock(material.rawMaterialBatchesUsed);
         }
+        
         deleteProcessedMaterial(id);
       }
     }
@@ -60,25 +65,7 @@ export default function ProcessedRawMaterials() {
     setEditingMaterial(null);
   };
 
-  // Calculate totals for processed materials by type
-  const copperMaterials = processedMaterials.filter((m) => m.materialType.toLowerCase() === 'copper');
-  const silverMaterials = processedMaterials.filter((m) => m.materialType.toLowerCase() === 'silver');
-  
-  const copperInput = copperMaterials.reduce((sum, m) => sum + m.inputQuantity, 0);
-  const copperOutput = copperMaterials.reduce((sum, m) => sum + m.outputQuantity, 0);
-  // Calculate copper stock: sum stock for all unique copper processed material names
-  const uniqueCopperNames = [...new Set(copperMaterials.map((m) => m.name))];
-  const copperStock = uniqueCopperNames.reduce((sum, name) => sum + getStockByName(name), 0);
-  const copperScrap = copperInput - copperOutput;
-  
-  const silverInput = silverMaterials.reduce((sum, m) => sum + m.inputQuantity, 0);
-  const silverOutput = silverMaterials.reduce((sum, m) => sum + m.outputQuantity, 0);
-  // Calculate silver stock: sum stock for all unique silver processed material names
-  const uniqueSilverNames = [...new Set(silverMaterials.map((m) => m.name))];
-  const silverStock = uniqueSilverNames.reduce((sum, name) => sum + getStockByName(name), 0);
-  const silverScrap = silverInput - silverOutput;
-
-  // Filter materials
+  // Filter materials first
   const filteredMaterials = processedMaterials.filter((m) => {
     // Material type filter
     if (filterMaterialType !== 'all' && m.materialType.toLowerCase() !== filterMaterialType.toLowerCase()) {
@@ -109,6 +96,36 @@ export default function ProcessedRawMaterials() {
 
     return true;
   });
+
+  // Calculate totals for filtered materials by type (using unique batches to avoid double counting input)
+  const batchGroups = filteredMaterials.reduce((groups, material) => {
+    const batchKey = `${material.batchId}-${material.date.toISOString()}`;
+    if (!groups[batchKey]) {
+      groups[batchKey] = {
+        materialType: material.materialType,
+        inputQuantity: material.inputQuantity, // Each batch has one input quantity
+        materials: [],
+      };
+    }
+    groups[batchKey].materials.push(material);
+    return groups;
+  }, {} as Record<string, { materialType: string; inputQuantity: number; materials: ProcessedRawMaterial[] }>);
+
+  // Calculate totals by material type from filtered batches
+  const copperBatches = Object.values(batchGroups).filter((b) => b.materialType.toLowerCase() === 'copper');
+  const silverBatches = Object.values(batchGroups).filter((b) => b.materialType.toLowerCase() === 'silver');
+  
+  const copperInput = copperBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  const copperOutput = copperBatches.reduce((sum, batch) => 
+    sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
+  );
+  const copperScrap = copperInput - copperOutput;
+  
+  const silverInput = silverBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  const silverOutput = silverBatches.reduce((sum, batch) => 
+    sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
+  );
+  const silverScrap = silverInput - silverOutput;
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -145,7 +162,7 @@ export default function ProcessedRawMaterials() {
       {/* Summary Stats - Copper */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Copper</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <div className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}</div>
             <div className="text-2xl font-bold text-brand-orange">{copperInput.toFixed(2)} kgs</div>
@@ -153,10 +170,6 @@ export default function ProcessedRawMaterials() {
           <div>
             <div className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}</div>
             <div className="text-2xl font-bold text-brand-orange">{copperOutput.toFixed(2)} kgs</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-600">{t('totalStock', 'processedMaterial')}</div>
-            <div className="text-2xl font-bold text-brand-blue">{copperStock.toFixed(2)} kgs</div>
           </div>
           <div>
             <div className="text-sm text-gray-600">{t('totalScrap', 'processedMaterial')}</div>
@@ -168,7 +181,7 @@ export default function ProcessedRawMaterials() {
       {/* Summary Stats - Silver */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Silver</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <div className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}</div>
             <div className="text-2xl font-bold text-brand-orange">{silverInput.toFixed(2)} kgs</div>
@@ -176,10 +189,6 @@ export default function ProcessedRawMaterials() {
           <div>
             <div className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}</div>
             <div className="text-2xl font-bold text-brand-orange">{silverOutput.toFixed(2)} kgs</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-600">{t('totalStock', 'processedMaterial')}</div>
-            <div className="text-2xl font-bold text-brand-blue">{silverStock.toFixed(2)} kgs</div>
           </div>
           <div>
             <div className="text-sm text-gray-600">{t('totalScrap', 'processedMaterial')}</div>

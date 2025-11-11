@@ -135,7 +135,18 @@
     "totalInputCopper": "Total Input (Copper)",
     "totalInputSilver": "Total Input (Silver)",
     "totalOutput": "Total Output",
-    "totalScrap": "Total Scrap/Waste"
+    "totalScrap": "Total Scrap/Waste",
+    "processedMaterials": "Processed Materials",
+    "addProcessedMaterial": "Add Processed Material",
+    "addMaterial": "Add Material",
+    "material": "Material",
+    "materialsInBatch": "Materials in Batch",
+    "batch": "Batch",
+    "remove": "Remove",
+    "materialsCount": "Materials",
+    "items": "items",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }
 

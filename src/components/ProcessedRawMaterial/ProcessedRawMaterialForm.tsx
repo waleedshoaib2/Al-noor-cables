@@ -7,6 +7,12 @@ import { Input } from '@/components/Common/Input';
 import { generateBatchId } from '@/utils/constants';
 import type { ProcessedRawMaterial } from '@/types';
 
+interface ProcessedMaterialItem {
+  name: string;
+  numberOfBundles: string;
+  weightPerBundle: string;
+}
+
 interface ProcessedRawMaterialFormProps {
   material?: ProcessedRawMaterial | null;
   onClose: () => void;
@@ -19,8 +25,8 @@ export default function ProcessedRawMaterialForm({
   onSubmit,
 }: ProcessedRawMaterialFormProps) {
   const { t, language } = useTranslation();
-  const addProcessedMaterial = useProcessedRawMaterialStore(
-    (state) => state.addProcessedMaterial
+  const addProcessedMaterialBatch = useProcessedRawMaterialStore(
+    (state) => state.addProcessedMaterialBatch
   );
   const updateProcessedMaterial = useProcessedRawMaterialStore(
     (state) => state.updateProcessedMaterial
@@ -34,30 +40,37 @@ export default function ProcessedRawMaterialForm({
   );
 
   const [formData, setFormData] = useState({
-    name: '',
     materialType: '',
     inputQuantity: '',
-    numberOfBundles: '',
-    weightPerBundle: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
 
+  const [processedMaterials, setProcessedMaterials] = useState<ProcessedMaterialItem[]>([
+    { name: '', numberOfBundles: '', weightPerBundle: '' },
+  ]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [materialErrors, setMaterialErrors] = useState<Record<number, Record<string, string>>>({});
   const [loading, setLoading] = useState(false);
   const [availableStock, setAvailableStock] = useState(0);
 
   useEffect(() => {
     if (material) {
+      // For editing, populate single material (legacy support)
       setFormData({
-        name: material.name,
         materialType: material.materialType,
         inputQuantity: material.inputQuantity.toString(),
-        numberOfBundles: material.numberOfBundles.toString(),
-        weightPerBundle: material.weightPerBundle.toString(),
         date: material.date.toISOString().split('T')[0],
         notes: material.notes || '',
       });
+      setProcessedMaterials([
+        {
+          name: material.name,
+          numberOfBundles: material.numberOfBundles.toString(),
+          weightPerBundle: material.weightPerBundle.toString(),
+        },
+      ]);
     }
   }, [material]);
 
@@ -70,20 +83,38 @@ export default function ProcessedRawMaterialForm({
     }
   }, [formData.materialType, getAvailableStockByType]);
 
-  // Regenerate batch ID when date changes (only for new entries)
-  useEffect(() => {
-    if (!material) {
-      const newBatchId = generateBatchId(new Date(formData.date));
-      // Batch ID is auto-generated, no need to store in formData
+  const addProcessedMaterialRow = () => {
+    setProcessedMaterials([
+      ...processedMaterials,
+      { name: '', numberOfBundles: '', weightPerBundle: '' },
+    ]);
+  };
+
+  const removeProcessedMaterialRow = (index: number) => {
+    if (processedMaterials.length > 1) {
+      setProcessedMaterials(processedMaterials.filter((_, i) => i !== index));
+      // Remove errors for this row
+      const newErrors = { ...materialErrors };
+      delete newErrors[index];
+      setMaterialErrors(newErrors);
     }
-  }, [formData.date, material]);
+  };
+
+  const updateProcessedMaterialRow = (index: number, field: keyof ProcessedMaterialItem, value: string) => {
+    const updated = [...processedMaterials];
+    updated[index] = { ...updated[index], [field]: value };
+    setProcessedMaterials(updated);
+    // Clear errors for this field
+    if (materialErrors[index]) {
+      const newErrors = { ...materialErrors };
+      delete newErrors[index]?.[field];
+      setMaterialErrors(newErrors);
+    }
+  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = language === 'ur' ? 'نام درکار ہے' : 'Name is required';
-    }
+    const newMaterialErrors: Record<number, Record<string, string>> = {};
 
     if (!formData.materialType.trim()) {
       newErrors.materialType =
@@ -101,19 +132,28 @@ export default function ProcessedRawMaterialForm({
           : 'Input quantity must be greater than 0';
     }
 
-    if (!formData.numberOfBundles || parseFloat(formData.numberOfBundles) <= 0) {
-      newErrors.numberOfBundles =
-        language === 'ur'
-          ? 'بنڈلز کی تعداد 0 سے زیادہ ہونی چاہیے'
-          : 'Number of bundles must be greater than 0';
-    }
-
-    if (!formData.weightPerBundle || parseFloat(formData.weightPerBundle) <= 0) {
-      newErrors.weightPerBundle =
-        language === 'ur'
-          ? 'فی بنڈل وزن 0 سے زیادہ ہونا چاہیے'
-          : 'Weight per bundle must be greater than 0';
-    }
+    // Validate processed materials
+    processedMaterials.forEach((pm, index) => {
+      const rowErrors: Record<string, string> = {};
+      if (!pm.name.trim()) {
+        rowErrors.name = language === 'ur' ? 'نام درکار ہے' : 'Name is required';
+      }
+      if (!pm.numberOfBundles || parseFloat(pm.numberOfBundles) <= 0) {
+        rowErrors.numberOfBundles =
+          language === 'ur'
+            ? 'بنڈلز کی تعداد 0 سے زیادہ ہونی چاہیے'
+            : 'Number of bundles must be greater than 0';
+      }
+      if (!pm.weightPerBundle || parseFloat(pm.weightPerBundle) <= 0) {
+        rowErrors.weightPerBundle =
+          language === 'ur'
+            ? 'فی بنڈل وزن 0 سے زیادہ ہونا چاہیے'
+            : 'Weight per bundle must be greater than 0';
+      }
+      if (Object.keys(rowErrors).length > 0) {
+        newMaterialErrors[index] = rowErrors;
+      }
+    });
 
     // Check available stock
     if (formData.materialType && !material) {
@@ -126,8 +166,23 @@ export default function ProcessedRawMaterialForm({
       }
     }
 
+    // Check if total output exceeds input
+    const totalOutput = processedMaterials.reduce((sum, pm) => {
+      const bundles = parseFloat(pm.numberOfBundles) || 0;
+      const weight = parseFloat(pm.weightPerBundle) || 0;
+      return sum + bundles * weight;
+    }, 0);
+    const inputQty = parseFloat(formData.inputQuantity) || 0;
+    if (totalOutput > inputQty) {
+      newErrors.totalOutput =
+        language === 'ur'
+          ? `کل آؤٹ پٹ ان پٹ سے زیادہ نہیں ہو سکتا`
+          : `Total output cannot exceed input quantity`;
+    }
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setMaterialErrors(newMaterialErrors);
+    return Object.keys(newErrors).length === 0 && Object.keys(newMaterialErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -141,33 +196,50 @@ export default function ProcessedRawMaterialForm({
 
     try {
       const inputQty = parseFloat(formData.inputQuantity);
-      const numBundles = parseFloat(formData.numberOfBundles);
-      const weightPerBundle = parseFloat(formData.weightPerBundle);
+      const batchId = material ? material.batchId : generateBatchId(new Date(formData.date));
+      const date = new Date(formData.date);
 
-      // Deduct stock from raw materials (FIFO)
+      // Deduct stock from raw materials (FIFO) - only once for the batch
       let batchesUsed: any[] = [];
       if (!material) {
         batchesUsed = deductStock(formData.materialType, inputQty);
+      } else {
+        batchesUsed = material.rawMaterialBatchesUsed;
       }
 
-      const processedMaterialData = {
-        name: formData.name.trim(),
-        materialType: formData.materialType.trim(),
-        inputQuantity: inputQty,
-        numberOfBundles: numBundles,
-        weightPerBundle: weightPerBundle,
-        date: new Date(formData.date),
-        batchId: material
-          ? material.batchId
-          : generateBatchId(new Date(formData.date)),
-        notes: formData.notes.trim() || undefined,
-        rawMaterialBatchesUsed: material ? material.rawMaterialBatchesUsed : batchesUsed,
-      };
-
       if (material) {
-        updateProcessedMaterial(material.id, processedMaterialData);
+        // Legacy: update single material
+        const pm = processedMaterials[0];
+        const numBundles = parseFloat(pm.numberOfBundles);
+        const weightPerBundle = parseFloat(pm.weightPerBundle);
+        updateProcessedMaterial(material.id, {
+          name: pm.name.trim(),
+          materialType: formData.materialType.trim(),
+          inputQuantity: inputQty,
+          numberOfBundles: numBundles,
+          weightPerBundle: weightPerBundle,
+          date,
+          batchId,
+          notes: formData.notes.trim() || undefined,
+          rawMaterialBatchesUsed: batchesUsed,
+        });
       } else {
-        addProcessedMaterial(processedMaterialData);
+        // New: add batch with multiple processed materials
+        const materialsData = processedMaterials.map((pm) => ({
+          name: pm.name.trim(),
+          numberOfBundles: parseFloat(pm.numberOfBundles),
+          weightPerBundle: parseFloat(pm.weightPerBundle),
+        }));
+
+        addProcessedMaterialBatch({
+          materialType: formData.materialType.trim(),
+          inputQuantity: inputQty,
+          date,
+          batchId,
+          notes: formData.notes.trim() || undefined,
+          rawMaterialBatchesUsed: batchesUsed,
+          processedMaterials: materialsData,
+        });
       }
 
       onSubmit();
@@ -181,52 +253,17 @@ export default function ProcessedRawMaterialForm({
     }
   };
 
-  const outputQuantity =
-    parseFloat(formData.numberOfBundles) * parseFloat(formData.weightPerBundle) || 0;
+  // Calculate totals
+  const totalOutput = processedMaterials.reduce((sum, pm) => {
+    const bundles = parseFloat(pm.numberOfBundles) || 0;
+    const weight = parseFloat(pm.weightPerBundle) || 0;
+    return sum + bundles * weight;
+  }, 0);
+  const inputQty = parseFloat(formData.inputQuantity) || 0;
+  const scrap = inputQty - totalOutput;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-      {/* Processed Material Name with datalist */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t('processedMaterialName', 'processedMaterial')} *
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            list="processedMaterialNames"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-              errors.name ? 'border-red-500' : ''
-            }`}
-            placeholder={t('typeOrSelect', 'processedMaterial')}
-            autoComplete="off"
-          />
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          <datalist id="processedMaterialNames">
-            {processedMaterialNames.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-        </div>
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-      </div>
-
       {/* Material Type */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -265,40 +302,6 @@ export default function ProcessedRawMaterialForm({
         error={errors.inputQuantity}
       />
 
-      {/* Number of Bundles and Weight Per Bundle */}
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          label={`${t('numberOfBundles', 'processedMaterial')} *`}
-          type="number"
-          step="1"
-          min="1"
-          value={formData.numberOfBundles}
-          onChange={(e) => setFormData({ ...formData, numberOfBundles: e.target.value })}
-          placeholder="0"
-          error={errors.numberOfBundles}
-        />
-        <Input
-          label={`${t('weightPerBundle', 'processedMaterial')} (kgs) *`}
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.weightPerBundle}
-          onChange={(e) => setFormData({ ...formData, weightPerBundle: e.target.value })}
-          placeholder="0.00"
-          error={errors.weightPerBundle}
-        />
-      </div>
-
-      {/* Output Quantity (calculated) */}
-      {outputQuantity > 0 && (
-        <div className="bg-gray-50 p-3 rounded-md">
-          <div className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}</div>
-          <div className="text-lg font-bold text-brand-blue">
-            {outputQuantity.toFixed(2)} kgs ({formData.numberOfBundles} {t('bundles', 'processedMaterial')})
-          </div>
-        </div>
-      )}
-
       {/* Date */}
       <Input
         label={`${t('date', 'processedMaterial')} *`}
@@ -322,9 +325,191 @@ export default function ProcessedRawMaterialForm({
         <p className="mt-1 text-xs text-gray-500">{t('autoGenerated', 'processedMaterial')}</p>
       </div>
 
+      {/* Processed Materials in Batch */}
+      <div className="border-t pt-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t('materialsInBatch', 'processedMaterial')}
+          </h3>
+          {!material && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={addProcessedMaterialRow}
+              className="text-sm"
+            >
+              + {t('addMaterial', 'processedMaterial')}
+            </Button>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          {processedMaterials.map((pm, index) => (
+            <div key={index} className="border rounded-lg p-4 bg-gray-50">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-medium text-gray-700">
+                  {t('material', 'processedMaterial')} {index + 1}
+                </h4>
+                {!material && processedMaterials.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeProcessedMaterialRow(index)}
+                    className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    {t('remove', 'processedMaterial')}
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Processed Material Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('processedMaterialName', 'processedMaterial')} *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      list={`processedMaterialNames-${index}`}
+                      value={pm.name}
+                      onChange={(e) =>
+                        updateProcessedMaterialRow(index, 'name', e.target.value)
+                      }
+                      className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                        materialErrors[index]?.name ? 'border-red-500' : ''
+                      }`}
+                      placeholder={t('typeOrSelect', 'processedMaterial')}
+                      autoComplete="off"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                    <datalist id={`processedMaterialNames-${index}`}>
+                      {processedMaterialNames.map((name) => (
+                        <option key={name} value={name} />
+                      ))}
+                    </datalist>
+                  </div>
+                  {materialErrors[index]?.name && (
+                    <p className="mt-1 text-sm text-red-600">{materialErrors[index].name}</p>
+                  )}
+                </div>
+
+                {/* Number of Bundles */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('numberOfBundles', 'processedMaterial')} *
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={pm.numberOfBundles}
+                    onChange={(e) =>
+                      updateProcessedMaterialRow(index, 'numberOfBundles', e.target.value)
+                    }
+                    className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                      materialErrors[index]?.numberOfBundles ? 'border-red-500' : ''
+                    }`}
+                    placeholder="0"
+                  />
+                  {materialErrors[index]?.numberOfBundles && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {materialErrors[index].numberOfBundles}
+                    </p>
+                  )}
+                </div>
+
+                {/* Weight Per Bundle */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('weightPerBundle', 'processedMaterial')} (kgs) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={pm.weightPerBundle}
+                    onChange={(e) =>
+                      updateProcessedMaterialRow(index, 'weightPerBundle', e.target.value)
+                    }
+                    className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                      materialErrors[index]?.weightPerBundle ? 'border-red-500' : ''
+                    }`}
+                    placeholder="0.00"
+                  />
+                  {materialErrors[index]?.weightPerBundle && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {materialErrors[index].weightPerBundle}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Individual Output */}
+              {parseFloat(pm.numberOfBundles) > 0 && parseFloat(pm.weightPerBundle) > 0 && (
+                <div className="mt-2 text-sm text-gray-600">
+                  {t('output', 'processedMaterial')}:{' '}
+                  {(
+                    parseFloat(pm.numberOfBundles) * parseFloat(pm.weightPerBundle)
+                  ).toFixed(2)}{' '}
+                  kgs ({pm.numberOfBundles} {t('bundles', 'processedMaterial')})
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary */}
+      {totalOutput > 0 && (
+        <div className="bg-gray-50 p-4 rounded-md space-y-2">
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}:</span>
+            <span className="text-sm font-semibold">{inputQty.toFixed(2)} kgs</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}:</span>
+            <span className="text-sm font-semibold text-brand-blue">
+              {totalOutput.toFixed(2)} kgs
+            </span>
+          </div>
+          <div className="flex justify-between border-t pt-2">
+            <span className="text-sm text-gray-600">{t('totalScrap', 'processedMaterial')}:</span>
+            <span className={`text-sm font-semibold ${scrap >= 0 ? 'text-red-600' : 'text-red-800'}`}>
+              {scrap.toFixed(2)} kgs
+            </span>
+          </div>
+          {scrap < 0 && (
+            <p className="text-xs text-red-600 mt-1">
+              {language === 'ur'
+                ? 'کل آؤٹ پٹ ان پٹ سے زیادہ ہے'
+                : 'Total output exceeds input quantity'}
+            </p>
+          )}
+          {errors.totalOutput && (
+            <p className="text-sm text-red-600">{errors.totalOutput}</p>
+          )}
+        </div>
+      )}
+
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t('notes', 'processedMaterial')}</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t('notes', 'processedMaterial')}
+        </label>
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -340,10 +525,13 @@ export default function ProcessedRawMaterialForm({
           {language === 'ur' ? 'منسوخ کریں' : 'Cancel'}
         </Button>
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? t('saving', 'processedMaterial') : material ? t('update', 'processedMaterial') : t('add', 'processedMaterial')}
+          {loading
+            ? t('saving', 'processedMaterial')
+            : material
+            ? t('update', 'processedMaterial')
+            : t('add', 'processedMaterial')}
         </Button>
       </div>
     </form>
   );
 }
-

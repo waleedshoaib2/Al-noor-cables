@@ -135,7 +135,18 @@
     "totalInputCopper": "کل ان پٹ (تانبا)",
     "totalInputSilver": "کل ان پٹ (چاندی)",
     "totalOutput": "کل آؤٹ پٹ",
-    "totalScrap": "کل سکریپ/فضول"
+    "totalScrap": "کل سکریپ/فضول",
+    "processedMaterials": "پروسیس شدہ مواد",
+    "addProcessedMaterial": "پروسیس شدہ مواد شامل کریں",
+    "addMaterial": "مواد شامل کریں",
+    "material": "مواد",
+    "materialsInBatch": "بیچ میں مواد",
+    "batch": "بیچ",
+    "remove": "ہٹائیں",
+    "materialsCount": "مواد",
+    "items": "اشیاء",
+    "edit": "ترمیم",
+    "delete": "حذف"
   }
 }
 

@@ -2,11 +2,26 @@ import { create } from 'zustand';
 import type { ProcessedRawMaterial } from '@/types';
 import { generateBatchId } from '@/utils/constants';
 
+interface ProcessedMaterialBatchData {
+  materialType: string;
+  inputQuantity: number;
+  date: Date;
+  batchId: string;
+  notes?: string;
+  rawMaterialBatchesUsed: any[];
+  processedMaterials: Array<{
+    name: string;
+    numberOfBundles: number;
+    weightPerBundle: number;
+  }>;
+}
+
 interface ProcessedRawMaterialState {
   processedMaterials: ProcessedRawMaterial[];
   processedMaterialNames: string[]; // Predefined + custom names
   stock: Record<string, number>; // Stock by processed material name (in kgs)
   addProcessedMaterial: (material: Omit<ProcessedRawMaterial, 'id' | 'createdAt' | 'outputQuantity'>) => void;
+  addProcessedMaterialBatch: (batch: ProcessedMaterialBatchData) => void;
   updateProcessedMaterial: (id: number, material: Partial<ProcessedRawMaterial>) => void;
   deleteProcessedMaterial: (id: number) => void;
   getProcessedMaterialById: (id: number) => ProcessedRawMaterial | undefined;
@@ -106,6 +121,53 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       };
 
       saveToStorage(newState.processedMaterials, processedMaterialNames, stock);
+      return newState;
+    });
+  },
+
+  addProcessedMaterialBatch: (batch) => {
+    const newMaterials: ProcessedRawMaterial[] = [];
+    const processedMaterialNames = new Set<string>(get().processedMaterialNames);
+    const stock = { ...get().stock };
+    const baseId = Date.now();
+
+    // Create an entry for each processed material
+    batch.processedMaterials.forEach((pm, index) => {
+      const outputQuantity = pm.numberOfBundles * pm.weightPerBundle;
+      const newMaterial: ProcessedRawMaterial = {
+        id: baseId + index, // Unique ID for each material in batch
+        name: pm.name,
+        materialType: batch.materialType,
+        inputQuantity: batch.inputQuantity, // Shared input quantity
+        numberOfBundles: pm.numberOfBundles,
+        weightPerBundle: pm.weightPerBundle,
+        outputQuantity,
+        date: batch.date,
+        batchId: batch.batchId, // Shared batch ID
+        notes: batch.notes,
+        rawMaterialBatchesUsed: batch.rawMaterialBatchesUsed, // Shared batches used
+        createdAt: new Date(),
+      };
+
+      newMaterials.push(newMaterial);
+
+      // Add processed material name if not exists
+      if (!processedMaterialNames.has(pm.name)) {
+        processedMaterialNames.add(pm.name);
+      }
+
+      // Update stock
+      stock[pm.name] = (stock[pm.name] || 0) + outputQuantity;
+    });
+
+    set((state) => {
+      const newState = {
+        processedMaterials: [...newMaterials, ...state.processedMaterials],
+        processedMaterialNames: Array.from(processedMaterialNames),
+        stock,
+      };
+
+      saveToStorage(newState.processedMaterials, newState.processedMaterialNames, stock);
       return newState;
     });
   },
