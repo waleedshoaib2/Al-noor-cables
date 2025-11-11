@@ -8,6 +8,8 @@ export default function Sidebar() {
     { path: '/stock', label: 'Stock', icon: '📦' },
     { path: '/raw-materials', label: 'Raw Materials', icon: '⚙️' },
     { path: '/processed-materials', label: 'Processed Materials', icon: '🔧' },
+    { path: '/products', label: 'Products', icon: '📦' },
+    { path: '/customers', label: 'Customers', icon: '👥' },
     { path: '/expenses', label: 'Expenses', icon: '💰' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];

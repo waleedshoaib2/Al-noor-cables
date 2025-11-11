@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard';
 import StockManagement from './pages/StockManagement';
 import RawMaterials from './pages/RawMaterials';
 import ProcessedRawMaterials from './pages/ProcessedRawMaterials';
+import Products from './pages/Products';
+import Customers from './pages/Customers';
 import ExpenseTracker from './pages/ExpenseTracker';
 import Reports from './pages/Reports';
 import MainLayout from './components/Layout/MainLayout';
@@ -73,6 +75,30 @@ function App() {
             isAuthenticated ? (
               <MainLayout>
                 <ProcessedRawMaterials />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <Products />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <Customers />
               </MainLayout>
             ) : (
               <Navigate to="/login" replace />
