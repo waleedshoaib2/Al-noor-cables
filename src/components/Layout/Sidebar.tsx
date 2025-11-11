@@ -6,12 +6,13 @@ export default function Sidebar() {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/stock', label: 'Stock', icon: '📦' },
+    { path: '/raw-materials', label: 'Raw Materials', icon: '⚙️' },
     { path: '/expenses', label: 'Expenses', icon: '💰' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];
 
   return (
-    <aside className="w-64 bg-gray-50 border-r border-gray-200 min-h-screen">
+    <aside className="w-64 bg-brand-blue border-r border-brand-blue-dark min-h-screen">
       <nav className="p-4">
         <ul className="space-y-2">
           {navItems.map((item) => {
@@ -22,8 +23,8 @@ export default function Sidebar() {
                   to={item.path}
                   className={`flex items-center px-4 py-2 rounded-md transition-colors ${
                     isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-200'
+                      ? 'bg-brand-blue-light text-white font-semibold'
+                      : 'text-gray-200 hover:bg-brand-blue-dark hover:text-white'
                   }`}
                 >
                   <span className="mr-3">{item.icon}</span>

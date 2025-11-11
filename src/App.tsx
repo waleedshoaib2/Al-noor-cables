@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Auth/Login';
 import Dashboard from './pages/Dashboard';
 import StockManagement from './pages/StockManagement';
+import RawMaterials from './pages/RawMaterials';
 import ExpenseTracker from './pages/ExpenseTracker';
 import Reports from './pages/Reports';
 import MainLayout from './components/Layout/MainLayout';
@@ -47,6 +48,18 @@ function App() {
             isAuthenticated ? (
               <MainLayout>
                 <StockManagement />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/raw-materials"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <RawMaterials />
               </MainLayout>
             ) : (
               <Navigate to="/login" replace />

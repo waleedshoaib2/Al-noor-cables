@@ -16,3 +16,44 @@ body {
   min-height: 100vh;
 }
 
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-view,
+  .print-view * {
+    visibility: visible;
+  }
+  
+  .print-view {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    display: block !important;
+  }
+  
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+  
+  /* Hide navigation and other UI elements */
+  nav,
+  aside,
+  header:not(.print-view header),
+  button:not(.print-view button) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+

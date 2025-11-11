@@ -4,15 +4,19 @@ import { Button } from '@/components/Common/Button';
 import type { RawMaterial } from '@/types';
 
 interface RawMaterialListProps {
+  materials?: RawMaterial[];
   onEdit: (material: RawMaterial) => void;
   onDelete: (id: number) => void;
   limit?: number;
 }
 
-export default function RawMaterialList({ onEdit, onDelete, limit }: RawMaterialListProps) {
-  const rawMaterials = useRawMaterialStore((state) =>
+export default function RawMaterialList({ materials, onEdit, onDelete, limit }: RawMaterialListProps) {
+  const rawMaterialsStore = useRawMaterialStore((state) =>
     limit ? state.getRecentMaterials(limit) : state.rawMaterials
   );
+
+  // Use provided materials or fall back to store
+  const rawMaterials = materials || rawMaterialsStore;
 
   if (rawMaterials.length === 0) {
     return <p className="text-gray-500">No raw materials recorded yet</p>;

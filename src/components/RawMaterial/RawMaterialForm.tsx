@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
 import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
+import { generateBatchId } from '@/utils/constants';
 import type { RawMaterial } from '@/types';
 
 interface RawMaterialFormProps {
@@ -21,7 +22,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
     supplier: '',
     date: new Date().toISOString().split('T')[0],
     quantity: '',
-    batchId: '',
+    batchId: generateBatchId(),
     notes: '',
   });
 
@@ -38,8 +39,20 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
         batchId: material.batchId,
         notes: material.notes || '',
       });
+    } else {
+      // Generate new batch ID when date changes
+      const newBatchId = generateBatchId(new Date(formData.date));
+      setFormData((prev) => ({ ...prev, batchId: newBatchId }));
     }
   }, [material]);
+
+  // Regenerate batch ID when date changes (only for new entries)
+  useEffect(() => {
+    if (!material) {
+      const newBatchId = generateBatchId(new Date(formData.date));
+      setFormData((prev) => ({ ...prev, batchId: newBatchId }));
+    }
+  }, [formData.date, material]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -58,10 +71,6 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
 
     if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
       newErrors.quantity = 'Quantity must be greater than 0';
-    }
-
-    if (!formData.batchId.trim()) {
-      newErrors.batchId = 'Batch ID is required';
     }
 
     setErrors(newErrors);
@@ -83,7 +92,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
         supplier: formData.supplier.trim(),
         date: new Date(formData.date),
         quantity: parseFloat(formData.quantity),
-        batchId: formData.batchId.trim(),
+        batchId: material ? formData.batchId.trim() : generateBatchId(new Date(formData.date)),
         notes: formData.notes.trim() || undefined,
       };
 
@@ -104,51 +113,87 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Material Type with datalist */}
+      {/* Material Type with improved dropdown */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Material Type *
         </label>
-        <input
-          type="text"
-          list="materialTypes"
-          value={formData.materialType}
-          onChange={(e) => setFormData({ ...formData, materialType: e.target.value })}
-          className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-            errors.materialType ? 'border-red-500' : ''
-          }`}
-          placeholder="Type or select material type"
-        />
-        <datalist id="materialTypes">
-          {materialTypes.map((type) => (
-            <option key={type} value={type} />
-          ))}
-        </datalist>
+        <div className="relative">
+          <input
+            type="text"
+            list="materialTypes"
+            value={formData.materialType}
+            onChange={(e) => setFormData({ ...formData, materialType: e.target.value })}
+            className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+              errors.materialType ? 'border-red-500' : ''
+            }`}
+            placeholder="Type or select material type"
+            autoComplete="off"
+          />
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          <datalist id="materialTypes">
+            {materialTypes.map((type) => (
+              <option key={type} value={type} />
+            ))}
+          </datalist>
+        </div>
         {errors.materialType && (
           <p className="mt-1 text-sm text-red-600">{errors.materialType}</p>
         )}
       </div>
 
-      {/* Supplier with datalist */}
+      {/* Supplier with improved dropdown */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Supplier *
         </label>
-        <input
-          type="text"
-          list="suppliers"
-          value={formData.supplier}
-          onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-          className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-            errors.supplier ? 'border-red-500' : ''
-          }`}
-          placeholder="Type or select supplier"
-        />
-        <datalist id="suppliers">
-          {suppliers.map((supplier) => (
-            <option key={supplier} value={supplier} />
-          ))}
-        </datalist>
+        <div className="relative">
+          <input
+            type="text"
+            list="suppliers"
+            value={formData.supplier}
+            onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+            className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+              errors.supplier ? 'border-red-500' : ''
+            }`}
+            placeholder="Type or select supplier"
+            autoComplete="off"
+          />
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+          <datalist id="suppliers">
+            {suppliers.map((supplier) => (
+              <option key={supplier} value={supplier} />
+            ))}
+          </datalist>
+        </div>
         {errors.supplier && (
           <p className="mt-1 text-sm text-red-600">{errors.supplier}</p>
         )}
@@ -175,15 +220,19 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
         />
       </div>
 
-      {/* Batch ID */}
-      <Input
-        label="Batch ID *"
-        type="text"
-        value={formData.batchId}
-        onChange={(e) => setFormData({ ...formData, batchId: e.target.value })}
-        placeholder="Enter batch ID"
-        error={errors.batchId}
-      />
+      {/* Batch ID - Auto-generated, read-only */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Batch ID
+        </label>
+        <input
+          type="text"
+          value={formData.batchId}
+          readOnly
+          className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-50 text-gray-600 cursor-not-allowed"
+        />
+        <p className="mt-1 text-xs text-gray-500">Auto-generated based on date</p>
+      </div>
 
       {/* Notes */}
       <div>
