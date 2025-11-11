@@ -55,3 +55,14 @@ export interface Expense {
   date: Date;
   createdAt: Date;
 }
+
+export interface RawMaterial {
+  id: number;
+  materialType: string;
+  supplier: string;
+  date: Date;
+  quantity: number; // in kgs
+  batchId: string;
+  notes?: string;
+  createdAt: Date;
+}

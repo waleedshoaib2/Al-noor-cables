@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStockStore } from '@/store/useStockStore';
 import { useExpenseStore } from '@/store/useExpenseStore';
 import { useCategoryStore } from '@/store/useCategoryStore';
+import { useRawMaterialStore } from '@/store/useRawMaterialStore';
 import { Button } from '@/components/Common/Button';
+import { Modal } from '@/components/Common/Modal';
+import RawMaterialForm from '@/components/RawMaterial/RawMaterialForm';
+import RawMaterialList from '@/components/RawMaterial/RawMaterialList';
 import { formatCurrency, formatDate } from '@/utils/helpers';
 import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
+import type { RawMaterial } from '@/types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -14,6 +20,13 @@ export default function Dashboard() {
   const expenses = useExpenseStore((state) => state.expenses);
   const getTotalByPeriod = useExpenseStore((state) => state.getTotalByPeriod);
   const categories = useCategoryStore((state) => state.categories);
+  
+  // Raw Material store
+  const deleteRawMaterial = useRawMaterialStore((state) => state.deleteRawMaterial);
+  const getTotalByMaterialType = useRawMaterialStore((state) => state.getTotalByMaterialType);
+  
+  const [showRawMaterialForm, setShowRawMaterialForm] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<RawMaterial | null>(null);
 
   const today = new Date();
   const todaySales = sales.filter(
@@ -32,6 +45,30 @@ export default function Dashboard() {
   const getProductName = (productId: number) => {
     return products.find((p) => p.id === productId)?.name || 'Unknown';
   };
+
+  const handleAddRawMaterial = () => {
+    setEditingMaterial(null);
+    setShowRawMaterialForm(true);
+  };
+
+  const handleEditRawMaterial = (material: RawMaterial) => {
+    setEditingMaterial(material);
+    setShowRawMaterialForm(true);
+  };
+
+  const handleDeleteRawMaterial = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this raw material entry?')) {
+      deleteRawMaterial(id);
+    }
+  };
+
+  const handleRawMaterialSubmit = () => {
+    setShowRawMaterialForm(false);
+    setEditingMaterial(null);
+  };
+
+  const totalCopper = getTotalByMaterialType('Copper');
+  const totalSilver = getTotalByMaterialType('Silver');
 
   return (
     <div className="space-y-6">
@@ -72,6 +109,58 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Raw Material Section */}
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Raw Material Intake</h2>
+          <Button variant="primary" onClick={handleAddRawMaterial}>
+            Add Raw Material
+          </Button>
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="text-sm text-gray-600">Total Copper</div>
+            <div className="text-2xl font-bold text-brand-orange">{totalCopper.toFixed(2)} kgs</div>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="text-sm text-gray-600">Total Silver</div>
+            <div className="text-2xl font-bold text-brand-orange">{totalSilver.toFixed(2)} kgs</div>
+          </div>
+        </div>
+
+        {/* Recent Raw Materials */}
+        <div>
+          <h3 className="text-md font-semibold text-gray-900 mb-3">Recent Entries</h3>
+          <RawMaterialList
+            onEdit={handleEditRawMaterial}
+            onDelete={handleDeleteRawMaterial}
+            limit={5}
+          />
+        </div>
+      </div>
+
+      {/* Raw Material Form Modal */}
+      <Modal
+        isOpen={showRawMaterialForm}
+        onClose={() => {
+          setShowRawMaterialForm(false);
+          setEditingMaterial(null);
+        }}
+        title={editingMaterial ? 'Edit Raw Material' : 'Add Raw Material'}
+        size="lg"
+      >
+        <RawMaterialForm
+          material={editingMaterial}
+          onClose={() => {
+            setShowRawMaterialForm(false);
+            setEditingMaterial(null);
+          }}
+          onSubmit={handleRawMaterialSubmit}
+        />
+      </Modal>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Recent Sales */}

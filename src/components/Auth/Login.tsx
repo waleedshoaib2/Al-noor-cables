@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
+import logoImage from '../../../alnoor-logo.jpeg';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,11 +18,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const success = login(username, password);
+      // Using 'admin' as default username since auth store requires both
+      const success = login('admin', password);
       if (success) {
         navigate('/dashboard');
       } else {
-        setError('Invalid username or password');
+        setError('Invalid password');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -32,27 +33,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#F8F8F8] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Al-Noor Cables
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Stock & Expense Management System
-          </p>
+        <div className="flex flex-col items-center">
+          <img 
+            src={logoImage} 
+            alt="Al Noor Cables Logo" 
+            className="w-64 h-auto mb-8"
+          />
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <Input
-              label="Username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-              required
-              className="rounded-t-md"
-            />
+          <div className="rounded-md shadow-sm">
             <Input
               label="Password"
               type="password"
@@ -60,12 +51,12 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
               required
-              className="rounded-b-md"
+              className="rounded-md focus:border-brand-blue focus:ring-brand-blue"
             />
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
+            <div className="rounded-md bg-red-50 p-4 border border-red-200">
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}
@@ -74,15 +65,11 @@ export default function Login() {
             <Button
               type="submit"
               variant="primary"
-              className="w-full"
+              className="w-full font-semibold py-3"
               disabled={loading}
             >
               {loading ? 'Logging in...' : 'Login'}
             </Button>
-          </div>
-
-          <div className="text-center text-sm text-gray-600">
-            <p>Default: admin / alnoor</p>
           </div>
         </form>
       </div>

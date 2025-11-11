@@ -7,6 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Brand colors matching Al Noor Cables logo
+        brand: {
+          blue: {
+            DEFAULT: '#1E3A8A', // Dark blue from logo
+            light: '#3B82F6',
+            dark: '#1E3A8A',
+          },
+          orange: {
+            DEFAULT: '#F97316', // Orange accent from logo
+            light: '#FB923C',
+            dark: '#EA580C',
+          },
+        },
         primary: {
           DEFAULT: '#2563EB',
           50: '#EFF6FF',
