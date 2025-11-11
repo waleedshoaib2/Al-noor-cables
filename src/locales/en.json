@@ -1,0 +1,65 @@
+{
+  "common": {
+    "appName": "Al-Noor Cables",
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "areYouSure": "Are you sure?",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "username": "Username",
+    "password": "Password",
+    "loginFailed": "Invalid username or password",
+    "loggingIn": "Logging in..."
+  },
+  "stock": {
+    "title": "Stock Management",
+    "addProduct": "Add Product",
+    "editProduct": "Edit Product",
+    "productName": "Product Name",
+    "sku": "SKU",
+    "description": "Description",
+    "costPrice": "Cost Price",
+    "sellingPrice": "Selling Price",
+    "quantity": "Quantity",
+    "reorderLevel": "Reorder Level",
+    "category": "Category",
+    "lowStock": "Low Stock Alerts",
+    "recordSale": "Record Sale",
+    "noProducts": "No products found"
+  },
+  "expense": {
+    "title": "Expense Tracker",
+    "addExpense": "Add Expense",
+    "editExpense": "Edit Expense",
+    "titleLabel": "Title",
+    "amount": "Amount",
+    "date": "Date",
+    "category": "Category",
+    "totalExpenses": "Total Expenses",
+    "noExpenses": "No expenses found"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalProducts": "Total Products",
+    "lowStockAlerts": "Low Stock Alerts",
+    "todaySales": "Today's Sales",
+    "monthExpenses": "This Month's Expenses",
+    "recentSales": "Recent Sales",
+    "quickActions": "Quick Actions"
+  }
+}
+

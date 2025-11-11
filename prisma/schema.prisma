@@ -1,0 +1,109 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./app.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique
+  passwordHash String
+  fullName     String?
+  role         String    @default("user")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  expenses     Expense[]
+
+  @@map("users")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id           Int       @id @default(autoincrement())
+  name         String    @unique
+  sku          String    @unique
+  description  String?
+  costPrice    Float
+  sellingPrice Float
+  quantity     Int       @default(0)
+  reorderLevel Int       @default(5)
+  categoryId   Int
+  isActive     Boolean   @default(true)
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  category     Category  @relation(fields: [categoryId], references: [id])
+  sales        Sale[]
+
+  @@index([categoryId])
+  @@index([sku])
+  @@map("products")
+}
+
+model Sale {
+  id            Int      @id @default(autoincrement())
+  saleNo        String   @unique
+  productId     Int
+  quantity      Int
+  unitPrice     Float
+  totalAmount   Float
+  discount      Float    @default(0)
+  finalAmount   Float
+  customerName  String?
+  customerPhone String?
+  saleDate      DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  product       Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([saleDate])
+  @@map("sales")
+}
+
+model ExpenseCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  color       String?
+
+  expenses    Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String?
+  amount      Float
+  categoryId  Int
+  userId      Int
+  date        DateTime         @default(now())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  category    ExpenseCategory  @relation(fields: [categoryId], references: [id])
+  user        User             @relation(fields: [userId], references: [id])
+
+  @@index([categoryId])
+  @@index([userId])
+  @@index([date])
+  @@map("expenses")
+}
+

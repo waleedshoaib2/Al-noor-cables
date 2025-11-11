@@ -1,0 +1,65 @@
+{
+  "common": {
+    "appName": "النور کیبلز",
+    "login": "لاگ ان",
+    "logout": "لاگ آؤٹ",
+    "save": "محفوظ کریں",
+    "cancel": "منسوخ کریں",
+    "delete": "حذف کریں",
+    "edit": "ترمیم",
+    "add": "شامل کریں",
+    "search": "تلاش",
+    "filter": "فلٹر",
+    "actions": "اعمال",
+    "loading": "لوڈ ہو رہا ہے...",
+    "error": "خرابی",
+    "success": "کامیابی",
+    "confirm": "تصدیق",
+    "areYouSure": "کیا آپ یقین ہیں؟",
+    "yes": "ہاں",
+    "no": "نہیں"
+  },
+  "auth": {
+    "username": "صارف نام",
+    "password": "پاس ورڈ",
+    "loginFailed": "غلط صارف نام یا پاس ورڈ",
+    "loggingIn": "لاگ ان ہو رہا ہے..."
+  },
+  "stock": {
+    "title": "اسٹاک مینجمنٹ",
+    "addProduct": "پروڈکٹ شامل کریں",
+    "editProduct": "پروڈکٹ میں ترمیم کریں",
+    "productName": "پروڈکٹ کا نام",
+    "sku": "SKU",
+    "description": "تفصیل",
+    "costPrice": "لاگت قیمت",
+    "sellingPrice": "فروخت قیمت",
+    "quantity": "مقدار",
+    "reorderLevel": "دوبارہ آرڈر کی سطح",
+    "category": "قسم",
+    "lowStock": "کم اسٹاک کی انتباہات",
+    "recordSale": "فروخت ریکارڈ کریں",
+    "noProducts": "کوئی پروڈکٹ نہیں ملا"
+  },
+  "expense": {
+    "title": "خرچ ٹریکر",
+    "addExpense": "خرچ شامل کریں",
+    "editExpense": "خرچ میں ترمیم کریں",
+    "titleLabel": "عنوان",
+    "amount": "رقم",
+    "date": "تاریخ",
+    "category": "قسم",
+    "totalExpenses": "کل اخراجات",
+    "noExpenses": "کوئی خرچ نہیں ملا"
+  },
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "totalProducts": "کل پروڈکٹس",
+    "lowStockAlerts": "کم اسٹاک کی انتباہات",
+    "todaySales": "آج کی فروخت",
+    "monthExpenses": "اس مہینے کے اخراجات",
+    "recentSales": "حالیہ فروخت",
+    "quickActions": "فوری اعمال"
+  }
+}
+
