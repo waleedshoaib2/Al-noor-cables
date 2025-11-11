@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/Common/Button';
 import { useNavigate } from 'react-router-dom';
+import { clearAllStorage } from '@/utils/storage';
 
 export default function Navbar() {
   const user = useAuthStore((state) => state.user);
@@ -12,6 +13,12 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+      clearAllStorage();
+    }
+  };
+
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="px-4 sm:px-6 lg:px-8">
@@ -20,6 +27,14 @@ export default function Navbar() {
             <h1 className="text-xl font-bold text-gray-900">Al-Noor Cables</h1>
           </div>
           <div className="flex items-center space-x-4">
+            <Button
+              variant="danger"
+              onClick={handleClearAll}
+              className="text-sm"
+              title="Clear all data from localStorage"
+            >
+              🗑️ Clear All Data
+            </Button>
             <span className="text-sm text-gray-700">{user?.fullName}</span>
             <Button variant="secondary" onClick={handleLogout}>
               Logout
