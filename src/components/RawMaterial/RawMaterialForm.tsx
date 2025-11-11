@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
 import { generateBatchId } from '@/utils/constants';
@@ -12,6 +13,7 @@ interface RawMaterialFormProps {
 }
 
 export default function RawMaterialForm({ material, onClose, onSubmit }: RawMaterialFormProps) {
+  const { t, language } = useTranslation();
   const addRawMaterial = useRawMaterialStore((state) => state.addRawMaterial);
   const updateRawMaterial = useRawMaterialStore((state) => state.updateRawMaterial);
   const materialTypes = useRawMaterialStore((state) => state.materialTypes);
@@ -58,19 +60,19 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
     const newErrors: Record<string, string> = {};
 
     if (!formData.materialType.trim()) {
-      newErrors.materialType = 'Material type is required';
+      newErrors.materialType = language === 'ur' ? 'مواد کی قسم درکار ہے' : 'Material type is required';
     }
 
     if (!formData.supplier.trim()) {
-      newErrors.supplier = 'Supplier is required';
+      newErrors.supplier = language === 'ur' ? 'سپلائر درکار ہے' : 'Supplier is required';
     }
 
     if (!formData.date) {
-      newErrors.date = 'Date is required';
+      newErrors.date = language === 'ur' ? 'تاریخ درکار ہے' : 'Date is required';
     }
 
     if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
-      newErrors.quantity = 'Quantity must be greater than 0';
+      newErrors.quantity = language === 'ur' ? 'مقدار 0 سے زیادہ ہونی چاہیے' : 'Quantity must be greater than 0';
     }
 
     setErrors(newErrors);
@@ -112,11 +114,11 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
       {/* Material Type with improved dropdown */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Material Type *
+          {t('materialType')} *
         </label>
         <div className="relative">
           <input
@@ -127,7 +129,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
             className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
               errors.materialType ? 'border-red-500' : ''
             }`}
-            placeholder="Type or select material type"
+            placeholder={t('typeOrSelect')}
             autoComplete="off"
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -159,7 +161,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
       {/* Supplier with improved dropdown */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Supplier *
+          {t('supplier')} *
         </label>
         <div className="relative">
           <input
@@ -170,7 +172,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
             className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
               errors.supplier ? 'border-red-500' : ''
             }`}
-            placeholder="Type or select supplier"
+            placeholder={t('typeOrSelect')}
             autoComplete="off"
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -202,14 +204,14 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
       {/* Date and Quantity */}
       <div className="grid grid-cols-2 gap-4">
         <Input
-          label="Date *"
+          label={`${t('date')} *`}
           type="date"
           value={formData.date}
           onChange={(e) => setFormData({ ...formData, date: e.target.value })}
           error={errors.date}
         />
         <Input
-          label="Quantity (kgs) *"
+          label={`${t('quantity')} *`}
           type="number"
           step="0.01"
           min="0"
@@ -223,7 +225,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
       {/* Batch ID - Auto-generated, read-only */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Batch ID
+          {t('batchId')}
         </label>
         <input
           type="text"
@@ -231,13 +233,13 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
           readOnly
           className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-50 text-gray-600 cursor-not-allowed"
         />
-        <p className="mt-1 text-xs text-gray-500">Auto-generated based on date</p>
+        <p className="mt-1 text-xs text-gray-500">{t('autoGenerated')}</p>
       </div>
 
       {/* Notes */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Notes
+          {t('notes')}
         </label>
         <textarea
           value={formData.notes}
@@ -251,10 +253,10 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
       {/* Buttons */}
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="secondary" onClick={onClose}>
-          Cancel
+          {language === 'ur' ? 'منسوخ کریں' : 'Cancel'}
         </Button>
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? 'Saving...' : material ? 'Update' : 'Add'}
+          {loading ? t('saving') : material ? t('update') : t('add')}
         </Button>
       </div>
     </form>

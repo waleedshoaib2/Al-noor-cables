@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
+import { useLanguageStore } from '@/store/useLanguageStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import RawMaterialForm from '@/components/RawMaterial/RawMaterialForm';
@@ -8,6 +10,8 @@ import RawMaterialPrintView from '@/components/RawMaterial/RawMaterialPrintView'
 import type { RawMaterial } from '@/types';
 
 export default function RawMaterials() {
+  const { t, language } = useTranslation();
+  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   const rawMaterials = useRawMaterialStore((state) => state.rawMaterials);
   const deleteRawMaterial = useRawMaterialStore((state) => state.deleteRawMaterial);
   const getTotalByMaterialType = useRawMaterialStore((state) => state.getTotalByMaterialType);
@@ -30,7 +34,7 @@ export default function RawMaterials() {
   };
 
   const handleDeleteRawMaterial = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this raw material entry?')) {
+    if (window.confirm(t('deleteConfirm'))) {
       deleteRawMaterial(id);
     }
   };
@@ -94,26 +98,36 @@ export default function RawMaterials() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={language === 'ur' ? 'rtl' : 'ltr'}>
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Raw Material Intake</h1>
-        <Button variant="primary" onClick={handleAddRawMaterial}>
-          Add Raw Material
-        </Button>
+        <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            onClick={toggleLanguage}
+            className="text-sm"
+            title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
+          >
+            {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
+          </Button>
+          <Button variant="primary" onClick={handleAddRawMaterial}>
+            {t('addRawMaterial')}
+          </Button>
+        </div>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Total Copper</div>
+          <div className="text-sm text-gray-600">{t('totalCopper')}</div>
           <div className="text-3xl font-bold text-brand-orange">{totalCopper.toFixed(2)} kgs</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Total Silver</div>
+          <div className="text-sm text-gray-600">{t('totalSilver')}</div>
           <div className="text-3xl font-bold text-brand-orange">{totalSilver.toFixed(2)} kgs</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Total All Materials</div>
+          <div className="text-sm text-gray-600">{t('totalAllMaterials')}</div>
           <div className="text-3xl font-bold text-brand-blue">{totalAll.toFixed(2)} kgs</div>
         </div>
       </div>
@@ -121,23 +135,23 @@ export default function RawMaterials() {
       {/* Filters */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('filters')}</h2>
           <Button variant="secondary" onClick={handleClearFilters} className="text-sm">
-            Clear All
+            {t('clearAll')}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Material Type Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Material Type
+              {t('materialType')}
             </label>
             <select
               value={filterMaterialType}
               onChange={(e) => setFilterMaterialType(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
             >
-              <option value="all">All Materials</option>
+              <option value="all">{t('allMaterials')}</option>
               {materialTypes.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -149,14 +163,14 @@ export default function RawMaterials() {
           {/* Supplier Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Supplier
+              {t('supplier')}
             </label>
             <select
               value={filterSupplier}
               onChange={(e) => setFilterSupplier(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue"
             >
-              <option value="all">All Suppliers</option>
+              <option value="all">{t('allSuppliers')}</option>
               {suppliers.map((supplier) => (
                 <option key={supplier} value={supplier}>
                   {supplier}
@@ -168,7 +182,7 @@ export default function RawMaterials() {
           {/* Start Date Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start Date
+              {t('startDate')}
             </label>
             <input
               type="date"
@@ -181,7 +195,7 @@ export default function RawMaterials() {
           {/* End Date Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              End Date
+              {t('endDate')}
             </label>
             <input
               type="date"
@@ -198,17 +212,17 @@ export default function RawMaterials() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">
             {filteredMaterials.length === 0 
-              ? 'No Raw Materials Found' 
-              : `${filteredMaterials.length} Raw Material${filteredMaterials.length !== 1 ? 's' : ''} Found`}
+              ? t('noMaterialsFound')
+              : `${filteredMaterials.length} ${filteredMaterials.length === 1 ? t('materialFound') : t('materialsFound')}`}
           </h2>
           {filteredMaterials.length > 0 && (
             <Button variant="secondary" onClick={handlePrint} className="no-print">
-              🖨️ Print
+              🖨️ {t('print')}
             </Button>
           )}
         </div>
         {filteredMaterials.length === 0 ? (
-          <p className="text-gray-500">No raw materials match the selected filters</p>
+          <p className="text-gray-500">{t('noMaterialsFound')}</p>
         ) : (
           <RawMaterialList
             materials={filteredMaterials}
@@ -225,7 +239,7 @@ export default function RawMaterials() {
           setShowRawMaterialForm(false);
           setEditingMaterial(null);
         }}
-        title={editingMaterial ? 'Edit Raw Material' : 'Add Raw Material'}
+        title={editingMaterial ? t('editRawMaterial') : t('addRawMaterial')}
         size="lg"
       >
         <RawMaterialForm
