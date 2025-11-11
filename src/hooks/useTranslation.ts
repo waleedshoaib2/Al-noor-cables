@@ -2,14 +2,18 @@ import { useLanguageStore } from '@/store/useLanguageStore';
 import enTranslations from '@/locales/en.json';
 import urTranslations from '@/locales/ur.json';
 
-type TranslationKey = keyof typeof enTranslations.rawMaterial;
+type RawMaterialKey = keyof typeof enTranslations.rawMaterial;
+type ProcessedMaterialKey = keyof typeof enTranslations.processedMaterial;
 
 export function useTranslation() {
   const language = useLanguageStore((state) => state.language);
   const translations = language === 'ur' ? urTranslations : enTranslations;
 
-  const t = (key: TranslationKey): string => {
-    return translations.rawMaterial[key] || key;
+  const t = (key: RawMaterialKey | ProcessedMaterialKey, section: 'rawMaterial' | 'processedMaterial' = 'rawMaterial'): string => {
+    if (section === 'processedMaterial') {
+      return translations.processedMaterial[key as ProcessedMaterialKey] || key;
+    }
+    return translations.rawMaterial[key as RawMaterialKey] || key;
   };
 
   return { t, language };

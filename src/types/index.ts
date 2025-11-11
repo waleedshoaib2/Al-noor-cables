@@ -66,3 +66,25 @@ export interface RawMaterial {
   notes?: string;
   createdAt: Date;
 }
+
+export interface ProcessedRawMaterial {
+  id: number;
+  name: string; // e.g., "7/12", "7/15", "7/64", "7/52" or custom
+  materialType: string; // Copper or Silver
+  inputQuantity: number; // in kgs (from raw material)
+  numberOfBundles: number;
+  weightPerBundle: number; // in kgs
+  outputQuantity: number; // numberOfBundles × weightPerBundle (in kgs)
+  date: Date;
+  batchId: string;
+  notes?: string;
+  rawMaterialBatchesUsed: RawMaterialBatchUsed[]; // History of which raw material batches were used
+  createdAt: Date;
+}
+
+export interface RawMaterialBatchUsed {
+  rawMaterialId: number;
+  batchId: string;
+  quantityUsed: number; // in kgs
+  materialType: string;
+}

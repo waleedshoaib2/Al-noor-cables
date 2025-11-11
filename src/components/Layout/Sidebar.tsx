@@ -7,6 +7,7 @@ export default function Sidebar() {
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/stock', label: 'Stock', icon: '📦' },
     { path: '/raw-materials', label: 'Raw Materials', icon: '⚙️' },
+    { path: '/processed-materials', label: 'Processed Materials', icon: '🔧' },
     { path: '/expenses', label: 'Expenses', icon: '💰' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];

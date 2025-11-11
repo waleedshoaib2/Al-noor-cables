@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { RawMaterial } from '@/types';
+import type { RawMaterial, RawMaterialBatchUsed } from '@/types';
 
 interface RawMaterialState {
   rawMaterials: RawMaterial[];
@@ -13,6 +13,11 @@ interface RawMaterialState {
   getRecentMaterials: (limit?: number) => RawMaterial[];
   loadFromStorage: () => void;
   saveToStorage: () => void;
+  // Stock management for processing
+  getAvailableStockByType: (materialType: string) => number;
+  deductStock: (materialType: string, quantity: number) => RawMaterialBatchUsed[];
+  getAvailableBatches: (materialType: string) => RawMaterial[];
+  restoreStock: (batchesUsed: RawMaterialBatchUsed[]) => void;
 }
 
 const STORAGE_KEY = 'raw-material-storage';
@@ -165,6 +170,107 @@ export const useRawMaterialStore = create<RawMaterialState>((set, get) => ({
   saveToStorage: () => {
     const state = get();
     saveToStorage(state.rawMaterials, state.materialTypes, state.suppliers);
+  },
+
+  // Get available stock by material type (considering deductions)
+  getAvailableStockByType: (materialType: string) => {
+    return get().rawMaterials
+      .filter((m) => m.materialType.toLowerCase() === materialType.toLowerCase())
+      .reduce((sum, m) => sum + m.quantity, 0);
+  },
+
+  // Get available batches sorted by date (FIFO)
+  getAvailableBatches: (materialType: string) => {
+    return get()
+      .rawMaterials.filter(
+        (m) =>
+          m.materialType.toLowerCase() === materialType.toLowerCase() &&
+          m.quantity > 0
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  },
+
+  // Deduct stock using FIFO (First In First Out)
+  deductStock: (materialType: string, quantity: number): RawMaterialBatchUsed[] => {
+    const batchesUsed: RawMaterialBatchUsed[] = [];
+    let remainingQuantity = quantity;
+
+    set((state) => {
+      const updatedMaterials = [...state.rawMaterials];
+      const availableBatches = updatedMaterials
+        .filter(
+          (m) =>
+            m.materialType.toLowerCase() === materialType.toLowerCase() &&
+            m.quantity > 0
+        )
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      for (const batch of availableBatches) {
+        if (remainingQuantity <= 0) break;
+
+        const quantityToUse = Math.min(batch.quantity, remainingQuantity);
+        const batchIndex = updatedMaterials.findIndex((m) => m.id === batch.id);
+
+        if (batchIndex !== -1) {
+          updatedMaterials[batchIndex] = {
+            ...updatedMaterials[batchIndex],
+            quantity: updatedMaterials[batchIndex].quantity - quantityToUse,
+          };
+
+          batchesUsed.push({
+            rawMaterialId: batch.id,
+            batchId: batch.batchId,
+            quantityUsed: quantityToUse,
+            materialType: batch.materialType,
+          });
+
+          remainingQuantity -= quantityToUse;
+        }
+      }
+
+      if (remainingQuantity > 0) {
+        throw new Error(
+          `Insufficient stock. Available: ${quantity - remainingQuantity} kgs, Required: ${quantity} kgs`
+        );
+      }
+
+      const newState = {
+        rawMaterials: updatedMaterials,
+        materialTypes: state.materialTypes,
+        suppliers: state.suppliers,
+      };
+
+      saveToStorage(updatedMaterials, state.materialTypes, state.suppliers);
+      return newState;
+    });
+
+    return batchesUsed;
+  },
+
+  // Restore stock when processed material is deleted
+  restoreStock: (batchesUsed: RawMaterialBatchUsed[]) => {
+    set((state) => {
+      const updatedMaterials = [...state.rawMaterials];
+
+      for (const batchUsed of batchesUsed) {
+        const batchIndex = updatedMaterials.findIndex((m) => m.id === batchUsed.rawMaterialId);
+        if (batchIndex !== -1) {
+          updatedMaterials[batchIndex] = {
+            ...updatedMaterials[batchIndex],
+            quantity: updatedMaterials[batchIndex].quantity + batchUsed.quantityUsed,
+          };
+        }
+      }
+
+      const newState = {
+        rawMaterials: updatedMaterials,
+        materialTypes: state.materialTypes,
+        suppliers: state.suppliers,
+      };
+
+      saveToStorage(updatedMaterials, state.materialTypes, state.suppliers);
+      return newState;
+    });
   },
 }));
 
