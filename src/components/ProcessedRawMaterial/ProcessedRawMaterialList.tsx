@@ -134,6 +134,9 @@ export default function ProcessedRawMaterialList({
                 const usedQuantity = material.usedQuantity || 0;
                 const availableQuantity = material.outputQuantity - usedQuantity;
                 const isUsed = usedQuantity > 0;
+                // Calculate bundles as decimals
+                const usedBundles = usedQuantity / material.weightPerBundle;
+                const availableBundles = availableQuantity / material.weightPerBundle;
                 return (
                   <div
                     key={material.id}
@@ -151,10 +154,10 @@ export default function ProcessedRawMaterialList({
                         )}
                       </div>
                       <span className="text-sm text-gray-600 ml-2">
-                        ({material.numberOfBundles} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs = {material.outputQuantity.toFixed(2)} kgs)
+                        ({material.numberOfBundles.toFixed(2)} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs = {material.outputQuantity.toFixed(2)} kgs)
                         {isUsed && (
                           <span className="ml-2 text-orange-600">
-                            ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {usedQuantity.toFixed(2)} kgs, {language === 'ur' ? 'دستیاب' : 'Available'}: {availableQuantity.toFixed(2)} kgs)
+                            ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {usedBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({usedQuantity.toFixed(2)} kgs), {language === 'ur' ? 'دستیاب' : 'Available'}: {availableBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({availableQuantity.toFixed(2)} kgs))
                           </span>
                         )}
                       </span>

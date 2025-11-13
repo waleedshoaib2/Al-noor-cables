@@ -38,6 +38,7 @@ export default function ProductProductionForm({
     productTara: '',
     processedMaterialId: '',
     bundlesUsed: '',
+    weightUsed: '', // Custom weight in kgs
     quantityFoot: '',
     quantityBundles: '',
     date: new Date().toISOString().split('T')[0],
@@ -49,12 +50,19 @@ export default function ProductProductionForm({
 
   useEffect(() => {
     if (production) {
+      const selectedMaterial = processedMaterials.find((m) => m.id === production.processedMaterialId);
+      const bundlesUsed = production.bundlesUsed || 0;
+      const weightUsed = selectedMaterial 
+        ? (bundlesUsed * selectedMaterial.weightPerBundle).toFixed(2)
+        : (production.bundlesUsed || 0).toString();
+      
       setFormData({
         productName: production.productName || '',
         productNumber: production.productNumber || '',
         productTara: production.productTara || '',
         processedMaterialId: production.processedMaterialId.toString(),
-        bundlesUsed: (production.bundlesUsed || 0).toString(),
+        bundlesUsed: bundlesUsed.toString(),
+        weightUsed: weightUsed,
         quantityFoot: (production.quantityFoot || 0).toString(),
         quantityBundles: (production.quantityBundles || 0).toString(),
         date: production.date.toISOString().split('T')[0],
@@ -68,6 +76,7 @@ export default function ProductProductionForm({
         productTara: '',
         processedMaterialId: '',
         bundlesUsed: '',
+        weightUsed: '',
         quantityFoot: '',
         quantityBundles: '',
         date: new Date().toISOString().split('T')[0],
@@ -75,7 +84,7 @@ export default function ProductProductionForm({
       });
     }
     setErrors({});
-  }, [production]);
+  }, [production, processedMaterials]);
 
   // Get available processed materials with stock
   const availableProcessedMaterials = processedMaterials.filter((m) => {
@@ -103,20 +112,39 @@ export default function ProductProductionForm({
         language === 'ur' ? 'پروسیس شدہ مواد درکار ہے' : 'Processed material is required';
     }
 
+    // Validate bundles or weight - at least one must be provided
     const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
-    if (!formData.processedMaterialId || bundlesUsed <= 0) {
+    const weightUsed = parseFloat(formData.weightUsed) || 0;
+    
+    if (!formData.processedMaterialId) {
+      // Error already set above
+    } else if (bundlesUsed <= 0 && weightUsed <= 0) {
       newErrors.bundlesUsed =
-        language === 'ur' ? 'استعمال شدہ بنڈلز درکار ہیں' : 'Bundles used is required and must be greater than 0';
+        language === 'ur' ? 'بنڈلز یا وزن درکار ہے' : 'Bundles or weight is required';
+      newErrors.weightUsed =
+        language === 'ur' ? 'بنڈلز یا وزن درکار ہے' : 'Bundles or weight is required';
     } else {
-      // Check if selected processed material has enough available bundles
       const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
       if (selectedMaterial) {
-        const availableBundles = selectedMaterial.numberOfBundles - (selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle;
-        if (bundlesUsed > availableBundles) {
+        // Use weight if provided, otherwise calculate from bundles
+        const finalWeight = weightUsed > 0 ? weightUsed : (bundlesUsed * selectedMaterial.weightPerBundle);
+        const finalBundles = bundlesUsed > 0 ? bundlesUsed : (weightUsed / selectedMaterial.weightPerBundle);
+        
+        const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
+        const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
+        
+        if (finalBundles > availableBundles) {
           newErrors.bundlesUsed =
             language === 'ur' 
               ? `دستیاب بنڈلز: ${availableBundles.toFixed(0)}`
               : `Available bundles: ${availableBundles.toFixed(0)}`;
+        }
+        
+        if (finalWeight > availableWeight) {
+          newErrors.weightUsed =
+            language === 'ur' 
+              ? `دستیاب وزن: ${availableWeight.toFixed(2)} kgs`
+              : `Available weight: ${availableWeight.toFixed(2)} kgs`;
         }
       }
     }
@@ -181,6 +209,7 @@ export default function ProductProductionForm({
     try {
       const processedMaterialId = parseInt(formData.processedMaterialId);
       const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
+      const weightUsed = parseFloat(formData.weightUsed) || 0;
       const quantityFoot = parseFloat(formData.quantityFoot) || 0;
       const quantityBundles = parseFloat(formData.quantityBundles) || 0;
 
@@ -190,8 +219,10 @@ export default function ProductProductionForm({
         throw new Error('Processed material not found');
       }
 
-      // Calculate the quantity in kgs based on bundles used
-      const quantityUsedKgs = bundlesUsed * processedMaterial.weightPerBundle;
+      // Calculate the quantity in kgs - use weight if provided, otherwise calculate from bundles
+      const quantityUsedKgs = weightUsed > 0 ? weightUsed : (bundlesUsed * processedMaterial.weightPerBundle);
+      // Calculate bundles from weight if weight was used, otherwise use bundles directly
+      const finalBundlesUsed = weightUsed > 0 ? (weightUsed / processedMaterial.weightPerBundle) : bundlesUsed;
 
       // Check if this specific processed material entry has enough available bundles
       const availableBundles = processedMaterial.numberOfBundles - ((processedMaterial.usedQuantity || 0) / processedMaterial.weightPerBundle);
@@ -269,7 +300,7 @@ export default function ProductProductionForm({
         processedMaterialBatchId: processedMaterials.find((m) => m.id === processedMaterialId)
           ?.batchId || '',
         processedMaterialSnapshot: processedMaterial, // Store snapshot for restoration
-        bundlesUsed,
+        bundlesUsed: finalBundlesUsed, // Store calculated bundles
         quantityFoot,
         quantityBundles,
         date: new Date(formData.date),
@@ -379,9 +410,23 @@ export default function ProductProductionForm({
           <Input
             type="number"
             min="0"
-            step="1"
+            step="0.01"
             value={formData.bundlesUsed}
-            onChange={(e) => setFormData({ ...formData, bundlesUsed: e.target.value })}
+            onChange={(e) => {
+              const bundles = e.target.value;
+              setFormData({ ...formData, bundlesUsed: bundles });
+              
+              // Calculate weight from bundles if bundles are entered
+              if (bundles && parseFloat(bundles) > 0) {
+                const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+                if (selectedMaterial) {
+                  const calculatedWeight = parseFloat(bundles) * selectedMaterial.weightPerBundle;
+                  setFormData((prev) => ({ ...prev, bundlesUsed: bundles, weightUsed: calculatedWeight.toFixed(2) }));
+                }
+              } else {
+                setFormData((prev) => ({ ...prev, bundlesUsed: bundles, weightUsed: '' }));
+              }
+            }}
             placeholder={language === 'ur' ? 'بنڈلز کی تعداد' : 'Number of bundles from processed material'}
             error={errors.bundlesUsed}
             disabled={!formData.processedMaterialId}
@@ -403,30 +448,30 @@ export default function ProductProductionForm({
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            {language === 'ur' ? 'وزن (کلوگرام)' : 'Weight (kgs)'}
+            {language === 'ur' ? 'وزن (کلوگرام)' : 'Weight (kgs)'} *
           </label>
           <Input
             type="number"
             min="0"
             step="0.01"
-            value={formData.processedMaterialId && formData.bundlesUsed ? (() => {
-              const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
-              if (selectedMaterial) {
-                const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
-                return (bundlesUsed * selectedMaterial.weightPerBundle).toFixed(2);
-              }
-              return '0.00';
-            })() : '0.00'}
+            value={formData.weightUsed}
             onChange={(e) => {
-              // Calculate bundles from weight
-              const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
-              if (selectedMaterial) {
-                const weight = parseFloat(e.target.value) || 0;
-                const calculatedBundles = weight / selectedMaterial.weightPerBundle;
-                setFormData({ ...formData, bundlesUsed: calculatedBundles.toFixed(0) });
+              const weight = e.target.value;
+              setFormData({ ...formData, weightUsed: weight });
+              
+              // Calculate bundles from weight if weight is entered
+              if (weight && parseFloat(weight) > 0) {
+                const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+                if (selectedMaterial) {
+                  const calculatedBundles = parseFloat(weight) / selectedMaterial.weightPerBundle;
+                  setFormData((prev) => ({ ...prev, weightUsed: weight, bundlesUsed: calculatedBundles.toFixed(2) }));
+                }
+              } else {
+                setFormData((prev) => ({ ...prev, weightUsed: weight, bundlesUsed: '' }));
               }
             }}
             placeholder={language === 'ur' ? 'وزن کلوگرام میں' : 'Weight in kgs'}
+            error={errors.weightUsed}
             disabled={!formData.processedMaterialId}
           />
           {formData.processedMaterialId && (() => {
