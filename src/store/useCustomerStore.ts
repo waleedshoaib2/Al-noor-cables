@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Customer } from '@/types';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface CustomerState {
   customers: Customer[];
@@ -70,6 +71,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
         customers: [newCustomer, ...state.customers],
       };
       saveToStorage(newState.customers);
+      supabaseSyncService.markPending('customers');
       return newState;
     });
   },
@@ -80,6 +82,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
         c.id === id ? { ...c, ...customer } : c
       );
       saveToStorage(updated);
+      supabaseSyncService.markPending('customers');
       return { customers: updated };
     });
   },
@@ -90,6 +93,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
         customers: state.customers.filter((c) => c.id !== id),
       };
       saveToStorage(newState.customers);
+      supabaseSyncService.markPending('customers');
       return newState;
     });
   },

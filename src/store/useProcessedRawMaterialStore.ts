@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { ProcessedRawMaterial } from '@/types';
 import { generateBatchId } from '@/utils/constants';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface ProcessedMaterialBatchData {
   materialType: string;
@@ -129,6 +130,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       };
 
       saveToStorage(newState.processedMaterials, processedMaterialNames, stock);
+      supabaseSyncService.markPending('processedMaterials');
       return newState;
     });
   },
@@ -187,6 +189,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       };
 
       saveToStorage(newState.processedMaterials, newState.processedMaterialNames, stock);
+      supabaseSyncService.markPending('processedMaterials');
       return newState;
     });
   },
@@ -237,6 +240,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       };
 
       saveToStorage(updated, processedMaterialNames, stock);
+      supabaseSyncService.markPending('processedMaterials');
       return newState;
     });
   },
@@ -262,6 +266,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       };
 
       saveToStorage(newState.processedMaterials, newState.processedMaterialNames, stock);
+      supabaseSyncService.markPending('processedMaterials');
       return newState;
     });
   },
@@ -307,6 +312,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       };
 
       saveToStorage(updatedMaterials, newState.processedMaterialNames, stock);
+      supabaseSyncService.markPending('processedMaterials');
       return newState;
     });
   },

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { ProductProduction, ProductSale } from '@/types';
 import { generateBatchId, generateSaleNumber } from '@/utils/constants';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface ProductState {
   productions: ProductProduction[];
@@ -142,6 +143,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       };
 
       saveToStorage(newState.productions, newState.sales, productNames, stock);
+      supabaseSyncService.markPending('products');
       return newState;
     });
   },
@@ -177,6 +179,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       };
 
       saveToStorage(updated, newState.sales, newState.productNames, stock);
+      supabaseSyncService.markPending('products');
       return newState;
     });
   },
@@ -205,6 +208,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       };
 
       saveToStorage(newState.productions, newState.sales, newState.productNames, stock);
+      supabaseSyncService.markPending('products');
       return newState;
     });
   },
@@ -255,6 +259,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       };
 
       saveToStorage(newState.productions, newState.sales, newState.productNames, updatedStock);
+      supabaseSyncService.markPending('products');
       return newState;
     });
   },
@@ -280,6 +285,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       };
 
       saveToStorage(newState.productions, updated, newState.productNames, newState.stock);
+      supabaseSyncService.markPending('products');
       return newState;
     });
   },
@@ -307,6 +313,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
         };
 
         saveToStorage(newState.productions, newState.sales, newState.productNames, stock);
+        supabaseSyncService.markPending('products');
         return newState;
       }
 
@@ -318,6 +325,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       };
 
       saveToStorage(newState.productions, newState.sales, newState.productNames, newState.stock);
+      supabaseSyncService.markPending('products');
       return newState;
     });
   },

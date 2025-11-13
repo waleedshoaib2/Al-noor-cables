@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { RawMaterial, RawMaterialBatchUsed } from '@/types';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface RawMaterialState {
   rawMaterials: RawMaterial[];
@@ -99,6 +100,7 @@ export const useRawMaterialStore = create<RawMaterialState>((set, get) => ({
       };
 
       saveToStorage(newState.rawMaterials, materialTypes, suppliers);
+      supabaseSyncService.markPending('rawMaterials');
       return newState;
     });
   },
@@ -140,6 +142,7 @@ export const useRawMaterialStore = create<RawMaterialState>((set, get) => ({
       };
 
       saveToStorage(updated, materialTypes, suppliers);
+      supabaseSyncService.markPending('rawMaterials');
       return newState;
     });
   },
@@ -153,6 +156,7 @@ export const useRawMaterialStore = create<RawMaterialState>((set, get) => ({
       };
 
       saveToStorage(newState.rawMaterials, newState.materialTypes, newState.suppliers);
+      supabaseSyncService.markPending('rawMaterials');
       return newState;
     });
   },

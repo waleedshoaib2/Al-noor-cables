@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Employee, DailyPayout } from '@/types';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface EmployeeState {
   employees: Employee[];
@@ -42,6 +43,7 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
       } catch (error) {
         console.error('Error saving employees to storage:', error);
       }
+      supabaseSyncService.markPending('employees');
       return updated;
     });
   },
@@ -74,6 +76,7 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
       } catch (error) {
         console.error('Error saving employees to storage:', error);
       }
+      supabaseSyncService.markPending('employees');
       return updated;
     });
   },
@@ -95,6 +98,7 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
       } catch (error) {
         console.error('Error saving employees to storage:', error);
       }
+      supabaseSyncService.markPending('employees');
       return updated;
     });
   },
@@ -128,6 +132,7 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
       } catch (error) {
         console.error('Error saving employees to storage:', error);
       }
+      supabaseSyncService.markPending('employees');
       return updated;
     });
   },
@@ -160,6 +165,7 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
       } catch (error) {
         console.error('Error saving employees to storage:', error);
       }
+      supabaseSyncService.markPending('employees');
       return updated;
     });
   },
@@ -187,6 +193,7 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
       } catch (error) {
         console.error('Error saving employees to storage:', error);
       }
+      supabaseSyncService.markPending('employees');
       return updated;
     });
   },

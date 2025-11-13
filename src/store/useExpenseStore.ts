@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Expense } from '@/types';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface ExpenseState {
   expenses: Expense[];
@@ -84,6 +85,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       } catch (error) {
         console.error('Error saving expenses to storage:', error);
       }
+      supabaseSyncService.markPending('expenses');
       return updated;
     });
   },
@@ -102,6 +104,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       } catch (error) {
         console.error('Error saving expenses to storage:', error);
       }
+      supabaseSyncService.markPending('expenses');
       return updated;
     });
   },
@@ -118,6 +121,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       } catch (error) {
         console.error('Error saving expenses to storage:', error);
       }
+      supabaseSyncService.markPending('expenses');
       return updated;
     });
   },

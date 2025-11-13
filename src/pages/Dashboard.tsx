@@ -11,6 +11,7 @@ import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import RawMaterialForm from '@/components/RawMaterial/RawMaterialForm';
 import RawMaterialList from '@/components/RawMaterial/RawMaterialList';
+import SyncStatus from '@/components/Sync/SyncStatus';
 import { formatCurrency, formatDate } from '@/utils/helpers';
 import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns';
 import type { RawMaterial } from '@/types';
@@ -111,6 +112,9 @@ export default function Dashboard() {
           <div className="text-3xl font-bold text-blue-600">{formatCurrency(monthExpenses)}</div>
         </div>
       </div>
+
+      {/* Cloud Sync Status */}
+      <SyncStatus />
 
       {/* Quick Actions */}
       <div className="bg-white p-6 rounded-lg shadow-md">

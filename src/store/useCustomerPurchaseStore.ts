@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { CustomerPurchase } from '@/types';
+import { supabaseSyncService } from '@/services/supabaseSyncService';
 
 interface CustomerPurchaseState {
   purchases: CustomerPurchase[];
@@ -71,6 +72,7 @@ export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get)
         purchases: [newPurchase, ...state.purchases],
       };
       saveToStorage(newState.purchases);
+      supabaseSyncService.markPending('purchases');
       return newState;
     });
   },
@@ -81,6 +83,7 @@ export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get)
         p.id === id ? { ...p, ...purchase } : p
       );
       saveToStorage(updated);
+      supabaseSyncService.markPending('purchases');
       return { purchases: updated };
     });
   },
@@ -91,6 +94,7 @@ export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get)
         purchases: state.purchases.filter((p) => p.id !== id),
       };
       saveToStorage(newState.purchases);
+      supabaseSyncService.markPending('purchases');
       return newState;
     });
   },
