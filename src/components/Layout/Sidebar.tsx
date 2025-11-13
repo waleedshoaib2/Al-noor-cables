@@ -5,7 +5,6 @@ export default function Sidebar() {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/stock', label: 'Stock', icon: '📦' },
     { path: '/raw-materials', label: 'Raw Materials', icon: '⚙️' },
     { path: '/processed-materials', label: 'Processed Materials', icon: '🔧' },
     { path: '/products', label: 'Products', icon: '📦' },
