@@ -100,6 +100,20 @@ export interface Customer {
   createdAt: Date;
 }
 
+export interface CustomerPurchase {
+  id: number;
+  customerId: number;
+  productProductionId: number; // Link to specific product production entry
+  productName: string; // Product name (for display)
+  productNumber: string; // Product number (for display)
+  productTara: string; // Product Tara (for display)
+  quantityBundles: number; // Quantity in bundles
+  price: number; // Price per transaction
+  date: Date;
+  notes?: string;
+  createdAt: Date;
+}
+
 export interface ProductProduction {
   id: number;
   productName: string; // Product name

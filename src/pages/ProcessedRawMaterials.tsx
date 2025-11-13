@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
@@ -7,6 +7,7 @@ import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import ProcessedRawMaterialForm from '@/components/ProcessedRawMaterial/ProcessedRawMaterialForm';
 import ProcessedRawMaterialList from '@/components/ProcessedRawMaterial/ProcessedRawMaterialList';
+import { exportToPDF } from '@/utils/pdfExport';
 import type { ProcessedRawMaterial } from '@/types';
 
 export default function ProcessedRawMaterials() {
@@ -137,9 +138,22 @@ export default function ProcessedRawMaterials() {
     setFilterEndDate('');
   };
 
+  const reportSectionRef = useRef<HTMLDivElement>(null);
+
   // Print handler
   const handlePrint = () => {
     window.print();
+  };
+
+  // PDF Export handler
+  const handleExportPDF = async () => {
+    if (reportSectionRef.current) {
+      await exportToPDF(
+        'processed-materials-report-section',
+        `Processed_Materials_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+        'Processed Materials Report'
+      );
+    }
   };
 
   return (
@@ -159,6 +173,18 @@ export default function ProcessedRawMaterials() {
             {t('addProcessedMaterial', 'processedMaterial')}
           </Button>
         </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-3">
+          {language === 'ur' ? 'پروسیسڈ خام مال کا انتظام' : 'Processed Raw Materials Management'}
+        </h2>
+        <p className="text-white/90 leading-relaxed">
+          {language === 'ur' 
+            ? 'یہ صفحہ آپ کو خام مال سے پروسیسڈ خام مال بنانے کی سہولت فراہم کرتا ہے۔ آپ یہاں پروسیسڈ مٹیریل کا نام، ان پٹ مقدار، بنڈلز کی تعداد، فی بنڈل وزن، اور آؤٹ پٹ مقدار شامل کر سکتے ہیں۔ یہ سسٹم خود بخود خام مال کی اسٹاک کو اپڈیٹ کرتا ہے۔'
+            : 'This page allows you to create processed raw materials from raw materials. You can add processed material name, input quantity, number of bundles, weight per bundle, and output quantity here. The system automatically updates raw material stock.'}
+        </p>
       </div>
 
       {/* Summary Stats - Copper */}
@@ -272,7 +298,7 @@ export default function ProcessedRawMaterials() {
       </div>
 
       {/* Processed Materials List */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div id="processed-materials-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">
             {filteredMaterials.length === 0
@@ -284,9 +310,14 @@ export default function ProcessedRawMaterials() {
                 }`}
           </h2>
           {filteredMaterials.length > 0 && (
-            <Button variant="secondary" onClick={handlePrint} className="no-print">
-              🖨️ {t('print', 'processedMaterial')}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={handleExportPDF} className="no-print">
+                📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+              </Button>
+              <Button variant="secondary" onClick={handlePrint} className="no-print">
+                🖨️ {t('print', 'processedMaterial')}
+              </Button>
+            </div>
           )}
         </div>
         {filteredMaterials.length === 0 ? (

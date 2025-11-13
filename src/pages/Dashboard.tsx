@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStockStore } from '@/store/useStockStore';
-import { useExpenseStore } from '@/store/useExpenseStore';
-import { useCategoryStore } from '@/store/useCategoryStore';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
+import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
+import { useProductStore } from '@/store/useProductStore';
+import { useCustomerStore } from '@/store/useCustomerStore';
+import { useCustomerPurchaseStore } from '@/store/useCustomerPurchaseStore';
+import { useExpenseStore } from '@/store/useExpenseStore';
 import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import RawMaterialForm from '@/components/RawMaterial/RawMaterialForm';
@@ -14,37 +16,37 @@ import type { RawMaterial } from '@/types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const products = useStockStore((state) => state.products);
-  const lowStockProducts = useStockStore((state) => state.getLowStockProducts());
-  const sales = useStockStore((state) => state.sales);
+  
+  // New stores
+  const rawMaterials = useRawMaterialStore((state) => state.rawMaterials);
+  const getTotalByMaterialType = useRawMaterialStore((state) => state.getTotalByMaterialType);
+  const deleteRawMaterial = useRawMaterialStore((state) => state.deleteRawMaterial);
+  
+  const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
+  
+  const productions = useProductStore((state) => state.productions);
+  const getTotalStock = useProductStore((state) => state.getTotalStock);
+  
+  const customers = useCustomerStore((state) => state.customers);
+  const purchases = useCustomerPurchaseStore((state) => state.purchases);
+  
   const expenses = useExpenseStore((state) => state.expenses);
   const getTotalByPeriod = useExpenseStore((state) => state.getTotalByPeriod);
-  const categories = useCategoryStore((state) => state.categories);
-  
-  // Raw Material store
-  const deleteRawMaterial = useRawMaterialStore((state) => state.deleteRawMaterial);
-  const getTotalByMaterialType = useRawMaterialStore((state) => state.getTotalByMaterialType);
   
   const [showRawMaterialForm, setShowRawMaterialForm] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<RawMaterial | null>(null);
 
   const today = new Date();
-  const todaySales = sales.filter(
-    (s) => s.saleDate >= startOfDay(today) && s.saleDate <= endOfDay(today)
+  const todayPurchases = purchases.filter(
+    (p) => new Date(p.date) >= startOfDay(today) && new Date(p.date) <= endOfDay(today)
   );
-  const todaySalesTotal = todaySales.reduce((sum, s) => sum + s.finalAmount, 0);
+  const todayPurchasesTotal = todayPurchases.reduce((sum, p) => sum + (p.price || 0), 0);
   const monthExpenses = getTotalByPeriod(startOfMonth(today), endOfMonth(today));
 
-  const recentSales = sales.slice(0, 5);
+  const recentPurchases = purchases.slice(0, 5).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const recentExpenses = expenses.slice(0, 5).sort((a, b) => b.date.getTime() - a.date.getTime());
-
-  const getCategoryName = (categoryId: number) => {
-    return categories.find((c) => c.id === categoryId)?.name || 'Unknown';
-  };
-
-  const getProductName = (productId: number) => {
-    return products.find((p) => p.id === productId)?.name || 'Unknown';
-  };
+  
+  const totalStock = getTotalStock();
 
   const handleAddRawMaterial = () => {
     setEditingMaterial(null);
@@ -78,15 +80,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">Total Products</div>
-          <div className="text-3xl font-bold text-gray-900">{products.length}</div>
+          <div className="text-3xl font-bold text-gray-900">{productions.length}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Low Stock Alerts</div>
-          <div className="text-3xl font-bold text-red-600">{lowStockProducts.length}</div>
+          <div className="text-sm text-gray-600">Total Customers</div>
+          <div className="text-3xl font-bold text-brand-blue">{customers.length}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Today's Sales</div>
-          <div className="text-3xl font-bold text-green-600">{formatCurrency(todaySalesTotal)}</div>
+          <div className="text-sm text-gray-600">Today's Purchases</div>
+          <div className="text-3xl font-bold text-green-600">{formatCurrency(todayPurchasesTotal)}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">This Month's Expenses</div>
@@ -98,11 +100,17 @@ export default function Dashboard() {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
-          <Button variant="primary" onClick={() => navigate('/stock')}>
+          <Button variant="primary" onClick={() => navigate('/raw-materials')}>
+            Add Raw Material
+          </Button>
+          <Button variant="primary" onClick={() => navigate('/processed-materials')}>
+            Add Processed Material
+          </Button>
+          <Button variant="primary" onClick={() => navigate('/products')}>
             Add Product
           </Button>
-          <Button variant="success" onClick={() => navigate('/stock')}>
-            Record Sale
+          <Button variant="primary" onClick={() => navigate('/customers')}>
+            Add Customer
           </Button>
           <Button variant="primary" onClick={() => navigate('/expenses')}>
             Add Expense
@@ -162,56 +170,64 @@ export default function Dashboard() {
         />
       </Modal>
 
+      {/* Product Stock Summary */}
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Stock Summary</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="text-sm text-gray-600">Total Stock (Foot)</div>
+            <div className="text-2xl font-bold text-brand-orange">{totalStock.foot.toFixed(2)}</div>
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="text-sm text-gray-600">Total Stock (Bundles)</div>
+            <div className="text-2xl font-bold text-brand-blue">{totalStock.bundles.toFixed(2)}</div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Recent Sales */}
+        {/* Recent Purchases */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Sales</h2>
-          {recentSales.length === 0 ? (
-            <p className="text-gray-500">No sales yet</p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Purchases</h2>
+          {recentPurchases.length === 0 ? (
+            <p className="text-gray-500">No purchases yet</p>
           ) : (
             <div className="space-y-3">
-              {recentSales.map((sale) => (
-                <div key={sale.id} className="border-b pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-gray-900">{getProductName(sale.productId)}</div>
-                      <div className="text-sm text-gray-500">{sale.saleNo}</div>
-                      <div className="text-xs text-gray-400">{formatDate(sale.saleDate)}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-green-600">{formatCurrency(sale.finalAmount)}</div>
-                      <div className="text-xs text-gray-500">Qty: {sale.quantity}</div>
+              {recentPurchases.map((purchase) => {
+                const customer = customers.find((c) => c.id === purchase.customerId);
+                return (
+                  <div key={purchase.id} className="border-b pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-medium text-gray-900">{customer?.name || 'Unknown'}</div>
+                        <div className="text-sm text-gray-500">{purchase.productName}</div>
+                        <div className="text-xs text-gray-400">{formatDate(purchase.date)}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-green-600">{formatCurrency(purchase.price || 0)}</div>
+                        <div className="text-xs text-gray-500">Qty: {purchase.quantityBundles.toFixed(2)} bundles</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* Low Stock Alerts */}
+        {/* Processed Materials Summary */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Low Stock Alerts</h2>
-          {lowStockProducts.length === 0 ? (
-            <p className="text-gray-500">No low stock alerts</p>
-          ) : (
-            <div className="space-y-3">
-              {lowStockProducts.slice(0, 5).map((product) => (
-                <div key={product.id} className="border-b pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-gray-900">{product.name}</div>
-                      <div className="text-sm text-gray-500">{getCategoryName(product.categoryId)}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-red-600">{product.quantity}</div>
-                      <div className="text-xs text-gray-500">Reorder: {product.reorderLevel}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Processed Materials</h2>
+          <div className="space-y-3">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-gray-600">Total Processed Materials</div>
+              <div className="text-2xl font-bold text-brand-orange">{processedMaterials.length}</div>
             </div>
-          )}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-gray-600">Total Raw Materials</div>
+              <div className="text-2xl font-bold text-brand-blue">{rawMaterials.length}</div>
+            </div>
+          </div>
         </div>
       </div>
 

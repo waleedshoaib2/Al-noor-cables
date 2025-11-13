@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -7,6 +7,7 @@ import { Modal } from '@/components/Common/Modal';
 import RawMaterialForm from '@/components/RawMaterial/RawMaterialForm';
 import RawMaterialList from '@/components/RawMaterial/RawMaterialList';
 import RawMaterialPrintView from '@/components/RawMaterial/RawMaterialPrintView';
+import { exportToPDF } from '@/utils/pdfExport';
 import type { RawMaterial } from '@/types';
 
 export default function RawMaterials() {
@@ -92,9 +93,22 @@ export default function RawMaterials() {
     setFilterEndDate('');
   };
 
+  const reportSectionRef = useRef<HTMLDivElement>(null);
+
   // Print handler
   const handlePrint = () => {
     window.print();
+  };
+
+  // PDF Export handler
+  const handleExportPDF = async () => {
+    if (reportSectionRef.current) {
+      await exportToPDF(
+        'raw-materials-report-section',
+        `Raw_Materials_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+        'Raw Materials Report'
+      );
+    }
   };
 
   return (
@@ -114,6 +128,18 @@ export default function RawMaterials() {
             {t('addRawMaterial')}
           </Button>
         </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-3">
+          {language === 'ur' ? 'خام مال کا انتظام' : 'Raw Materials Management'}
+        </h2>
+        <p className="text-white/90 leading-relaxed">
+          {language === 'ur' 
+            ? 'یہ صفحہ آپ کو خام مال (Copper اور Silver) کی انٹری ریکارڈ کرنے، دیکھنے، فلٹر کرنے اور رپورٹس تیار کرنے کی سہولت فراہم کرتا ہے۔ آپ یہاں مٹیریل کی قسم، سپلائر، تاریخ، مقدار، بیچ آئی ڈی اور نوٹس شامل کر سکتے ہیں۔'
+            : 'This page allows you to record, view, filter, and generate reports for raw materials (Copper and Silver). You can add material type, supplier, date, quantity, batch ID, and notes here.'}
+        </p>
       </div>
 
       {/* Summary Stats */}
@@ -208,7 +234,7 @@ export default function RawMaterials() {
       </div>
 
       {/* Raw Materials List */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div id="raw-materials-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">
             {filteredMaterials.length === 0 
@@ -216,9 +242,14 @@ export default function RawMaterials() {
               : `${filteredMaterials.length} ${filteredMaterials.length === 1 ? t('materialFound') : t('materialsFound')}`}
           </h2>
           {filteredMaterials.length > 0 && (
-            <Button variant="secondary" onClick={handlePrint} className="no-print">
-              🖨️ {t('print')}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={handleExportPDF} className="no-print">
+                📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+              </Button>
+              <Button variant="secondary" onClick={handlePrint} className="no-print">
+                🖨️ {t('print')}
+              </Button>
+            </div>
           )}
         </div>
         {filteredMaterials.length === 0 ? (
