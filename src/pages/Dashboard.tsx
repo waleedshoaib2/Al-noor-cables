@@ -25,9 +25,11 @@ export default function Dashboard() {
   const deleteRawMaterial = useRawMaterialStore((state) => state.deleteRawMaterial);
   
   const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
+  const processedMaterialStock = useProcessedRawMaterialStore((state) => state.stock);
   
   const productions = useProductStore((state) => state.productions);
   const getTotalStock = useProductStore((state) => state.getTotalStock);
+  const productStock = useProductStore((state) => state.stock);
   
   const customers = useCustomerStore((state) => state.customers);
   const purchases = useCustomerPurchaseStore((state) => state.purchases);
@@ -49,6 +51,8 @@ export default function Dashboard() {
   const recentExpenses = expenses.slice(0, 5).sort((a, b) => b.date.getTime() - a.date.getTime());
   
   const totalStock = getTotalStock();
+  // Count products with bundles > 0 (available products)
+  const availableProductsCount = Object.values(productStock).filter(stock => stock.bundles > 0).length;
 
   const handleAddRawMaterial = () => {
     setEditingMaterial(null);
@@ -136,7 +140,7 @@ export default function Dashboard() {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">
-            {language === 'ur' ? 'خام مال کی انٹری' : 'Raw Material Intake'}
+            {language === 'ur' ? 'دستیاب خام مال' : 'Available Raw Material'}
           </h2>
           <Button variant="primary" onClick={handleAddRawMaterial}>
             {language === 'ur' ? 'خام مال شامل کریں' : 'Add Raw Material'}
@@ -194,15 +198,19 @@ export default function Dashboard() {
 
       {/* Product Stock Summary */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          {language === 'ur' ? 'مصنوعات کی اسٹاک کا خلاصہ' : 'Product Stock Summary'}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            {language === 'ur' ? 'مصنوعات کی اسٹاک کا خلاصہ' : 'Product Stock Summary'}
+          </h2>
+        </div>
+        
+        {/* Total Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="text-sm text-gray-600">
-              {language === 'ur' ? 'کل اسٹاک (فٹ)' : 'Total Stock (Foot)'}
+              {language === 'ur' ? 'مصنوعات کی تعداد' : 'Number of Products'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{totalStock.foot.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-brand-orange">{availableProductsCount}</div>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="text-sm text-gray-600">
@@ -211,6 +219,52 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-brand-blue">{totalStock.bundles.toFixed(2)}</div>
           </div>
         </div>
+
+        {/* Product Breakdown */}
+        {Object.entries(productStock).filter(([, stock]) => stock.bundles > 0).length > 0 ? (
+          <div>
+            <h3 className="text-md font-semibold text-gray-700 mb-3">
+              {language === 'ur' ? 'مصنوعات کی تفصیل' : 'Products in Inventory'}
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                      {language === 'ur' ? 'مصنوعات کا نام' : 'Product Name'}
+                    </th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                      {language === 'ur' ? 'فٹ' : 'Foot'}
+                    </th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                      {language === 'ur' ? 'بنڈلز' : 'Bundles'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(productStock)
+                    .filter(([, stock]) => stock.bundles > 0)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([productName, stock]) => (
+                      <tr key={productName} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4 text-gray-900 font-medium">{productName}</td>
+                        <td className="py-3 px-4 text-gray-700">
+                          {stock.foot > 0 ? stock.foot.toFixed(2) : '-'}
+                        </td>
+                        <td className="py-3 px-4 text-gray-700">
+                          {stock.bundles.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-4">
+            {language === 'ur' ? 'کوئی مصنوعات موجود نہیں' : 'No products in inventory'}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -252,7 +306,9 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             {language === 'ur' ? 'پروسیسڈ مال' : 'Processed Materials'}
           </h2>
-          <div className="space-y-3">
+          
+          {/* Total Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="text-sm text-gray-600">
                 {language === 'ur' ? 'کل پروسیسڈ مال' : 'Total Processed Materials'}
@@ -266,6 +322,45 @@ export default function Dashboard() {
               <div className="text-2xl font-bold text-brand-blue">{rawMaterials.length}</div>
             </div>
           </div>
+
+          {/* Processed Materials Breakdown */}
+          {Object.keys(processedMaterialStock).length > 0 ? (
+            <div>
+              <h3 className="text-md font-semibold text-gray-700 mb-3">
+                {language === 'ur' ? 'پروسیسڈ مال کی تفصیل' : 'Processed Materials in Inventory'}
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        {language === 'ur' ? 'مٹیریل کا نام' : 'Material Name'}
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                        {language === 'ur' ? 'دستیاب مقدار (کلو)' : 'Available Quantity (kgs)'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(processedMaterialStock)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([materialName, stock]) => (
+                        <tr key={materialName} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <td className="py-3 px-4 text-gray-900 font-medium">{materialName}</td>
+                          <td className="py-3 px-4 text-gray-700">
+                            {stock > 0 ? stock.toFixed(2) : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-4">
+              {language === 'ur' ? 'کوئی پروسیسڈ مال موجود نہیں' : 'No processed materials in inventory'}
+            </p>
+          )}
         </div>
       </div>
 

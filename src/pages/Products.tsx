@@ -18,6 +18,7 @@ export default function Products() {
   const productions = useProductStore((state) => state.productions);
   const deleteProduction = useProductStore((state) => state.deleteProduction);
   const getTotalStock = useProductStore((state) => state.getTotalStock);
+  const productStock = useProductStore((state) => state.stock);
   const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
   const restoreProcessedMaterialForProduct = useProcessedRawMaterialStore((state) => state.restoreProcessedMaterialForProduct);
   const purchases = useCustomerPurchaseStore((state) => state.purchases);
@@ -98,6 +99,8 @@ export default function Products() {
   };
 
   const totalStock = getTotalStock();
+  // Count products with bundles > 0 (available products)
+  const availableProductsCount = Object.values(productStock).filter(stock => stock.bundles > 0).length;
   const reportSectionRef = useRef<HTMLDivElement>(null);
 
   // PDF Export handler
@@ -145,8 +148,10 @@ export default function Products() {
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">{t('totalStockFoot', 'product')}</div>
-          <div className="text-3xl font-bold text-brand-orange">{totalStock.foot.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'مصنوعات کی تعداد' : 'Number of Products'}
+          </div>
+          <div className="text-3xl font-bold text-brand-orange">{availableProductsCount}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">{t('totalStockBundles', 'product')}</div>
@@ -197,6 +202,9 @@ export default function Products() {
                     {language === 'ur' ? 'تاریخ' : 'Date'}
                   </th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'دستیاب' : 'Available'}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
                     {language === 'ur' ? 'اعمال' : 'Actions'}
                   </th>
                 </tr>
@@ -206,6 +214,10 @@ export default function Products() {
                   // Get purchases for this specific product production
                   const productPurchases = purchases.filter((p) => p.productProductionId === production.id);
                   const totalPurchasedBundles = productPurchases.reduce((sum, p) => sum + p.quantityBundles, 0);
+                  
+                  // Check if product is available (has bundles > 0 in stock)
+                  const productStockData = productStock[production.productName] || { foot: 0, bundles: 0 };
+                  const isAvailable = productStockData.bundles > 0;
                   
                   return (
                     <>
@@ -233,6 +245,19 @@ export default function Products() {
                         </td>
                         <td className="py-3 px-4 text-gray-600 text-sm">
                           {new Date(production.date).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              isAvailable
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {isAvailable
+                              ? language === 'ur' ? 'دستیاب' : 'Available'
+                              : language === 'ur' ? 'دستیاب نہیں' : 'Not Available'}
+                          </span>
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-3">

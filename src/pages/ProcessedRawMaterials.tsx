@@ -192,11 +192,15 @@ export default function ProcessedRawMaterials() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Copper</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <div className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{copperInput.toFixed(2)} kgs</div>
           </div>
           <div>
-            <div className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'دستیاب مقدار' : 'Amount Available'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{copperOutput.toFixed(2)} kgs</div>
           </div>
           <div>
@@ -211,11 +215,15 @@ export default function ProcessedRawMaterials() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Silver</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <div className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{silverInput.toFixed(2)} kgs</div>
           </div>
           <div>
-            <div className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'دستیاب مقدار' : 'Amount Available'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{silverOutput.toFixed(2)} kgs</div>
           </div>
           <div>

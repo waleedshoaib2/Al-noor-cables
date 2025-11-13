@@ -5,7 +5,7 @@ export function calculateFinalAmount(quantity: number, unitPrice: number, discou
 
 // Format currency
 export function formatCurrency(amount: number): string {
-  return `PKR ${amount.toLocaleString()}`;
+  return `PKR ${Math.round(amount).toLocaleString()}`;
 }
 
 // Format date

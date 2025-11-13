@@ -370,7 +370,7 @@ export default function Customers() {
                           {purchase.quantityBundles.toFixed(2)}
                         </td>
                         <td className="py-3 px-4 text-gray-700">
-                          {purchase.price > 0 ? purchase.price.toFixed(2) : '-'}
+                          {purchase.price > 0 ? Math.round(purchase.price).toLocaleString() : '-'}
                         </td>
                         <td className="py-3 px-4 text-gray-600 text-sm">
                           {new Date(purchase.date).toLocaleDateString()}
