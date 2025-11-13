@@ -108,6 +108,7 @@ export interface ProductProduction {
   processedMaterialId: number; // Link to processed raw material used (for reference, may be deleted)
   processedMaterialBatchId: string;
   processedMaterialSnapshot?: ProcessedRawMaterial; // Snapshot of processed material when used (for restoration)
+  bundlesUsed: number; // Number of bundles from processed raw material that were actually used
   quantityFoot: number; // in foot
   quantityBundles: number; // in bundles
   date: Date;

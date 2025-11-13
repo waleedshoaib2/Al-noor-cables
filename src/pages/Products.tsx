@@ -35,7 +35,38 @@ export default function Products() {
       const production = productions.find((p) => p.id === id);
       if (production && production.processedMaterialSnapshot) {
         // Restore the processed raw material entry that was used
-        restoreProcessedMaterialForProduct(production.processedMaterialSnapshot);
+        // Calculate the amount to restore based on bundlesUsed
+        const bundlesUsed = production.bundlesUsed || 0;
+        const quantityToRestore = bundlesUsed * production.processedMaterialSnapshot.weightPerBundle;
+        
+        // Manually restore by reducing usedQuantity
+        const processedMaterials = useProcessedRawMaterialStore.getState().processedMaterials;
+        const material = processedMaterials.find((m) => m.id === production.processedMaterialSnapshot!.id);
+        if (material && quantityToRestore > 0) {
+          const updatedMaterials = processedMaterials.map((m) =>
+            m.id === material.id
+              ? { ...m, usedQuantity: Math.max(0, (m.usedQuantity || 0) - quantityToRestore) }
+              : m
+          );
+          // Recalculate stock
+          const currentState = useProcessedRawMaterialStore.getState();
+          const stock = { ...currentState.stock };
+          const materialsWithName = updatedMaterials.filter((m) => m.name === material.name);
+          stock[material.name] = materialsWithName.reduce(
+            (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+            0
+          );
+          // Update the store
+          useProcessedRawMaterialStore.setState({
+            processedMaterials: updatedMaterials,
+            stock,
+          });
+          // Save to storage
+          const saveToStorage = useProcessedRawMaterialStore.getState().saveToStorage;
+          if (saveToStorage) {
+            saveToStorage();
+          }
+        }
       }
       deleteProduction(id);
     }

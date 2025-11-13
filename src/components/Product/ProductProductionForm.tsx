@@ -37,6 +37,7 @@ export default function ProductProductionForm({
     productNumber: '',
     productTara: '',
     processedMaterialId: '',
+    bundlesUsed: '',
     quantityFoot: '',
     quantityBundles: '',
     date: new Date().toISOString().split('T')[0],
@@ -53,6 +54,7 @@ export default function ProductProductionForm({
         productNumber: production.productNumber || '',
         productTara: production.productTara || '',
         processedMaterialId: production.processedMaterialId.toString(),
+        bundlesUsed: (production.bundlesUsed || 0).toString(),
         quantityFoot: (production.quantityFoot || 0).toString(),
         quantityBundles: (production.quantityBundles || 0).toString(),
         date: production.date.toISOString().split('T')[0],
@@ -65,6 +67,7 @@ export default function ProductProductionForm({
         productNumber: '',
         productTara: '',
         processedMaterialId: '',
+        bundlesUsed: '',
         quantityFoot: '',
         quantityBundles: '',
         date: new Date().toISOString().split('T')[0],
@@ -98,6 +101,24 @@ export default function ProductProductionForm({
     if (!formData.processedMaterialId) {
       newErrors.processedMaterialId =
         language === 'ur' ? 'پروسیس شدہ مواد درکار ہے' : 'Processed material is required';
+    }
+
+    const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
+    if (!formData.processedMaterialId || bundlesUsed <= 0) {
+      newErrors.bundlesUsed =
+        language === 'ur' ? 'استعمال شدہ بنڈلز درکار ہیں' : 'Bundles used is required and must be greater than 0';
+    } else {
+      // Check if selected processed material has enough available bundles
+      const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+      if (selectedMaterial) {
+        const availableBundles = selectedMaterial.numberOfBundles - (selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle;
+        if (bundlesUsed > availableBundles) {
+          newErrors.bundlesUsed =
+            language === 'ur' 
+              ? `دستیاب بنڈلز: ${availableBundles.toFixed(0)}`
+              : `Available bundles: ${availableBundles.toFixed(0)}`;
+        }
+      }
     }
 
     const quantityFoot = parseFloat(formData.quantityFoot) || 0;
@@ -159,6 +180,7 @@ export default function ProductProductionForm({
 
     try {
       const processedMaterialId = parseInt(formData.processedMaterialId);
+      const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
       const quantityFoot = parseFloat(formData.quantityFoot) || 0;
       const quantityBundles = parseFloat(formData.quantityBundles) || 0;
 
@@ -168,62 +190,75 @@ export default function ProductProductionForm({
         throw new Error('Processed material not found');
       }
 
-      // Use the entire processed raw material entry (its outputQuantity), regardless of foot/bundle quantities
+      // Calculate the quantity in kgs based on bundles used
+      const quantityUsedKgs = bundlesUsed * processedMaterial.weightPerBundle;
+
+      // Check if this specific processed material entry has enough available bundles
+      const availableBundles = processedMaterial.numberOfBundles - ((processedMaterial.usedQuantity || 0) / processedMaterial.weightPerBundle);
+      if (bundlesUsed > availableBundles) {
+        throw new Error(
+          `Insufficient bundles for ${processedMaterial.name}. Available: ${availableBundles.toFixed(0)} bundles, Required: ${bundlesUsed.toFixed(0)} bundles`
+        );
+      }
+
       if (!production) {
-        // Check if this specific processed material entry is available (has stock)
-        const availableStock = getStockByName(processedMaterial.name);
-        if (availableStock < processedMaterial.outputQuantity) {
-          throw new Error(
-            `Insufficient stock for ${processedMaterial.name}. Available: ${availableStock.toFixed(2)} kgs, Required: ${processedMaterial.outputQuantity.toFixed(2)} kgs`
-          );
-        }
-        
-        // Deduct the entire outputQuantity of this specific processed material entry
-        deductStockForProduct(processedMaterialId, processedMaterial.outputQuantity);
+        // Deduct the quantity based on bundles used (bundlesUsed × weightPerBundle)
+        deductStockForProduct(processedMaterialId, quantityUsedKgs);
       } else {
         // When updating, restore old processed material and deduct new one
         const oldProduction = production;
+        const oldBundlesUsed = oldProduction.bundlesUsed || 0;
+        const oldQuantityUsedKgs = oldProduction.processedMaterialSnapshot 
+          ? oldBundlesUsed * oldProduction.processedMaterialSnapshot.weightPerBundle
+          : 0;
         
-        if (oldProduction.processedMaterialSnapshot) {
-          if (oldProduction.processedMaterialId === processedMaterialId) {
-            // Same material - no change needed since we're using the same entry's outputQuantity
-            // The stock is already deducted correctly
-          } else {
-            // Different material - restore old entry, deduct new entry
-            restoreProcessedMaterialForProduct(oldProduction.processedMaterialSnapshot);
-            
-            // Check if new material entry is available
-            const availableStock = getStockByName(processedMaterial.name);
-            if (availableStock < processedMaterial.outputQuantity) {
-              // Restore the old material back since we can't complete the update
-              // We need to re-deduct the old one
-              const oldMaterial = oldProduction.processedMaterialSnapshot;
-              deductStockForProduct(oldMaterial.id, oldMaterial.outputQuantity);
-              throw new Error(
-                `Insufficient stock for ${processedMaterial.name}. Available: ${availableStock.toFixed(2)} kgs, Required: ${processedMaterial.outputQuantity.toFixed(2)} kgs`
-              );
+        // Restore old amount first
+        if (oldQuantityUsedKgs > 0 && oldProduction.processedMaterialSnapshot) {
+          const oldMaterial = oldProduction.processedMaterialSnapshot;
+          const oldMaterialInStore = processedMaterials.find((m) => m.id === oldMaterial.id);
+          if (oldMaterialInStore) {
+            // Manually restore by reducing usedQuantity
+            const updatedMaterials = processedMaterials.map((m) =>
+              m.id === oldMaterial.id
+                ? { ...m, usedQuantity: Math.max(0, (m.usedQuantity || 0) - oldQuantityUsedKgs) }
+                : m
+            );
+            // Recalculate stock for the old material
+            const materialsWithName = updatedMaterials.filter((m) => m.name === oldMaterial.name);
+            const currentState = useProcessedRawMaterialStore.getState();
+            const stock = { ...currentState.stock };
+            stock[oldMaterial.name] = materialsWithName.reduce(
+              (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+              0
+            );
+            // Update the store
+            useProcessedRawMaterialStore.setState({
+              processedMaterials: updatedMaterials,
+              stock,
+            });
+            // Save to storage using the store's save method
+            const saveToStorage = useProcessedRawMaterialStore.getState().saveToStorage;
+            if (saveToStorage) {
+              saveToStorage();
             }
-            
-            deductStockForProduct(processedMaterialId, processedMaterial.outputQuantity);
-          }
-        } else {
-          // Legacy: old production without snapshot - try to find the material
-          const oldProcessedMaterial = processedMaterials.find((m) => m.id === oldProduction.processedMaterialId);
-          if (oldProcessedMaterial && oldProduction.processedMaterialId !== processedMaterialId) {
-            // Different material - restore old, deduct new
-            restoreProcessedMaterialForProduct(oldProcessedMaterial);
-            
-            const availableStock = getStockByName(processedMaterial.name);
-            if (availableStock < processedMaterial.outputQuantity) {
-              deductStockForProduct(oldProcessedMaterial.id, oldProcessedMaterial.outputQuantity);
-              throw new Error(
-                `Insufficient stock for ${processedMaterial.name}. Available: ${availableStock.toFixed(2)} kgs, Required: ${processedMaterial.outputQuantity.toFixed(2)} kgs`
-              );
-            }
-            
-            deductStockForProduct(processedMaterialId, processedMaterial.outputQuantity);
           }
         }
+        
+        // Check if new material entry has enough bundles
+        const availableBundles = processedMaterial.numberOfBundles - ((processedMaterial.usedQuantity || 0) / processedMaterial.weightPerBundle);
+        if (bundlesUsed > availableBundles) {
+          // Restore the old material back since we can't complete the update
+          if (oldQuantityUsedKgs > 0 && oldProduction.processedMaterialSnapshot) {
+            const oldMaterial = oldProduction.processedMaterialSnapshot;
+            deductStockForProduct(oldMaterial.id, oldQuantityUsedKgs);
+          }
+          throw new Error(
+            `Insufficient bundles for ${processedMaterial.name}. Available: ${availableBundles.toFixed(0)} bundles, Required: ${bundlesUsed.toFixed(0)} bundles`
+          );
+        }
+        
+        // Deduct new amount
+        deductStockForProduct(processedMaterialId, quantityUsedKgs);
       }
 
       const productionData = {
@@ -234,6 +269,7 @@ export default function ProductProductionForm({
         processedMaterialBatchId: processedMaterials.find((m) => m.id === processedMaterialId)
           ?.batchId || '',
         processedMaterialSnapshot: processedMaterial, // Store snapshot for restoration
+        bundlesUsed,
         quantityFoot,
         quantityBundles,
         date: new Date(formData.date),
@@ -312,27 +348,109 @@ export default function ProductProductionForm({
         </label>
         <select
           value={formData.processedMaterialId}
-          onChange={(e) => setFormData({ ...formData, processedMaterialId: e.target.value })}
+          onChange={(e) => {
+            setFormData({ ...formData, processedMaterialId: e.target.value, bundlesUsed: '' });
+          }}
           className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
             errors.processedMaterialId ? 'border-red-500' : ''
           }`}
         >
           <option value="">{t('selectProcessedMaterial', 'product')}</option>
-          {availableProcessedMaterials.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name} ({m.materialType}) - Stock: {getStockByName(m.name).toFixed(2)} kgs
-            </option>
-          ))}
+          {availableProcessedMaterials.map((m) => {
+            const availableBundles = m.numberOfBundles - ((m.usedQuantity || 0) / m.weightPerBundle);
+            return (
+              <option key={m.id} value={m.id}>
+                {m.name} ({m.materialType}) - {getStockByName(m.name).toFixed(2)} kgs ({availableBundles.toFixed(0)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
+              </option>
+            );
+          })}
         </select>
-        {selectedMaterial && (
-          <p className="mt-1 text-xs text-gray-500">
-            {t('availableStock', 'product')}: {availableStock.toFixed(2)} kgs
-          </p>
-        )}
         {errors.processedMaterialId && (
           <p className="mt-1 text-sm text-red-600">{errors.processedMaterialId}</p>
         )}
       </div>
+
+      {/* Bundles Used and Weight - Always visible, right after Processed Material */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {language === 'ur' ? 'استعمال شدہ بنڈلز' : 'Bundles Used'} *
+          </label>
+          <Input
+            type="number"
+            min="0"
+            step="1"
+            value={formData.bundlesUsed}
+            onChange={(e) => setFormData({ ...formData, bundlesUsed: e.target.value })}
+            placeholder={language === 'ur' ? 'بنڈلز کی تعداد' : 'Number of bundles from processed material'}
+            error={errors.bundlesUsed}
+            disabled={!formData.processedMaterialId}
+          />
+          {formData.processedMaterialId && (() => {
+            const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+            if (selectedMaterial) {
+              const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
+              return (
+                <p className="mt-1 text-sm text-gray-500">
+                  {language === 'ur' 
+                    ? `دستیاب: ${availableBundles.toFixed(0)} بنڈلز`
+                    : `Available: ${availableBundles.toFixed(0)} bundles`}
+                </p>
+              );
+            }
+            return null;
+          })()}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {language === 'ur' ? 'وزن (کلوگرام)' : 'Weight (kgs)'}
+          </label>
+          <Input
+            type="number"
+            min="0"
+            step="0.01"
+            value={formData.processedMaterialId && formData.bundlesUsed ? (() => {
+              const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+              if (selectedMaterial) {
+                const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
+                return (bundlesUsed * selectedMaterial.weightPerBundle).toFixed(2);
+              }
+              return '0.00';
+            })() : '0.00'}
+            onChange={(e) => {
+              // Calculate bundles from weight
+              const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+              if (selectedMaterial) {
+                const weight = parseFloat(e.target.value) || 0;
+                const calculatedBundles = weight / selectedMaterial.weightPerBundle;
+                setFormData({ ...formData, bundlesUsed: calculatedBundles.toFixed(0) });
+              }
+            }}
+            placeholder={language === 'ur' ? 'وزن کلوگرام میں' : 'Weight in kgs'}
+            disabled={!formData.processedMaterialId}
+          />
+          {formData.processedMaterialId && (() => {
+            const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+            if (selectedMaterial) {
+              const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
+              const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
+              return (
+                <p className="mt-1 text-sm text-gray-500">
+                  {language === 'ur' 
+                    ? `دستیاب: ${availableWeight.toFixed(2)} کلوگرام`
+                    : `Available: ${availableWeight.toFixed(2)} kgs`}
+                </p>
+              );
+            }
+            return null;
+          })()}
+        </div>
+      </div>
+      {!formData.processedMaterialId && (
+        <p className="text-sm text-gray-400 -mt-2">
+          {language === 'ur' ? 'پہلے پروسیس شدہ مواد منتخب کریں' : 'Please select a processed material first'}
+        </p>
+      )}
 
       {/* Quantity Foot and Bundles */}
       <div className="grid grid-cols-2 gap-4">

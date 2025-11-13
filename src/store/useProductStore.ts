@@ -54,6 +54,8 @@ const loadFromStorage = (): {
           // Migration: add productNumber and productTara if missing
           productNumber: p.productNumber ?? '',
           productTara: p.productTara ?? '',
+          // Migration: add bundlesUsed if missing (default to 0 for old entries)
+          bundlesUsed: p.bundlesUsed ?? 0,
           // Migration: handle processedMaterialSnapshot dates
           processedMaterialSnapshot: p.processedMaterialSnapshot ? {
             ...p.processedMaterialSnapshot,
