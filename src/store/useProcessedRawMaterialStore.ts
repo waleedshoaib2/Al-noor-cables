@@ -55,6 +55,7 @@ const loadFromStorage = (): {
           date: new Date(m.date),
           createdAt: new Date(m.createdAt),
           rawMaterialBatchesUsed: m.rawMaterialBatchesUsed || [],
+          usedQuantity: m.usedQuantity ?? 0, // Migration: add usedQuantity if missing
         })) || [],
         processedMaterialNames: parsed.processedMaterialNames || PREDEFINED_NAMES,
         stock: parsed.stock || {},
@@ -101,6 +102,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
     const newMaterial: ProcessedRawMaterial = {
       ...material,
       outputQuantity,
+      usedQuantity: 0, // Initialize as unused
       id: Date.now(),
       batchId: generateBatchId(material.date),
       createdAt: new Date(),
@@ -112,9 +114,13 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
         ? state.processedMaterialNames
         : [...state.processedMaterialNames, material.name];
 
-      // Update stock
+      // Update stock - recalculate based on all materials with this name
       const stock = { ...state.stock };
-      stock[material.name] = (stock[material.name] || 0) + outputQuantity;
+      const materialsWithName = [newMaterial, ...state.processedMaterials].filter((m) => m.name === material.name);
+      stock[material.name] = materialsWithName.reduce(
+        (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+        0
+      );
 
       const newState = {
         processedMaterials: [newMaterial, ...state.processedMaterials],
@@ -144,6 +150,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
         numberOfBundles: pm.numberOfBundles,
         weightPerBundle: pm.weightPerBundle,
         outputQuantity,
+        usedQuantity: 0, // Initialize as unused
         date: batch.date,
         batchId: batch.batchId, // Shared batch ID
         notes: batch.notes,
@@ -158,13 +165,23 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
         processedMaterialNames.add(pm.name);
       }
 
-      // Update stock
-      stock[pm.name] = (stock[pm.name] || 0) + outputQuantity;
+      // Stock will be recalculated after all materials are added
     });
 
     set((state) => {
+      // Recalculate stock for all affected material names
+      const allMaterials = [...newMaterials, ...state.processedMaterials];
+      const affectedNames = new Set(newMaterials.map((m) => m.name));
+      affectedNames.forEach((name) => {
+        const materialsWithName = allMaterials.filter((m) => m.name === name);
+        stock[name] = materialsWithName.reduce(
+          (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+          0
+        );
+      });
+
       const newState = {
-        processedMaterials: [...newMaterials, ...state.processedMaterials],
+        processedMaterials: allMaterials,
         processedMaterialNames: Array.from(processedMaterialNames),
         stock,
       };
@@ -183,17 +200,29 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
         m.id === id ? { ...m, ...material } : m
       );
 
-      // Update stock if output quantity changed
+      // Recalculate stock for affected material names
       let stock = { ...state.stock };
+      const affectedNames = new Set<string>();
+      if (material.name) {
+        affectedNames.add(material.name);
+        affectedNames.add(existing.name);
+      } else {
+        affectedNames.add(existing.name);
+      }
       if (material.numberOfBundles !== undefined || material.weightPerBundle !== undefined) {
         const updatedMaterial = updated.find((m) => m.id === id);
         if (updatedMaterial) {
-          const oldOutput = existing.outputQuantity;
-          const newOutput = updatedMaterial.numberOfBundles * updatedMaterial.weightPerBundle;
-          const diff = newOutput - oldOutput;
-          stock[updatedMaterial.name] = (stock[updatedMaterial.name] || 0) + diff;
+          affectedNames.add(updatedMaterial.name);
         }
       }
+      // Recalculate stock for all affected names
+      affectedNames.forEach((name) => {
+        const materialsWithName = updated.filter((m) => m.name === name);
+        stock[name] = materialsWithName.reduce(
+          (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+          0
+        );
+      });
 
       // Update processed material names if name changed
       let processedMaterialNames = state.processedMaterialNames;
@@ -217,12 +246,17 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       const material = state.processedMaterials.find((m) => m.id === id);
       if (!material) return state;
 
-      // Reduce stock
+      // Recalculate stock for the affected material name
+      const updated = state.processedMaterials.filter((m) => m.id !== id);
       const stock = { ...state.stock };
-      stock[material.name] = Math.max(0, (stock[material.name] || 0) - material.outputQuantity);
+      const materialsWithName = updated.filter((m) => m.name === material.name);
+      stock[material.name] = materialsWithName.reduce(
+        (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+        0
+      );
 
       const newState = {
-        processedMaterials: state.processedMaterials.filter((m) => m.id !== id),
+        processedMaterials: updated,
         processedMaterialNames: state.processedMaterialNames,
         stock,
       };
@@ -237,7 +271,9 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
   },
 
   getStockByName: (name: string) => {
-    return get().stock[name] || 0;
+    // Calculate available stock: sum of (outputQuantity - usedQuantity) for all materials with this name
+    const materials = get().processedMaterials.filter((m) => m.name === name);
+    return materials.reduce((sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)), 0);
   },
 
   getTotalStock: () => {
@@ -249,11 +285,20 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       const material = state.processedMaterials.find((m) => m.id === processedMaterialId);
       if (!material) return state;
 
-      const stock = { ...state.stock };
-      stock[material.name] = Math.max(0, (stock[material.name] || 0) - quantity);
+      // Update the material to mark it as used (increase usedQuantity)
+      const updatedMaterials = state.processedMaterials.map((m) =>
+        m.id === processedMaterialId
+          ? { ...m, usedQuantity: (m.usedQuantity || 0) + quantity }
+          : m
+      );
 
-      // Remove the processed material entry since it's been fully consumed
-      const updatedMaterials = state.processedMaterials.filter((m) => m.id !== processedMaterialId);
+      // Recalculate stock based on available quantity (outputQuantity - usedQuantity)
+      const stock = { ...state.stock };
+      const materialsWithName = updatedMaterials.filter((m) => m.name === material.name);
+      stock[material.name] = materialsWithName.reduce(
+        (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+        0
+      );
 
       const newState = {
         processedMaterials: updatedMaterials,
@@ -268,25 +313,32 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
 
   restoreProcessedMaterialForProduct: (processedMaterial: ProcessedRawMaterial) => {
     set((state) => {
-      // Restore the processed material entry and stock
-      const stock = { ...state.stock };
-      stock[processedMaterial.name] = (stock[processedMaterial.name] || 0) + processedMaterial.outputQuantity;
+      // Find the material by ID and restore its usedQuantity
+      const material = state.processedMaterials.find((m) => m.id === processedMaterial.id);
+      if (!material) return state; // Material not found, nothing to restore
 
-      // Add the processed material back to the list
-      const updatedMaterials = [...state.processedMaterials, processedMaterial];
-      
-      // Add processed material name if not exists
-      const processedMaterialNames = state.processedMaterialNames.includes(processedMaterial.name)
-        ? state.processedMaterialNames
-        : [...state.processedMaterialNames, processedMaterial.name];
+      // Reduce usedQuantity by the outputQuantity that was used
+      const updatedMaterials = state.processedMaterials.map((m) =>
+        m.id === processedMaterial.id
+          ? { ...m, usedQuantity: Math.max(0, (m.usedQuantity || 0) - processedMaterial.outputQuantity) }
+          : m
+      );
+
+      // Recalculate stock based on available quantity (outputQuantity - usedQuantity)
+      const stock = { ...state.stock };
+      const materialsWithName = updatedMaterials.filter((m) => m.name === processedMaterial.name);
+      stock[processedMaterial.name] = materialsWithName.reduce(
+        (sum, m) => sum + (m.outputQuantity - (m.usedQuantity || 0)),
+        0
+      );
 
       const newState = {
         processedMaterials: updatedMaterials,
-        processedMaterialNames,
+        processedMaterialNames: state.processedMaterialNames,
         stock,
       };
 
-      saveToStorage(updatedMaterials, processedMaterialNames, stock);
+      saveToStorage(updatedMaterials, newState.processedMaterialNames, stock);
       return newState;
     });
   },

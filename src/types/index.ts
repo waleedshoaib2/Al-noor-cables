@@ -75,7 +75,8 @@ export interface ProcessedRawMaterial {
   inputQuantity: number; // in kgs (from raw material)
   numberOfBundles: number;
   weightPerBundle: number; // in kgs
-  outputQuantity: number; // numberOfBundles × weightPerBundle (in kgs)
+  outputQuantity: number; // numberOfBundles × weightPerBundle (in kgs) - original output
+  usedQuantity: number; // in kgs - amount used in products (gets deducted from outputQuantity for stock calculation)
   date: Date;
   batchId: string;
   notes?: string;

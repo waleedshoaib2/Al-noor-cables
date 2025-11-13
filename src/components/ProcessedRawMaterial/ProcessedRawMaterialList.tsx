@@ -130,33 +130,52 @@ export default function ProcessedRawMaterialList({
               {t('materialsInBatch', 'processedMaterial')}:
             </div>
             <div className="space-y-2">
-              {batch.materials.map((material) => (
-                <div
-                  key={material.id}
-                  className="bg-gray-50 rounded p-2 flex justify-between items-center"
-                >
-                  <div className="flex-1">
-                    <span className="font-medium text-gray-900">{material.name}</span>
-                    <span className="text-sm text-gray-600 ml-2">
-                      ({material.numberOfBundles} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs = {material.outputQuantity.toFixed(2)} kgs)
-                    </span>
+              {batch.materials.map((material) => {
+                const usedQuantity = material.usedQuantity || 0;
+                const availableQuantity = material.outputQuantity - usedQuantity;
+                const isUsed = usedQuantity > 0;
+                return (
+                  <div
+                    key={material.id}
+                    className={`bg-gray-50 rounded p-2 flex justify-between items-center ${
+                      isUsed ? 'border-l-4 border-orange-500' : ''
+                    }`}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">{material.name}</span>
+                        {isUsed && (
+                          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded">
+                            {language === 'ur' ? 'استعمال شدہ' : 'Used'}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-600 ml-2">
+                        ({material.numberOfBundles} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs = {material.outputQuantity.toFixed(2)} kgs)
+                        {isUsed && (
+                          <span className="ml-2 text-orange-600">
+                            ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {usedQuantity.toFixed(2)} kgs, {language === 'ur' ? 'دستیاب' : 'Available'}: {availableQuantity.toFixed(2)} kgs)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={() => onEdit(material)}
+                        className="text-brand-blue hover:text-brand-blue-dark text-xs font-medium px-2 py-1 hover:bg-blue-50 rounded"
+                      >
+                        {t('edit', 'processedMaterial')}
+                      </button>
+                      <button
+                        onClick={() => onDelete(material.id)}
+                        className="text-red-600 hover:text-red-700 text-xs font-medium px-2 py-1 hover:bg-red-50 rounded"
+                      >
+                        {t('delete', 'processedMaterial')}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => onEdit(material)}
-                      className="text-brand-blue hover:text-brand-blue-dark text-xs font-medium px-2 py-1 hover:bg-blue-50 rounded"
-                    >
-                      {t('edit', 'processedMaterial')}
-                    </button>
-                    <button
-                      onClick={() => onDelete(material.id)}
-                      className="text-red-600 hover:text-red-700 text-xs font-medium px-2 py-1 hover:bg-red-50 rounded"
-                    >
-                      {t('delete', 'processedMaterial')}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
