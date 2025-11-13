@@ -89,65 +89,83 @@ export default function Products() {
         {productions.length === 0 ? (
           <p className="text-gray-500">{t('noProductionsFound', 'product')}</p>
         ) : (
-          <div className="space-y-3">
-            {productions.map((production) => (
-              <div
-                key={production.id}
-                className="border-b pb-3 last:border-b-0 flex justify-between items-start"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="font-medium text-gray-900">{production.productName}</div>
-                    {production.productNumber && (
-                      <>
-                        <span className="text-sm text-gray-500">•</span>
-                        <div className="text-sm text-gray-600">{production.productNumber}</div>
-                      </>
-                    )}
-                    {production.productTara && (
-                      <>
-                        <span className="text-sm text-gray-500">•</span>
-                        <div className="text-sm text-gray-600">{production.productTara}</div>
-                      </>
-                    )}
-                    {(production.quantityFoot > 0 || production.quantityBundles > 0) && (
-                      <>
-                        <span className="text-sm text-gray-500">•</span>
-                        <div className="text-sm text-gray-600">
-                          {production.quantityFoot > 0 && (
-                            <span>{production.quantityFoot} {t('foot', 'product')}</span>
-                          )}
-                          {production.quantityFoot > 0 && production.quantityBundles > 0 && (
-                            <span className="mx-1">+</span>
-                          )}
-                          {production.quantityBundles > 0 && (
-                            <span>{production.quantityBundles} {t('bundles', 'product')}</span>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">Batch ID: {production.batchId}</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    {new Date(production.date).toLocaleDateString()}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEditProduction(production)}
-                    className="text-brand-blue hover:text-brand-blue-dark text-sm font-medium"
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'نام' : 'Name'}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'نمبر' : 'Number'}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'تارا' : 'Tara'}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {t('foot', 'product')}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {t('bundles', 'product')}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'تاریخ' : 'Date'}
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    {language === 'ur' ? 'اعمال' : 'Actions'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {productions.map((production) => (
+                  <tr
+                    key={production.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
-                    {t('edit', 'product')}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteProduction(production.id)}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium"
-                  >
-                    {t('delete', 'product')}
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <td className="py-3 px-4 text-gray-900 font-medium">
+                      {production.productName}
+                    </td>
+                    <td className="py-3 px-4 text-gray-700">
+                      {production.productNumber || '-'}
+                    </td>
+                    <td className="py-3 px-4 text-gray-700">
+                      {production.productTara || '-'}
+                    </td>
+                    <td className="py-3 px-4 text-gray-700">
+                      {production.quantityFoot > 0 ? production.quantityFoot.toFixed(2) : '-'}
+                    </td>
+                    <td className="py-3 px-4 text-gray-700">
+                      {production.quantityBundles > 0 ? production.quantityBundles.toFixed(2) : '-'}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 text-sm">
+                      {production.batchId}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 text-sm">
+                      {new Date(production.date).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleEditProduction(production)}
+                          className="text-brand-blue hover:text-brand-blue-dark text-sm font-medium"
+                        >
+                          {t('edit', 'product')}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduction(production.id)}
+                          className="text-red-600 hover:text-red-700 text-sm font-medium"
+                        >
+                          {t('delete', 'product')}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
