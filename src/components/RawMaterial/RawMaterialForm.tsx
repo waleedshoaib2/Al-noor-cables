@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
+import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
@@ -18,6 +19,14 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
   const updateRawMaterial = useRawMaterialStore((state) => state.updateRawMaterial);
   const materialTypes = useRawMaterialStore((state) => state.materialTypes);
   const suppliers = useRawMaterialStore((state) => state.suppliers);
+  const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
+
+  // Check if material has been used in processed materials
+  const isMaterialUsed = material
+    ? processedMaterials.some((pm) =>
+        pm.rawMaterialBatchesUsed?.some((batch) => batch.rawMaterialId === material.id)
+      )
+    : false;
 
   const [formData, setFormData] = useState({
     materialType: '',
@@ -82,6 +91,14 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent editing if material has been used
+    if (material && isMaterialUsed) {
+      alert(language === 'ur' 
+        ? 'یہ مواد پروسیس شدہ مواد میں استعمال ہو چکا ہے اور اس میں ترمیم نہیں کی جا سکتی'
+        : 'This material has been used in processed materials and cannot be edited');
+      return;
+    }
+
     if (!validate()) {
       return;
     }
@@ -115,6 +132,26 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+      {/* Warning if material has been used */}
+      {isMaterialUsed && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-800">
+                {language === 'ur'
+                  ? 'یہ مواد پروسیس شدہ مواد میں استعمال ہو چکا ہے۔ صرف کل مقدار میں تبدیلی کی جاسکتی ہے، مواد کی تفصیلات میں ترمیم نہیں کی جا سکتی۔'
+                  : 'This material has been used in processed materials. Only the total quantity can be updated; material details cannot be edited.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Material Type with improved dropdown */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -126,9 +163,10 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
             list="materialTypes"
             value={formData.materialType}
             onChange={(e) => setFormData({ ...formData, materialType: e.target.value })}
+            disabled={isMaterialUsed}
             className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
               errors.materialType ? 'border-red-500' : ''
-            }`}
+            } ${isMaterialUsed ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             placeholder={t('typeOrSelect')}
             autoComplete="off"
           />
@@ -169,9 +207,10 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
             list="suppliers"
             value={formData.supplier}
             onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+            disabled={isMaterialUsed}
             className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
               errors.supplier ? 'border-red-500' : ''
-            }`}
+            } ${isMaterialUsed ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             placeholder={t('typeOrSelect')}
             autoComplete="off"
           />
@@ -209,6 +248,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
           value={formData.date}
           onChange={(e) => setFormData({ ...formData, date: e.target.value })}
           error={errors.date}
+          disabled={isMaterialUsed}
         />
         <Input
           label={`${t('quantity')} *`}
@@ -219,6 +259,7 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
           onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
           placeholder="0.00"
           error={errors.quantity}
+          disabled={isMaterialUsed}
         />
       </div>
 

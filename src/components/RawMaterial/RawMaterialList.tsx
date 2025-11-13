@@ -1,4 +1,5 @@
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
+import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { formatDate } from '@/utils/helpers';
 import { Button } from '@/components/Common/Button';
 import type { RawMaterial } from '@/types';
@@ -14,9 +15,17 @@ export default function RawMaterialList({ materials, onEdit, onDelete, limit }: 
   const rawMaterialsStore = useRawMaterialStore((state) =>
     limit ? state.getRecentMaterials(limit) : state.rawMaterials
   );
+  const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
 
   // Use provided materials or fall back to store
   const rawMaterials = materials || rawMaterialsStore;
+
+  // Check if a raw material has been used in processed materials
+  const isMaterialUsed = (rawMaterialId: number): boolean => {
+    return processedMaterials.some((pm) =>
+      pm.rawMaterialBatchesUsed?.some((batch) => batch.rawMaterialId === rawMaterialId)
+    );
+  };
 
   if (rawMaterials.length === 0) {
     return <p className="text-gray-500">No raw materials recorded yet</p>;
@@ -50,19 +59,36 @@ export default function RawMaterialList({ materials, onEdit, onDelete, limit }: 
           <div className="flex items-center gap-3 ml-4">
             <div className="text-right">
               <div className="font-bold text-brand-blue">
-                {material.quantity.toFixed(2)} kgs
+                {material.originalQuantity.toFixed(2)} kgs
               </div>
+              {material.quantity !== material.originalQuantity && (
+                <div className="text-xs text-gray-500 mt-1">
+                  Available: {material.quantity.toFixed(2)} kgs
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => onEdit(material)}
-                className="text-brand-blue hover:text-brand-blue-dark text-sm font-medium"
+                disabled={isMaterialUsed(material.id)}
+                className={`text-sm font-medium ${
+                  isMaterialUsed(material.id)
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-brand-blue hover:text-brand-blue-dark'
+                }`}
+                title={isMaterialUsed(material.id) ? 'This material has been used in processed materials and cannot be edited' : 'Edit'}
               >
                 Edit
               </button>
               <button
                 onClick={() => onDelete(material.id)}
-                className="text-red-600 hover:text-red-700 text-sm font-medium"
+                disabled={isMaterialUsed(material.id)}
+                className={`text-sm font-medium ${
+                  isMaterialUsed(material.id)
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-red-600 hover:text-red-700'
+                }`}
+                title={isMaterialUsed(material.id) ? 'This material has been used in processed materials and cannot be deleted' : 'Delete'}
               >
                 Delete
               </button>

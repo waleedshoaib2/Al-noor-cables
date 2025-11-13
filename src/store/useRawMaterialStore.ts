@@ -33,6 +33,8 @@ const loadFromStorage = (): { rawMaterials: RawMaterial[]; materialTypes: string
           ...m,
           date: new Date(m.date),
           createdAt: new Date(m.createdAt),
+          // Migration: if originalQuantity doesn't exist, set it to quantity
+          originalQuantity: m.originalQuantity ?? m.quantity,
         })) || [],
         materialTypes: parsed.materialTypes || ['Copper', 'Silver'],
         suppliers: parsed.suppliers || [],
@@ -75,6 +77,8 @@ export const useRawMaterialStore = create<RawMaterialState>((set, get) => ({
       ...material,
       id: Date.now(),
       createdAt: new Date(),
+      // Set originalQuantity to the initial quantity
+      originalQuantity: material.quantity,
     };
 
     set((state) => {
@@ -101,9 +105,21 @@ export const useRawMaterialStore = create<RawMaterialState>((set, get) => ({
 
   updateRawMaterial: (id, material) => {
     set((state) => {
-      const updated = state.rawMaterials.map((m) =>
-        m.id === id ? { ...m, ...material } : m
-      );
+      const updated = state.rawMaterials.map((m) => {
+        if (m.id === id) {
+          const updatedMaterial = { ...m, ...material };
+          // If quantity is being updated, also update originalQuantity (only for unused materials)
+          // This allows correcting entries before they're used
+          if (material.quantity !== undefined) {
+            updatedMaterial.originalQuantity = material.quantity;
+          } else {
+            // Preserve originalQuantity if quantity is not being updated
+            updatedMaterial.originalQuantity = m.originalQuantity;
+          }
+          return updatedMaterial;
+        }
+        return m;
+      });
 
       // Update material types and suppliers if changed
       let materialTypes = state.materialTypes;

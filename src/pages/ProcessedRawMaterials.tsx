@@ -65,7 +65,37 @@ export default function ProcessedRawMaterials() {
     setEditingMaterial(null);
   };
 
-  // Filter materials first
+  // Calculate totals for ALL materials by type (unfiltered - for summary stats)
+  const allBatchGroups = processedMaterials.reduce((groups, material) => {
+    const batchKey = `${material.batchId}-${material.date.toISOString()}`;
+    if (!groups[batchKey]) {
+      groups[batchKey] = {
+        materialType: material.materialType,
+        inputQuantity: material.inputQuantity, // Each batch has one input quantity
+        materials: [],
+      };
+    }
+    groups[batchKey].materials.push(material);
+    return groups;
+  }, {} as Record<string, { materialType: string; inputQuantity: number; materials: ProcessedRawMaterial[] }>);
+
+  // Calculate totals by material type from ALL batches (unfiltered)
+  const allCopperBatches = Object.values(allBatchGroups).filter((b) => b.materialType.toLowerCase() === 'copper');
+  const allSilverBatches = Object.values(allBatchGroups).filter((b) => b.materialType.toLowerCase() === 'silver');
+  
+  const copperInput = allCopperBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  const copperOutput = allCopperBatches.reduce((sum, batch) => 
+    sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
+  );
+  const copperScrap = copperInput - copperOutput;
+  
+  const silverInput = allSilverBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  const silverOutput = allSilverBatches.reduce((sum, batch) => 
+    sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
+  );
+  const silverScrap = silverInput - silverOutput;
+
+  // Filter materials for the list display only
   const filteredMaterials = processedMaterials.filter((m) => {
     // Material type filter
     if (filterMaterialType !== 'all' && m.materialType.toLowerCase() !== filterMaterialType.toLowerCase()) {
@@ -96,36 +126,6 @@ export default function ProcessedRawMaterials() {
 
     return true;
   });
-
-  // Calculate totals for filtered materials by type (using unique batches to avoid double counting input)
-  const batchGroups = filteredMaterials.reduce((groups, material) => {
-    const batchKey = `${material.batchId}-${material.date.toISOString()}`;
-    if (!groups[batchKey]) {
-      groups[batchKey] = {
-        materialType: material.materialType,
-        inputQuantity: material.inputQuantity, // Each batch has one input quantity
-        materials: [],
-      };
-    }
-    groups[batchKey].materials.push(material);
-    return groups;
-  }, {} as Record<string, { materialType: string; inputQuantity: number; materials: ProcessedRawMaterial[] }>);
-
-  // Calculate totals by material type from filtered batches
-  const copperBatches = Object.values(batchGroups).filter((b) => b.materialType.toLowerCase() === 'copper');
-  const silverBatches = Object.values(batchGroups).filter((b) => b.materialType.toLowerCase() === 'silver');
-  
-  const copperInput = copperBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
-  const copperOutput = copperBatches.reduce((sum, batch) => 
-    sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
-  );
-  const copperScrap = copperInput - copperOutput;
-  
-  const silverInput = silverBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
-  const silverOutput = silverBatches.reduce((sum, batch) => 
-    sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
-  );
-  const silverScrap = silverInput - silverOutput;
 
   // Clear all filters
   const handleClearFilters = () => {
