@@ -391,7 +391,7 @@ export default function ProductProductionForm({
             const availableBundles = m.numberOfBundles - ((m.usedQuantity || 0) / m.weightPerBundle);
             return (
               <option key={m.id} value={m.id}>
-                {m.name} ({m.materialType}) - {getStockByName(m.name).toFixed(2)} kgs ({availableBundles.toFixed(0)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
+                {m.name} ({m.materialType}) - {getStockByName(m.name).toFixed(2)} kgs ({availableBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
               </option>
             );
           })}
@@ -438,8 +438,8 @@ export default function ProductProductionForm({
               return (
                 <p className="mt-1 text-sm text-gray-500">
                   {language === 'ur' 
-                    ? `دستیاب: ${availableBundles.toFixed(0)} بنڈلز`
-                    : `Available: ${availableBundles.toFixed(0)} bundles`}
+                    ? `دستیاب: ${availableBundles.toFixed(2)} بنڈلز`
+                    : `Available: ${availableBundles.toFixed(2)} bundles`}
                 </p>
               );
             }
