@@ -6,6 +6,7 @@ import { useProductStore } from '@/store/useProductStore';
 import { useCustomerStore } from '@/store/useCustomerStore';
 import { useCustomerPurchaseStore } from '@/store/useCustomerPurchaseStore';
 import { useExpenseStore } from '@/store/useExpenseStore';
+import { useLanguageStore } from '@/store/useLanguageStore';
 import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import RawMaterialForm from '@/components/RawMaterial/RawMaterialForm';
@@ -16,6 +17,7 @@ import type { RawMaterial } from '@/types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const language = useLanguageStore((state) => state.language);
   
   // New stores
   const rawMaterials = useRawMaterialStore((state) => state.rawMaterials);
@@ -73,47 +75,59 @@ export default function Dashboard() {
   const totalSilver = getTotalByMaterialType('Silver');
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <div className="space-y-6" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+      <h1 className="text-2xl font-bold text-gray-900">
+        {language === 'ur' ? 'ڈیش بورڈ' : 'Dashboard'}
+      </h1>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Total Products</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'کل مصنوعات' : 'Total Products'}
+          </div>
           <div className="text-3xl font-bold text-gray-900">{productions.length}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Total Customers</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'کل گاہک' : 'Total Customers'}
+          </div>
           <div className="text-3xl font-bold text-brand-blue">{customers.length}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">Today's Purchases</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'آج کی خریداری' : "Today's Purchases"}
+          </div>
           <div className="text-3xl font-bold text-green-600">{formatCurrency(todayPurchasesTotal)}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">This Month's Expenses</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'اس مہینے کے اخراجات' : "This Month's Expenses"}
+          </div>
           <div className="text-3xl font-bold text-blue-600">{formatCurrency(monthExpenses)}</div>
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {language === 'ur' ? 'فوری اعمال' : 'Quick Actions'}
+        </h2>
         <div className="flex flex-wrap gap-3">
           <Button variant="primary" onClick={() => navigate('/raw-materials')}>
-            Add Raw Material
+            {language === 'ur' ? 'خام مال شامل کریں' : 'Add Raw Material'}
           </Button>
           <Button variant="primary" onClick={() => navigate('/processed-materials')}>
-            Add Processed Material
+            {language === 'ur' ? 'پروسیسڈ مال شامل کریں' : 'Add Processed Material'}
           </Button>
           <Button variant="primary" onClick={() => navigate('/products')}>
-            Add Product
+            {language === 'ur' ? 'مصنوعات شامل کریں' : 'Add Product'}
           </Button>
           <Button variant="primary" onClick={() => navigate('/customers')}>
-            Add Customer
+            {language === 'ur' ? 'گاہک شامل کریں' : 'Add Customer'}
           </Button>
           <Button variant="primary" onClick={() => navigate('/expenses')}>
-            Add Expense
+            {language === 'ur' ? 'خرچہ شامل کریں' : 'Add Expense'}
           </Button>
         </div>
       </div>
@@ -121,27 +135,35 @@ export default function Dashboard() {
       {/* Raw Material Section */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Raw Material Intake</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {language === 'ur' ? 'خام مال کی انٹری' : 'Raw Material Intake'}
+          </h2>
           <Button variant="primary" onClick={handleAddRawMaterial}>
-            Add Raw Material
+            {language === 'ur' ? 'خام مال شامل کریں' : 'Add Raw Material'}
           </Button>
         </div>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Total Copper</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'کل کاپر' : 'Total Copper'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{totalCopper.toFixed(2)} kgs</div>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Total Silver</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'کل سلور' : 'Total Silver'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{totalSilver.toFixed(2)} kgs</div>
           </div>
         </div>
 
         {/* Recent Raw Materials */}
         <div>
-          <h3 className="text-md font-semibold text-gray-900 mb-3">Recent Entries</h3>
+          <h3 className="text-md font-semibold text-gray-900 mb-3">
+            {language === 'ur' ? 'حالیہ انٹریز' : 'Recent Entries'}
+          </h3>
           <RawMaterialList
             onEdit={handleEditRawMaterial}
             onDelete={handleDeleteRawMaterial}
@@ -157,7 +179,7 @@ export default function Dashboard() {
           setShowRawMaterialForm(false);
           setEditingMaterial(null);
         }}
-        title={editingMaterial ? 'Edit Raw Material' : 'Add Raw Material'}
+        title={editingMaterial ? (language === 'ur' ? 'خام مال میں ترمیم' : 'Edit Raw Material') : (language === 'ur' ? 'خام مال شامل کریں' : 'Add Raw Material')}
         size="lg"
       >
         <RawMaterialForm
@@ -172,14 +194,20 @@ export default function Dashboard() {
 
       {/* Product Stock Summary */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Stock Summary</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {language === 'ur' ? 'مصنوعات کی اسٹاک کا خلاصہ' : 'Product Stock Summary'}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Total Stock (Foot)</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'کل اسٹاک (فٹ)' : 'Total Stock (Foot)'}
+            </div>
             <div className="text-2xl font-bold text-brand-orange">{totalStock.foot.toFixed(2)}</div>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="text-sm text-gray-600">Total Stock (Bundles)</div>
+            <div className="text-sm text-gray-600">
+              {language === 'ur' ? 'کل اسٹاک (بنڈلز)' : 'Total Stock (Bundles)'}
+            </div>
             <div className="text-2xl font-bold text-brand-blue">{totalStock.bundles.toFixed(2)}</div>
           </div>
         </div>
@@ -188,9 +216,11 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Recent Purchases */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Purchases</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            {language === 'ur' ? 'حالیہ خریداری' : 'Recent Purchases'}
+          </h2>
           {recentPurchases.length === 0 ? (
-            <p className="text-gray-500">No purchases yet</p>
+            <p className="text-gray-500">{language === 'ur' ? 'ابھی تک کوئی خریداری نہیں' : 'No purchases yet'}</p>
           ) : (
             <div className="space-y-3">
               {recentPurchases.map((purchase) => {
@@ -205,7 +235,9 @@ export default function Dashboard() {
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-green-600">{formatCurrency(purchase.price || 0)}</div>
-                        <div className="text-xs text-gray-500">Qty: {purchase.quantityBundles.toFixed(2)} bundles</div>
+                        <div className="text-xs text-gray-500">
+                          {language === 'ur' ? 'مقدار' : 'Qty'}: {purchase.quantityBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -217,14 +249,20 @@ export default function Dashboard() {
 
         {/* Processed Materials Summary */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Processed Materials</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            {language === 'ur' ? 'پروسیسڈ مال' : 'Processed Materials'}
+          </h2>
           <div className="space-y-3">
             <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-gray-600">Total Processed Materials</div>
+              <div className="text-sm text-gray-600">
+                {language === 'ur' ? 'کل پروسیسڈ مال' : 'Total Processed Materials'}
+              </div>
               <div className="text-2xl font-bold text-brand-orange">{processedMaterials.length}</div>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-gray-600">Total Raw Materials</div>
+              <div className="text-sm text-gray-600">
+                {language === 'ur' ? 'کل خام مال' : 'Total Raw Materials'}
+              </div>
               <div className="text-2xl font-bold text-brand-blue">{rawMaterials.length}</div>
             </div>
           </div>
@@ -233,9 +271,11 @@ export default function Dashboard() {
 
       {/* Recent Expenses */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Expenses</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          {language === 'ur' ? 'حالیہ اخراجات' : 'Recent Expenses'}
+        </h2>
         {recentExpenses.length === 0 ? (
-          <p className="text-gray-500">No expenses yet</p>
+          <p className="text-gray-500">{language === 'ur' ? 'ابھی تک کوئی اخراجات نہیں' : 'No expenses yet'}</p>
         ) : (
           <div className="space-y-3">
             {recentExpenses.map((expense) => (

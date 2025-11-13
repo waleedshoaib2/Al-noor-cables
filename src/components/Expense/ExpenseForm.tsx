@@ -18,60 +18,81 @@ interface ExpenseFormProps {
 export default function ExpenseForm({ isOpen, onClose, expense, onSubmit }: ExpenseFormProps) {
   const expenseCategories = useCategoryStore((state) => state.expenseCategories);
   const [loading, setLoading] = useState(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    clearErrors,
+    trigger,
   } = useForm({
     resolver: zodResolver(expenseSchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    shouldFocusError: false,
+    criteriaMode: 'all',
     defaultValues: expense
       ? {
           title: expense.title,
           description: expense.description || '',
-          amount: expense.amount,
-          categoryId: expense.categoryId,
+          amount: String(expense.amount),
+          categoryId: String(expense.categoryId),
           date: expense.date.toISOString().split('T')[0],
         }
       : {
           title: '',
           description: '',
-          amount: 0,
-          categoryId: expenseCategories[0]?.id || 1,
+          amount: '',
+          categoryId: String(expenseCategories[0]?.id || 1),
           date: new Date().toISOString().split('T')[0],
         },
   });
 
+  // Clear errors and reset form when modal opens/closes
   useEffect(() => {
-    if (expense) {
-      reset({
-        title: expense.title,
-        description: expense.description || '',
-        amount: expense.amount,
-        categoryId: expense.categoryId,
-        date: expense.date.toISOString().split('T')[0],
-      });
+    if (isOpen) {
+      setHasAttemptedSubmit(false);
+      clearErrors();
+      // Reset form when opening
+      if (expense) {
+        reset({
+          title: expense.title,
+          description: expense.description || '',
+          amount: String(expense.amount),
+          categoryId: String(expense.categoryId),
+          date: expense.date.toISOString().split('T')[0],
+        }, { keepErrors: false, keepDefaultValues: false });
+      } else {
+        reset({
+          title: '',
+          description: '',
+          amount: '',
+          categoryId: String(expenseCategories[0]?.id || 1),
+          date: new Date().toISOString().split('T')[0],
+        }, { keepErrors: false, keepDefaultValues: false });
+      }
     } else {
-      reset({
-        title: '',
-        description: '',
-        amount: 0,
-        categoryId: expenseCategories[0]?.id || 1,
-        date: new Date().toISOString().split('T')[0],
-      });
+      // Clear form when modal closes
+      setHasAttemptedSubmit(false);
+      clearErrors();
     }
-  }, [expense, expenseCategories, reset]);
+  }, [isOpen, clearErrors, reset, expense, expenseCategories]);
 
   const onFormSubmit = async (data: any) => {
+    setHasAttemptedSubmit(true);
     setLoading(true);
     try {
+      // Data is already transformed by zod schema
       await onSubmit({
-        ...data,
-        amount: Number(data.amount),
-        categoryId: Number(data.categoryId),
-        date: new Date(data.date),
+        title: data.title,
+        description: data.description || '',
+        amount: typeof data.amount === 'number' ? data.amount : Number(data.amount),
+        categoryId: typeof data.categoryId === 'number' ? data.categoryId : Number(data.categoryId),
+        date: data.date instanceof Date ? data.date : new Date(data.date),
       });
+      setHasAttemptedSubmit(false);
       onClose();
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -91,7 +112,7 @@ export default function ExpenseForm({ isOpen, onClose, expense, onSubmit }: Expe
         <Input
           label="Title *"
           {...register('title')}
-          error={errors.title?.message as string}
+          error={hasAttemptedSubmit ? (errors.title?.message as string) : undefined}
         />
 
         <div>
@@ -110,14 +131,14 @@ export default function ExpenseForm({ isOpen, onClose, expense, onSubmit }: Expe
             label="Amount *"
             type="number"
             step="0.01"
-            {...register('amount', { valueAsNumber: true })}
-            error={errors.amount?.message as string}
+            {...register('amount')}
+            error={hasAttemptedSubmit ? (errors.amount?.message as string) : undefined}
           />
           <Input
             label="Date *"
             type="date"
             {...register('date')}
-            error={errors.date?.message as string}
+            error={hasAttemptedSubmit ? (errors.date?.message as string) : undefined}
           />
         </div>
 
@@ -127,7 +148,7 @@ export default function ExpenseForm({ isOpen, onClose, expense, onSubmit }: Expe
           </label>
           <select
             className="border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500"
-            {...register('categoryId', { valueAsNumber: true })}
+            {...register('categoryId')}
           >
             {expenseCategories.map((cat) => (
               <option key={cat.id} value={cat.id}>

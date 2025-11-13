@@ -9,6 +9,8 @@ interface ExpenseState {
   getExpensesByDateRange: (startDate: Date, endDate: Date) => Expense[];
   getTotalByCategory: (categoryId: number) => number;
   getTotalByPeriod: (startDate: Date, endDate: Date) => number;
+  saveToStorage: () => void;
+  loadFromStorage: () => void;
 }
 
 // Seed sample expenses
@@ -60,6 +62,8 @@ const INITIAL_EXPENSES: Expense[] = [
   },
 ];
 
+const STORAGE_KEY = 'alnoor_expenses';
+
 export const useExpenseStore = create<ExpenseState>((set, get) => ({
   expenses: INITIAL_EXPENSES,
   addExpense: (expense) => {
@@ -68,19 +72,54 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       id: Date.now(),
       createdAt: new Date(),
     };
-    set((state) => ({
-      expenses: [...state.expenses, newExpense],
-    }));
+    set((state) => {
+      const updated = { expenses: [...state.expenses, newExpense] };
+      // Save to storage
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated.expenses.map(e => ({
+          ...e,
+          date: e.date.toISOString(),
+          createdAt: e.createdAt.toISOString(),
+        }))));
+      } catch (error) {
+        console.error('Error saving expenses to storage:', error);
+      }
+      return updated;
+    });
   },
   updateExpense: (id, expense) => {
-    set((state) => ({
-      expenses: state.expenses.map((e) => (e.id === id ? { ...e, ...expense } : e)),
-    }));
+    set((state) => {
+      const updated = {
+        expenses: state.expenses.map((e) => (e.id === id ? { ...e, ...expense } : e)),
+      };
+      // Save to storage
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated.expenses.map(e => ({
+          ...e,
+          date: e.date.toISOString(),
+          createdAt: e.createdAt.toISOString(),
+        }))));
+      } catch (error) {
+        console.error('Error saving expenses to storage:', error);
+      }
+      return updated;
+    });
   },
   deleteExpense: (id) => {
-    set((state) => ({
-      expenses: state.expenses.filter((e) => e.id !== id),
-    }));
+    set((state) => {
+      const updated = { expenses: state.expenses.filter((e) => e.id !== id) };
+      // Save to storage
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated.expenses.map(e => ({
+          ...e,
+          date: e.date.toISOString(),
+          createdAt: e.createdAt.toISOString(),
+        }))));
+      } catch (error) {
+        console.error('Error saving expenses to storage:', error);
+      }
+      return updated;
+    });
   },
   getExpensesByDateRange: (startDate, endDate) => {
     return get().expenses.filter(
@@ -97,5 +136,38 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       .getExpensesByDateRange(startDate, endDate)
       .reduce((sum, e) => sum + e.amount, 0);
   },
+  saveToStorage: () => {
+    try {
+      const expenses = get().expenses;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses.map(e => ({
+        ...e,
+        date: e.date.toISOString(),
+        createdAt: e.createdAt.toISOString(),
+      }))));
+    } catch (error) {
+      console.error('Error saving expenses to storage:', error);
+    }
+  },
+  loadFromStorage: () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const expenses: Expense[] = parsed.map((e: any) => ({
+          ...e,
+          date: new Date(e.date),
+          createdAt: new Date(e.createdAt),
+        }));
+        set({ expenses });
+      }
+    } catch (error) {
+      console.error('Error loading expenses from storage:', error);
+    }
+  },
 }));
+
+// Load from storage on initialization
+if (typeof window !== 'undefined') {
+  useExpenseStore.getState().loadFromStorage();
+}
 

@@ -12,13 +12,34 @@ export const productSchema = z.object({
   categoryId: z.number().int(),
 });
 
-// Expense validation schema
+// Expense validation schema - validates form inputs as strings, converts on submit
 export const expenseSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
-  amount: z.number().min(0.01, 'Amount must be greater than 0'),
-  categoryId: z.number().int(),
-  date: z.date(),
+  title: z.string().trim().min(1, 'Title is required'),
+  description: z.string().optional().or(z.literal('')),
+  amount: z.union([
+    z.string().trim().min(1, 'Amount is required').refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num > 0;
+      },
+      { message: 'Amount must be greater than 0' }
+    ),
+    z.number().min(0.01, 'Amount must be greater than 0'),
+  ]).transform((val) => typeof val === 'string' ? Number(val) : val),
+  categoryId: z.union([
+    z.string(),
+    z.number(),
+  ]).transform((val) => typeof val === 'string' ? Number(val) : val),
+  date: z.union([
+    z.string().trim().min(1, 'Date is required').refine(
+      (val) => {
+        const date = new Date(val);
+        return !isNaN(date.getTime());
+      },
+      { message: 'Invalid date' }
+    ),
+    z.date(),
+  ]).transform((val) => typeof val === 'string' ? new Date(val) : val),
 });
 
 // Sale validation schema
