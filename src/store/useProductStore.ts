@@ -25,11 +25,11 @@ const STORAGE_KEY = 'product-storage';
 
 // Pre-defined product names (22 products)
 const PREDEFINED_PRODUCT_NAMES = [
-  'Product 1', 'Product 2', 'Product 3', 'Product 4', 'Product 5',
-  'Product 6', 'Product 7', 'Product 8', 'Product 9', 'Product 10',
-  'Product 11', 'Product 12', 'Product 13', 'Product 14', 'Product 15',
-  'Product 16', 'Product 17', 'Product 18', 'Product 19', 'Product 20',
-  'Product 21', 'Product 22',
+  '1 mm', '2 mm', '3 mm', '4 mm', '5 mm',
+  '6 mm', '7 mm', '8 mm', '9 mm', '10 mm',
+  '11 mm', '12 mm', '13 mm', '14 mm', '15 mm',
+  '16 mm', '17 mm', '18 mm', '19 mm', '20 mm',
+  '21 mm', '22 mm',
 ];
 
 // Helper functions for localStorage
@@ -48,13 +48,23 @@ const loadFromStorage = (): {
           ...p,
           date: new Date(p.date),
           createdAt: new Date(p.createdAt),
+          // Migration: convert old quantity/unit to quantityFoot/quantityBundles
+          quantityFoot: p.quantityFoot ?? (p.unit === 'foot' ? p.quantity : 0),
+          quantityBundles: p.quantityBundles ?? (p.unit === 'bundles' ? p.quantity : 0),
+          // Migration: handle processedMaterialSnapshot dates
+          processedMaterialSnapshot: p.processedMaterialSnapshot ? {
+            ...p.processedMaterialSnapshot,
+            date: new Date(p.processedMaterialSnapshot.date),
+            createdAt: new Date(p.processedMaterialSnapshot.createdAt),
+          } : undefined,
         })) || [],
         sales: parsed.sales?.map((s: any) => ({
           ...s,
           purchaseDate: new Date(s.purchaseDate),
           createdAt: new Date(s.createdAt),
         })) || [],
-        productNames: parsed.productNames || PREDEFINED_PRODUCT_NAMES,
+        // Always use the new predefined product names
+        productNames: PREDEFINED_PRODUCT_NAMES,
         stock: parsed.stock || {},
       };
     }
@@ -112,16 +122,12 @@ export const useProductStore = create<ProductState>((set, get) => ({
       if (!stock[production.productName]) {
         stock[production.productName] = { foot: 0, bundles: 0 };
       }
-      if (production.unit === 'foot') {
-        stock[production.productName].foot += production.quantity;
-      } else {
-        stock[production.productName].bundles += production.quantity;
-      }
+      stock[production.productName].foot += production.quantityFoot || 0;
+      stock[production.productName].bundles += production.quantityBundles || 0;
 
-      // Add product name if not exists
-      const productNames = state.productNames.includes(production.productName)
-        ? state.productNames
-        : [...state.productNames, production.productName];
+      // Always use predefined product names (don't add custom ones to the list)
+      // Custom names can still be used in productions, but dropdown will show predefined names
+      const productNames = PREDEFINED_PRODUCT_NAMES;
 
       const newState = {
         productions: [newProduction, ...state.productions],
@@ -144,23 +150,17 @@ export const useProductStore = create<ProductState>((set, get) => ({
         p.id === id ? { ...p, ...production } : p
       );
 
-      // Update stock if quantity or unit changed
+      // Update stock if quantities changed
       let stock = { ...state.stock };
-      if (production.quantity !== undefined || production.unit !== undefined) {
+      if (production.quantityFoot !== undefined || production.quantityBundles !== undefined) {
         const updatedProduction = updated.find((p) => p.id === id);
         if (updatedProduction) {
           // Remove old stock
-          if (existing.unit === 'foot') {
-            stock[existing.productName].foot -= existing.quantity;
-          } else {
-            stock[existing.productName].bundles -= existing.quantity;
-          }
+          stock[existing.productName].foot -= existing.quantityFoot || 0;
+          stock[existing.productName].bundles -= existing.quantityBundles || 0;
           // Add new stock
-          if (updatedProduction.unit === 'foot') {
-            stock[updatedProduction.productName].foot += updatedProduction.quantity;
-          } else {
-            stock[updatedProduction.productName].bundles += updatedProduction.quantity;
-          }
+          stock[updatedProduction.productName].foot += updatedProduction.quantityFoot || 0;
+          stock[updatedProduction.productName].bundles += updatedProduction.quantityBundles || 0;
         }
       }
 
@@ -183,17 +183,14 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
       // Reduce stock
       const stock = { ...state.stock };
-      if (production.unit === 'foot') {
-        stock[production.productName].foot = Math.max(
-          0,
-          stock[production.productName].foot - production.quantity
-        );
-      } else {
-        stock[production.productName].bundles = Math.max(
-          0,
-          stock[production.productName].bundles - production.quantity
-        );
-      }
+      stock[production.productName].foot = Math.max(
+        0,
+        (stock[production.productName].foot || 0) - (production.quantityFoot || 0)
+      );
+      stock[production.productName].bundles = Math.max(
+        0,
+        (stock[production.productName].bundles || 0) - (production.quantityBundles || 0)
+      );
 
       const newState = {
         productions: state.productions.filter((p) => p.id !== id),
@@ -344,14 +341,15 @@ export const useProductStore = create<ProductState>((set, get) => ({
     set({
       productions: data.productions,
       sales: data.sales,
-      productNames: data.productNames,
+      productNames: PREDEFINED_PRODUCT_NAMES, // Always use predefined names
       stock: data.stock,
     });
   },
 
   saveToStorage: () => {
     const state = get();
-    saveToStorage(state.productions, state.sales, state.productNames, state.stock);
+    // Always save predefined product names
+    saveToStorage(state.productions, state.sales, PREDEFINED_PRODUCT_NAMES, state.stock);
   },
 }));
 

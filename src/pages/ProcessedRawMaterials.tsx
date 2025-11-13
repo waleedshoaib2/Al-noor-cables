@@ -84,12 +84,14 @@ export default function ProcessedRawMaterials() {
   const allSilverBatches = Object.values(allBatchGroups).filter((b) => b.materialType.toLowerCase() === 'silver');
   
   const copperInput = allCopperBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  // Calculate total output produced from all copper materials (sum of all outputQuantity)
   const copperOutput = allCopperBatches.reduce((sum, batch) => 
     sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
   );
   const copperScrap = copperInput - copperOutput;
   
   const silverInput = allSilverBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  // Calculate total output produced from all silver materials (sum of all outputQuantity)
   const silverOutput = allSilverBatches.reduce((sum, batch) => 
     sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
   );

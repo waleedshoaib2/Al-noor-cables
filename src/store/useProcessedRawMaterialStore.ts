@@ -29,6 +29,7 @@ interface ProcessedRawMaterialState {
   getTotalStock: () => number;
   getRecentProcessedMaterials: (limit?: number) => ProcessedRawMaterial[];
   deductStockForProduct: (processedMaterialId: number, quantity: number) => void;
+  restoreProcessedMaterialForProduct: (processedMaterial: ProcessedRawMaterial) => void;
   loadFromStorage: () => void;
   saveToStorage: () => void;
 }
@@ -251,13 +252,41 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       const stock = { ...state.stock };
       stock[material.name] = Math.max(0, (stock[material.name] || 0) - quantity);
 
+      // Remove the processed material entry since it's been fully consumed
+      const updatedMaterials = state.processedMaterials.filter((m) => m.id !== processedMaterialId);
+
       const newState = {
-        processedMaterials: state.processedMaterials,
+        processedMaterials: updatedMaterials,
         processedMaterialNames: state.processedMaterialNames,
         stock,
       };
 
-      saveToStorage(newState.processedMaterials, newState.processedMaterialNames, stock);
+      saveToStorage(updatedMaterials, newState.processedMaterialNames, stock);
+      return newState;
+    });
+  },
+
+  restoreProcessedMaterialForProduct: (processedMaterial: ProcessedRawMaterial) => {
+    set((state) => {
+      // Restore the processed material entry and stock
+      const stock = { ...state.stock };
+      stock[processedMaterial.name] = (stock[processedMaterial.name] || 0) + processedMaterial.outputQuantity;
+
+      // Add the processed material back to the list
+      const updatedMaterials = [...state.processedMaterials, processedMaterial];
+      
+      // Add processed material name if not exists
+      const processedMaterialNames = state.processedMaterialNames.includes(processedMaterial.name)
+        ? state.processedMaterialNames
+        : [...state.processedMaterialNames, processedMaterial.name];
+
+      const newState = {
+        processedMaterials: updatedMaterials,
+        processedMaterialNames,
+        stock,
+      };
+
+      saveToStorage(updatedMaterials, processedMaterialNames, stock);
       return newState;
     });
   },

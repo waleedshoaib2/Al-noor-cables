@@ -102,10 +102,11 @@ export interface Customer {
 export interface ProductProduction {
   id: number;
   productName: string; // Pre-defined product name (from list of 22)
-  processedMaterialId: number; // Link to processed raw material used
+  processedMaterialId: number; // Link to processed raw material used (for reference, may be deleted)
   processedMaterialBatchId: string;
-  quantity: number; // in foot or bundles
-  unit: 'foot' | 'bundles';
+  processedMaterialSnapshot?: ProcessedRawMaterial; // Snapshot of processed material when used (for restoration)
+  quantityFoot: number; // in foot
+  quantityBundles: number; // in bundles
   date: Date;
   batchId: string;
   notes?: string;

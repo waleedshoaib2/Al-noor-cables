@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useProductStore } from '@/store/useProductStore';
+import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
@@ -13,6 +14,8 @@ export default function Products() {
   const productions = useProductStore((state) => state.productions);
   const deleteProduction = useProductStore((state) => state.deleteProduction);
   const getTotalStock = useProductStore((state) => state.getTotalStock);
+  const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
+  const restoreProcessedMaterialForProduct = useProcessedRawMaterialStore((state) => state.restoreProcessedMaterialForProduct);
 
   const [showProductionForm, setShowProductionForm] = useState(false);
   const [editingProduction, setEditingProduction] = useState<ProductProduction | null>(null);
@@ -29,6 +32,11 @@ export default function Products() {
 
   const handleDeleteProduction = (id: number) => {
     if (window.confirm(t('deleteConfirm', 'product'))) {
+      const production = productions.find((p) => p.id === id);
+      if (production && production.processedMaterialSnapshot) {
+        // Restore the processed raw material entry that was used
+        restoreProcessedMaterialForProduct(production.processedMaterialSnapshot);
+      }
       deleteProduction(id);
     }
   };
@@ -88,12 +96,24 @@ export default function Products() {
                 className="border-b pb-3 last:border-b-0 flex justify-between items-start"
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <div className="font-medium text-gray-900">{production.productName}</div>
-                    <span className="text-sm text-gray-500">•</span>
-                    <div className="text-sm text-gray-600">
-                      {production.quantity} {production.unit}
-                    </div>
+                    {(production.quantityFoot > 0 || production.quantityBundles > 0) && (
+                      <>
+                        <span className="text-sm text-gray-500">•</span>
+                        <div className="text-sm text-gray-600">
+                          {production.quantityFoot > 0 && (
+                            <span>{production.quantityFoot} {t('foot', 'product')}</span>
+                          )}
+                          {production.quantityFoot > 0 && production.quantityBundles > 0 && (
+                            <span className="mx-1">+</span>
+                          )}
+                          {production.quantityBundles > 0 && (
+                            <span>{production.quantityBundles} {t('bundles', 'product')}</span>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="text-sm text-gray-500 mt-1">Batch ID: {production.batchId}</div>
                   <div className="text-xs text-gray-400 mt-1">

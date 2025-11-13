@@ -29,12 +29,15 @@ export default function ProductProductionForm({
   const deductStockForProduct = useProcessedRawMaterialStore(
     (state) => state.deductStockForProduct
   );
+  const restoreStockForProduct = useProcessedRawMaterialStore(
+    (state) => state.restoreStockForProduct
+  );
 
   const [formData, setFormData] = useState({
     productName: '',
     processedMaterialId: '',
-    quantity: '',
-    unit: 'foot' as 'foot' | 'bundles',
+    quantityFoot: '',
+    quantityBundles: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
@@ -47,8 +50,8 @@ export default function ProductProductionForm({
       setFormData({
         productName: production.productName,
         processedMaterialId: production.processedMaterialId.toString(),
-        quantity: production.quantity.toString(),
-        unit: production.unit,
+        quantityFoot: (production.quantityFoot || 0).toString(),
+        quantityBundles: (production.quantityBundles || 0).toString(),
         date: production.date.toISOString().split('T')[0],
         notes: production.notes || '',
       });
@@ -73,30 +76,46 @@ export default function ProductProductionForm({
         language === 'ur' ? 'پروسیس شدہ مواد درکار ہے' : 'Processed material is required';
     }
 
-    if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
-      newErrors.quantity =
+    const quantityFoot = parseFloat(formData.quantityFoot) || 0;
+    const quantityBundles = parseFloat(formData.quantityBundles) || 0;
+    
+    if (quantityFoot < 0) {
+      newErrors.quantityFoot =
         language === 'ur'
-          ? 'مقدار 0 سے زیادہ ہونی چاہیے'
-          : 'Quantity must be greater than 0';
+          ? 'مقدار منفی نہیں ہو سکتی'
+          : 'Quantity cannot be negative';
+    }
+    
+    if (quantityBundles < 0) {
+      newErrors.quantityBundles =
+        language === 'ur'
+          ? 'مقدار منفی نہیں ہو سکتی'
+          : 'Quantity cannot be negative';
+    }
+    
+    if (quantityFoot === 0 && quantityBundles === 0) {
+      newErrors.quantityFoot =
+        language === 'ur'
+          ? 'کم از کم ایک مقدار درکار ہے'
+          : 'At least one quantity is required';
     }
 
     if (!formData.date) {
       newErrors.date = language === 'ur' ? 'تاریخ درکار ہے' : 'Date is required';
     }
 
-    // Check available stock
+    // Check available stock (just need to ensure there's stock available)
     if (formData.processedMaterialId && !production) {
       const material = processedMaterials.find(
         (m) => m.id === parseInt(formData.processedMaterialId)
       );
       if (material) {
         const stock = getStockByName(material.name);
-        const quantity = parseFloat(formData.quantity);
-        if (quantity > stock) {
-          newErrors.quantity =
+        if (stock <= 0) {
+          newErrors.processedMaterialId =
             language === 'ur'
-              ? `دستیاب اسٹاک: ${stock.toFixed(2)} کلوگرام`
-              : `Available stock: ${stock.toFixed(2)} kgs`;
+              ? `کوئی اسٹاک دستیاب نہیں: ${stock.toFixed(2)} کلوگرام`
+              : `No stock available: ${stock.toFixed(2)} kgs`;
         }
       }
     }
@@ -116,11 +135,71 @@ export default function ProductProductionForm({
 
     try {
       const processedMaterialId = parseInt(formData.processedMaterialId);
-      const quantity = parseFloat(formData.quantity);
+      const quantityFoot = parseFloat(formData.quantityFoot) || 0;
+      const quantityBundles = parseFloat(formData.quantityBundles) || 0;
 
-      // Deduct stock from processed raw material
+      // Get the processed material
+      const processedMaterial = processedMaterials.find((m) => m.id === processedMaterialId);
+      if (!processedMaterial) {
+        throw new Error('Processed material not found');
+      }
+
+      // Use the entire processed raw material entry (its outputQuantity), regardless of foot/bundle quantities
       if (!production) {
-        deductStockForProduct(processedMaterialId, quantity);
+        // Check if this specific processed material entry is available (has stock)
+        const availableStock = getStockByName(processedMaterial.name);
+        if (availableStock < processedMaterial.outputQuantity) {
+          throw new Error(
+            `Insufficient stock for ${processedMaterial.name}. Available: ${availableStock.toFixed(2)} kgs, Required: ${processedMaterial.outputQuantity.toFixed(2)} kgs`
+          );
+        }
+        
+        // Deduct the entire outputQuantity of this specific processed material entry
+        deductStockForProduct(processedMaterialId, processedMaterial.outputQuantity);
+      } else {
+        // When updating, restore old processed material and deduct new one
+        const oldProduction = production;
+        
+        if (oldProduction.processedMaterialSnapshot) {
+          if (oldProduction.processedMaterialId === processedMaterialId) {
+            // Same material - no change needed since we're using the same entry's outputQuantity
+            // The stock is already deducted correctly
+          } else {
+            // Different material - restore old entry, deduct new entry
+            restoreProcessedMaterialForProduct(oldProduction.processedMaterialSnapshot);
+            
+            // Check if new material entry is available
+            const availableStock = getStockByName(processedMaterial.name);
+            if (availableStock < processedMaterial.outputQuantity) {
+              // Restore the old material back since we can't complete the update
+              // We need to re-deduct the old one
+              const oldMaterial = oldProduction.processedMaterialSnapshot;
+              deductStockForProduct(oldMaterial.id, oldMaterial.outputQuantity);
+              throw new Error(
+                `Insufficient stock for ${processedMaterial.name}. Available: ${availableStock.toFixed(2)} kgs, Required: ${processedMaterial.outputQuantity.toFixed(2)} kgs`
+              );
+            }
+            
+            deductStockForProduct(processedMaterialId, processedMaterial.outputQuantity);
+          }
+        } else {
+          // Legacy: old production without snapshot - try to find the material
+          const oldProcessedMaterial = processedMaterials.find((m) => m.id === oldProduction.processedMaterialId);
+          if (oldProcessedMaterial && oldProduction.processedMaterialId !== processedMaterialId) {
+            // Different material - restore old, deduct new
+            restoreProcessedMaterialForProduct(oldProcessedMaterial);
+            
+            const availableStock = getStockByName(processedMaterial.name);
+            if (availableStock < processedMaterial.outputQuantity) {
+              deductStockForProduct(oldProcessedMaterial.id, oldProcessedMaterial.outputQuantity);
+              throw new Error(
+                `Insufficient stock for ${processedMaterial.name}. Available: ${availableStock.toFixed(2)} kgs, Required: ${processedMaterial.outputQuantity.toFixed(2)} kgs`
+              );
+            }
+            
+            deductStockForProduct(processedMaterialId, processedMaterial.outputQuantity);
+          }
+        }
       }
 
       const productionData = {
@@ -128,8 +207,9 @@ export default function ProductProductionForm({
         processedMaterialId,
         processedMaterialBatchId: processedMaterials.find((m) => m.id === processedMaterialId)
           ?.batchId || '',
-        quantity,
-        unit: formData.unit,
+        processedMaterialSnapshot: processedMaterial, // Store snapshot for restoration
+        quantityFoot,
+        quantityBundles,
         date: new Date(formData.date),
         batchId: production ? production.batchId : generateBatchId(new Date(formData.date)),
         notes: formData.notes.trim() || undefined,
@@ -229,33 +309,28 @@ export default function ProductProductionForm({
         )}
       </div>
 
-      {/* Quantity and Unit */}
+      {/* Quantity Foot and Bundles */}
       <div className="grid grid-cols-2 gap-4">
         <Input
-          label={`${t('quantity', 'product')} *`}
+          label={`${t('quantity', 'product')} (${t('foot', 'product')})`}
           type="number"
           step="0.01"
           min="0"
-          value={formData.quantity}
-          onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+          value={formData.quantityFoot}
+          onChange={(e) => setFormData({ ...formData, quantityFoot: e.target.value })}
           placeholder="0.00"
-          error={errors.quantity}
+          error={errors.quantityFoot}
         />
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('unit', 'product')} *
-          </label>
-          <select
-            value={formData.unit}
-            onChange={(e) =>
-              setFormData({ ...formData, unit: e.target.value as 'foot' | 'bundles' })
-            }
-            className="border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
-          >
-            <option value="foot">{t('foot', 'product')}</option>
-            <option value="bundles">{t('bundles', 'product')}</option>
-          </select>
-        </div>
+        <Input
+          label={`${t('quantity', 'product')} (${t('bundles', 'product')})`}
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.quantityBundles}
+          onChange={(e) => setFormData({ ...formData, quantityBundles: e.target.value })}
+          placeholder="0.00"
+          error={errors.quantityBundles}
+        />
       </div>
 
       {/* Date */}
