@@ -148,3 +148,21 @@ export interface ProductSale {
   notes?: string;
   createdAt: Date;
 }
+
+export interface DailyPayout {
+  id: number;
+  employeeId: number;
+  amount: number;
+  date: Date;
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface Employee {
+  id: number;
+  name: string;
+  salaryDate: Date; // Date when salary is due/paid
+  totalSalary: number; // Fixed salary amount
+  dailyPayouts: DailyPayout[]; // Array of daily payouts
+  createdAt: Date;
+}

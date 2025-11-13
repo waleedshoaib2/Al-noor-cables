@@ -9,6 +9,7 @@ import Products from './pages/Products';
 import Customers from './pages/Customers';
 import ExpenseTracker from './pages/ExpenseTracker';
 import Reports from './pages/Reports';
+import EmployeeManagement from './pages/EmployeeManagement';
 import MainLayout from './components/Layout/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -150,6 +151,18 @@ function App() {
             isAuthenticated ? (
               <MainLayout>
                 <Reports />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <EmployeeManagement />
               </MainLayout>
             ) : (
               <Navigate to="/login" replace />

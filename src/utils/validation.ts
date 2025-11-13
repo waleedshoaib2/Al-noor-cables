@@ -52,3 +52,53 @@ export const saleSchema = z.object({
   customerPhone: z.string().optional(),
 });
 
+// Employee validation schema
+export const employeeSchema = z.object({
+  name: z.string().trim().min(1, 'Employee name is required'),
+  salaryDate: z.union([
+    z.string().trim().min(1, 'Salary date is required').refine(
+      (val) => {
+        const date = new Date(val);
+        return !isNaN(date.getTime());
+      },
+      { message: 'Invalid date' }
+    ),
+    z.date(),
+  ]).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  totalSalary: z.union([
+    z.string().trim().min(1, 'Total salary is required').refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num > 0;
+      },
+      { message: 'Total salary must be greater than 0' }
+    ),
+    z.number().min(0.01, 'Total salary must be greater than 0'),
+  ]).transform((val) => typeof val === 'string' ? Number(val) : val),
+});
+
+// Daily payout validation schema
+export const dailyPayoutSchema = z.object({
+  amount: z.union([
+    z.string().trim().min(1, 'Amount is required').refine(
+      (val) => {
+        const num = Number(val);
+        return !isNaN(num) && num > 0;
+      },
+      { message: 'Amount must be greater than 0' }
+    ),
+    z.number().min(0.01, 'Amount must be greater than 0'),
+  ]).transform((val) => typeof val === 'string' ? Number(val) : val),
+  date: z.union([
+    z.string().trim().min(1, 'Date is required').refine(
+      (val) => {
+        const date = new Date(val);
+        return !isNaN(date.getTime());
+      },
+      { message: 'Invalid date' }
+    ),
+    z.date(),
+  ]).transform((val) => typeof val === 'string' ? new Date(val) : val),
+  notes: z.string().optional().or(z.literal('')),
+});
+

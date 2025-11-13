@@ -10,6 +10,7 @@ export default function Sidebar() {
     { path: '/products', label: 'Products', icon: '📦' },
     { path: '/customers', label: 'Customers', icon: '👥' },
     { path: '/expenses', label: 'Expenses', icon: '💰' },
+    { path: '/employees', label: 'Employee Management', icon: '👔' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];
 
