@@ -278,7 +278,7 @@ export default function Products() {
                       </tr>
                       {productPurchases.length > 0 && (
                         <tr className="bg-gray-50">
-                          <td colSpan={8} className="py-2 px-4">
+                          <td colSpan={9} className="py-2 px-4">
                             <div className="text-xs font-semibold text-gray-600 mb-1">
                               {language === 'ur' ? 'خریداری' : 'Purchases'} ({productPurchases.length}):
                             </div>
@@ -295,10 +295,18 @@ export default function Products() {
                                   </div>
                                 );
                               })}
-                              <div className="text-xs font-medium text-gray-700 mt-1">
-                                {language === 'ur' 
-                                  ? `کل فروخت: ${totalPurchasedBundles.toFixed(2)} بنڈلز`
-                                  : `Total Sold: ${totalPurchasedBundles.toFixed(2)} bundles`}
+                              <div className="text-xs font-medium text-gray-700 mt-1 flex items-center gap-2">
+                                <span>
+                                  {language === 'ur' 
+                                    ? `کل فروخت: ${totalPurchasedBundles.toFixed(2)} بنڈلز`
+                                    : `Total Sold: ${totalPurchasedBundles.toFixed(2)} bundles`}
+                                </span>
+                                <span>•</span>
+                                <span className={isAvailable ? 'text-green-600' : 'text-red-600'}>
+                                  {language === 'ur' 
+                                    ? `دستیاب: ${productStockData.bundles.toFixed(2)} بنڈلز`
+                                    : `Available: ${productStockData.bundles.toFixed(2)} bundles`}
+                                </span>
                               </div>
                             </div>
                           </td>
