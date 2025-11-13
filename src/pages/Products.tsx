@@ -98,6 +98,18 @@ export default function Products() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="font-medium text-gray-900">{production.productName}</div>
+                    {production.productNumber && (
+                      <>
+                        <span className="text-sm text-gray-500">•</span>
+                        <div className="text-sm text-gray-600">{production.productNumber}</div>
+                      </>
+                    )}
+                    {production.productTara && (
+                      <>
+                        <span className="text-sm text-gray-500">•</span>
+                        <div className="text-sm text-gray-600">{production.productTara}</div>
+                      </>
+                    )}
                     {(production.quantityFoot > 0 || production.quantityBundles > 0) && (
                       <>
                         <span className="text-sm text-gray-500">•</span>

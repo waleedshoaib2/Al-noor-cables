@@ -51,6 +51,9 @@ const loadFromStorage = (): {
           // Migration: convert old quantity/unit to quantityFoot/quantityBundles
           quantityFoot: p.quantityFoot ?? (p.unit === 'foot' ? p.quantity : 0),
           quantityBundles: p.quantityBundles ?? (p.unit === 'bundles' ? p.quantity : 0),
+          // Migration: add productNumber and productTara if missing
+          productNumber: p.productNumber ?? '',
+          productTara: p.productTara ?? '',
           // Migration: handle processedMaterialSnapshot dates
           processedMaterialSnapshot: p.processedMaterialSnapshot ? {
             ...p.processedMaterialSnapshot,

@@ -21,7 +21,6 @@ export default function ProductProductionForm({
   const { t, language } = useTranslation();
   const addProduction = useProductStore((state) => state.addProduction);
   const updateProduction = useProductStore((state) => state.updateProduction);
-  const productNames = useProductStore((state) => state.productNames);
   const processedMaterials = useProcessedRawMaterialStore(
     (state) => state.processedMaterials
   );
@@ -35,6 +34,8 @@ export default function ProductProductionForm({
 
   const [formData, setFormData] = useState({
     productName: '',
+    productNumber: '',
+    productTara: '',
     processedMaterialId: '',
     quantityFoot: '',
     quantityBundles: '',
@@ -48,14 +49,29 @@ export default function ProductProductionForm({
   useEffect(() => {
     if (production) {
       setFormData({
-        productName: production.productName,
+        productName: production.productName || '',
+        productNumber: production.productNumber || '',
+        productTara: production.productTara || '',
         processedMaterialId: production.processedMaterialId.toString(),
         quantityFoot: (production.quantityFoot || 0).toString(),
         quantityBundles: (production.quantityBundles || 0).toString(),
         date: production.date.toISOString().split('T')[0],
         notes: production.notes || '',
       });
+    } else {
+      // Reset form for new production
+      setFormData({
+        productName: '',
+        productNumber: '',
+        productTara: '',
+        processedMaterialId: '',
+        quantityFoot: '',
+        quantityBundles: '',
+        date: new Date().toISOString().split('T')[0],
+        notes: '',
+      });
     }
+    setErrors({});
   }, [production]);
 
   // Get available processed materials with stock
@@ -69,6 +85,14 @@ export default function ProductProductionForm({
 
     if (!formData.productName.trim()) {
       newErrors.productName = language === 'ur' ? 'پروڈکٹ کا نام درکار ہے' : 'Product name is required';
+    }
+
+    if (!formData.productNumber.trim()) {
+      newErrors.productNumber = language === 'ur' ? 'پروڈکٹ نمبر درکار ہے' : 'Product number is required';
+    }
+
+    if (!formData.productTara.trim()) {
+      newErrors.productTara = language === 'ur' ? 'پروڈکٹ تارا درکار ہے' : 'Product Tara is required';
     }
 
     if (!formData.processedMaterialId) {
@@ -204,6 +228,8 @@ export default function ProductProductionForm({
 
       const productionData = {
         productName: formData.productName.trim(),
+        productNumber: formData.productNumber.trim(),
+        productTara: formData.productTara.trim(),
         processedMaterialId,
         processedMaterialBatchId: processedMaterials.find((m) => m.id === processedMaterialId)
           ?.batchId || '',
@@ -239,45 +265,44 @@ export default function ProductProductionForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-      {/* Product Name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t('productName', 'product')} *
-        </label>
-        <div className="relative">
-          <input
+      {/* Product Name, Product Number, Product Tara */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t('productName', 'product')} *
+          </label>
+          <Input
             type="text"
-            list="productNames"
             value={formData.productName}
             onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-            className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-              errors.productName ? 'border-red-500' : ''
-            }`}
-            placeholder={t('typeOrSelect', 'product')}
-            autoComplete="off"
+            placeholder={t('productName', 'product')}
+            error={errors.productName}
           />
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-          <datalist id="productNames">
-            {productNames.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
         </div>
-        {errors.productName && <p className="mt-1 text-sm text-red-600">{errors.productName}</p>}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {language === 'ur' ? 'پروڈکٹ نمبر' : 'Product Number'} *
+          </label>
+          <Input
+            type="text"
+            value={formData.productNumber}
+            onChange={(e) => setFormData({ ...formData, productNumber: e.target.value })}
+            placeholder={language === 'ur' ? 'پروڈکٹ نمبر' : 'Product Number'}
+            error={errors.productNumber}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {language === 'ur' ? 'پروڈکٹ تارا' : 'Product Tara'} *
+          </label>
+          <Input
+            type="text"
+            value={formData.productTara}
+            onChange={(e) => setFormData({ ...formData, productTara: e.target.value })}
+            placeholder={language === 'ur' ? 'پروڈکٹ تارا' : 'Product Tara'}
+            error={errors.productTara}
+          />
+        </div>
       </div>
 
       {/* Processed Material */}
