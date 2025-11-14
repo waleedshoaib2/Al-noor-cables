@@ -107,6 +107,27 @@ export default function Products() {
     setEditingProduction(null);
   };
 
+  const handleAddCustomProduct = () => {
+    setEditingCustomProduct(null);
+    setShowCustomProductForm(true);
+  };
+
+  const handleEditCustomProduct = (product: CustomProduct) => {
+    setEditingCustomProduct(product);
+    setShowCustomProductForm(true);
+  };
+
+  const handleDeleteCustomProduct = (id: number) => {
+    if (window.confirm(t('deleteConfirm', 'product'))) {
+      deleteCustomProduct(id);
+    }
+  };
+
+  const handleCustomProductSubmit = () => {
+    setShowCustomProductForm(false);
+    setEditingCustomProduct(null);
+  };
+
   const totalStock = getTotalStock();
   // Count products with bundles > 0 (available products)
   const availableProductsCount = Object.values(productStock).filter(stock => stock.bundles > 0).length;
