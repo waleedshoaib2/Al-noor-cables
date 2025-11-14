@@ -74,7 +74,8 @@ export interface ProcessedRawMaterial {
   materialType: string; // Copper or Silver
   inputQuantity: number; // in kgs (from raw material)
   numberOfBundles: number;
-  weightPerBundle: number; // in kgs
+  weightPerBundle: number; // in kgs - actual processed material weight (net weight)
+  grossWeightPerBundle?: number; // in kgs - weight with tool/attachment (gross weight)
   outputQuantity: number; // numberOfBundles × weightPerBundle (in kgs) - original output
   usedQuantity: number; // in kgs - amount used in products (gets deducted from outputQuantity for stock calculation)
   date: Date;
@@ -164,5 +165,27 @@ export interface Employee {
   salaryDate: Date; // Date when salary is due/paid
   totalSalary: number; // Fixed salary amount
   dailyPayouts: DailyPayout[]; // Array of daily payouts
+  createdAt: Date;
+}
+
+export interface Scrap {
+  id: number;
+  amount: number; // Amount of scrap in kgs
+  materialType: 'Copper' | 'Silver'; // Kind of scrap
+  date: Date;
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface CustomProcessedRawMaterial {
+  id: number;
+  name: string; // Custom processed material name
+  priorRawMaterial: string; // Prior raw material type (e.g., "Copper", "Silver")
+  createdAt: Date;
+}
+
+export interface CustomProduct {
+  id: number;
+  name: string; // Custom product name
   createdAt: Date;
 }

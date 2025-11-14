@@ -6,7 +6,8 @@ import type {
   Customer, 
   CustomerPurchase, 
   Expense, 
-  Employee 
+  Employee,
+  Scrap
 } from '@/types';
 
 interface SyncStatus {
@@ -20,6 +21,7 @@ interface SyncStatus {
     purchases: number;
     expenses: number;
     employees: number;
+    scrap: number;
   };
   isSyncing: boolean;
   error: string | null;
@@ -37,6 +39,7 @@ class SupabaseSyncService {
       purchases: 0,
       expenses: 0,
       employees: 0,
+      scrap: 0,
     },
     isSyncing: false,
     error: null,
@@ -140,6 +143,7 @@ class SupabaseSyncService {
       const purchases = this.loadFromStorage<CustomerPurchase>('customer-purchase-storage');
       const expenses = this.loadFromStorage<Expense>('alnoor_expenses');
       const employees = this.loadFromStorage<Employee>('alnoor_employees');
+      const scrap = this.loadFromStorage<Scrap>('alnoor_scrap');
       
       console.log('📊 Data loaded:', {
         rawMaterials: rawMaterials.length,
@@ -149,6 +153,7 @@ class SupabaseSyncService {
         purchases: purchases.length,
         expenses: expenses.length,
         employees: employees.length,
+        scrap: scrap.length,
       });
 
       // Sync each collection
@@ -160,6 +165,7 @@ class SupabaseSyncService {
       await this.syncCollection('purchases', purchases);
       await this.syncCollection('expenses', expenses);
       await this.syncCollection('employees', employees);
+      await this.syncCollection('scrap', scrap);
       console.log('✅ All collections synced successfully!');
 
       this.syncStatus.lastSyncTime = new Date();
@@ -171,6 +177,7 @@ class SupabaseSyncService {
         purchases: 0,
         expenses: 0,
         employees: 0,
+        scrap: 0,
       };
       this.saveSyncStatus();
 
@@ -210,6 +217,8 @@ class SupabaseSyncService {
         return parsed.expenses;
       } else if (parsed.employees) {
         return parsed.employees;
+      } else if (parsed.scrap) {
+        return parsed.scrap;
       } else if (parsed.rawMaterials) {
         return parsed.rawMaterials;
       } else if (parsed.processedMaterials) {
@@ -300,6 +309,7 @@ class SupabaseSyncService {
         'purchases',
         'expenses',
         'employees',
+        'scrap',
       ];
 
       const cloudData: Record<string, any[]> = {};

@@ -14,6 +14,7 @@ interface ProcessedMaterialBatchData {
     name: string;
     numberOfBundles: number;
     weightPerBundle: number;
+    grossWeightPerBundle?: number;
   }>;
 }
 
@@ -31,6 +32,7 @@ interface ProcessedRawMaterialState {
   getRecentProcessedMaterials: (limit?: number) => ProcessedRawMaterial[];
   deductStockForProduct: (processedMaterialId: number, quantity: number) => void;
   restoreProcessedMaterialForProduct: (processedMaterial: ProcessedRawMaterial) => void;
+  getAllProcessedMaterialNames: () => string[]; // Get all names including custom ones
   loadFromStorage: () => void;
   saveToStorage: () => void;
 }
@@ -100,14 +102,15 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
 
   addProcessedMaterial: (material) => {
     const outputQuantity = material.numberOfBundles * material.weightPerBundle;
-    const newMaterial: ProcessedRawMaterial = {
-      ...material,
-      outputQuantity,
-      usedQuantity: 0, // Initialize as unused
-      id: Date.now(),
-      batchId: generateBatchId(material.date),
-      createdAt: new Date(),
-    };
+      const newMaterial: ProcessedRawMaterial = {
+        ...material,
+        outputQuantity,
+        usedQuantity: 0, // Initialize as unused
+        id: Date.now(),
+        batchId: generateBatchId(material.date),
+        createdAt: new Date(),
+        grossWeightPerBundle: material.grossWeightPerBundle,
+      };
 
     set((state) => {
       // Add processed material name if not exists
@@ -151,6 +154,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
         inputQuantity: batch.inputQuantity, // Shared input quantity
         numberOfBundles: pm.numberOfBundles,
         weightPerBundle: pm.weightPerBundle,
+        grossWeightPerBundle: pm.grossWeightPerBundle,
         outputQuantity,
         usedQuantity: 0, // Initialize as unused
         date: batch.date,
@@ -354,6 +358,17 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
       .processedMaterials.slice()
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, limit);
+  },
+
+  getAllProcessedMaterialNames: () => {
+    // Only get custom processed material names
+    try {
+      const customMaterials = JSON.parse(localStorage.getItem('custom-processed-material-storage') || '[]');
+      const customNames = customMaterials.map((m: any) => m.name);
+      return customNames;
+    } catch {
+      return [];
+    }
   },
 
   loadFromStorage: () => {

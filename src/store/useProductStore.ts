@@ -18,6 +18,7 @@ interface ProductState {
   getSaleById: (id: number) => ProductSale | undefined;
   getStockByName: (name: string) => { foot: number; bundles: number };
   getTotalStock: () => { foot: number; bundles: number };
+  getAllProductNames: () => string[]; // Get all product names including custom ones
   loadFromStorage: () => void;
   saveToStorage: () => void;
 }
@@ -347,6 +348,17 @@ export const useProductStore = create<ProductState>((set, get) => ({
       }),
       { foot: 0, bundles: 0 }
     );
+  },
+
+  getAllProductNames: () => {
+    // Only get custom product names
+    try {
+      const customProducts = JSON.parse(localStorage.getItem('custom-product-storage') || '[]');
+      const customNames = customProducts.map((p: any) => p.name);
+      return customNames;
+    } catch {
+      return [];
+    }
   },
 
   loadFromStorage: () => {

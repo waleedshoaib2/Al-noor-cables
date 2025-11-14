@@ -11,6 +11,7 @@ export default function Sidebar() {
     { path: '/customers', label: 'Customers', icon: '👥' },
     { path: '/expenses', label: 'Expenses', icon: '💰' },
     { path: '/employees', label: 'Employee Management', icon: '👔' },
+    { path: '/scrap', label: 'Scrap', icon: '🗑️' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];
 

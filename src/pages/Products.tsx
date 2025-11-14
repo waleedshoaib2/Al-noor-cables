@@ -9,8 +9,12 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import ProductProductionForm from '@/components/Product/ProductProductionForm';
+import CustomProductForm from '@/components/CustomProduct/CustomProductForm';
+import CustomProductList from '@/components/CustomProduct/CustomProductList';
 import { exportToPDF } from '@/utils/pdfExport';
 import type { ProductProduction } from '@/types';
+import type { CustomProduct } from '@/types';
+import { useCustomProductStore } from '@/store/useCustomProductStore';
 
 export default function Products() {
   const { t, language } = useTranslation();
@@ -26,6 +30,11 @@ export default function Products() {
 
   const [showProductionForm, setShowProductionForm] = useState(false);
   const [editingProduction, setEditingProduction] = useState<ProductProduction | null>(null);
+  const [showCustomProductForm, setShowCustomProductForm] = useState(false);
+  const [editingCustomProduct, setEditingCustomProduct] = useState<CustomProduct | null>(null);
+  const [showCustomProductList, setShowCustomProductList] = useState(false);
+
+  const deleteCustomProduct = useCustomProductStore((state) => state.deleteCustomProduct);
 
   const handleAddProduction = () => {
     setEditingProduction(null);
@@ -126,6 +135,9 @@ export default function Products() {
             title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
           >
             {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
+          </Button>
+          <Button variant="secondary" onClick={() => setShowCustomProductList(true)}>
+            {t('manageCustomProducts', 'product')}
           </Button>
           <Button variant="primary" onClick={handleAddProduction}>
             {t('addProduction', 'product')}
@@ -342,6 +354,47 @@ export default function Products() {
             setEditingProduction(null);
           }}
           onSubmit={handleProductionSubmit}
+        />
+      </Modal>
+
+      {/* Custom Product Management Modal */}
+      <Modal
+        isOpen={showCustomProductList}
+        onClose={() => {
+          setShowCustomProductList(false);
+          setEditingCustomProduct(null);
+        }}
+        title={t('manageCustomProducts', 'product')}
+      >
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="primary" onClick={handleAddCustomProduct}>
+              {t('addCustomProduct', 'product')}
+            </Button>
+          </div>
+          <CustomProductList
+            onEdit={handleEditCustomProduct}
+            onDelete={handleDeleteCustomProduct}
+          />
+        </div>
+      </Modal>
+
+      {/* Custom Product Form Modal */}
+      <Modal
+        isOpen={showCustomProductForm}
+        onClose={() => {
+          setShowCustomProductForm(false);
+          setEditingCustomProduct(null);
+        }}
+        title={editingCustomProduct ? t('editCustomProduct', 'product') : t('addCustomProduct', 'product')}
+      >
+        <CustomProductForm
+          product={editingCustomProduct}
+          onClose={() => {
+            setShowCustomProductForm(false);
+            setEditingCustomProduct(null);
+          }}
+          onSubmit={handleCustomProductSubmit}
         />
       </Modal>
     </div>

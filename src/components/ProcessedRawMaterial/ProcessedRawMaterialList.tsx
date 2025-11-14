@@ -17,7 +17,6 @@ interface BatchGroup {
   inputQuantity: number;
   materials: ProcessedRawMaterial[];
   totalOutput: number;
-  scrap: number;
   notes?: string;
   rawMaterialBatchesUsed: any[];
 }
@@ -51,7 +50,6 @@ export default function ProcessedRawMaterialList({
         inputQuantity: material.inputQuantity, // All entries in batch share same input
         materials: [],
         totalOutput: 0,
-        scrap: 0,
         notes: material.notes,
         rawMaterialBatchesUsed: material.rawMaterialBatchesUsed || [],
       };
@@ -60,11 +58,6 @@ export default function ProcessedRawMaterialList({
     groups[batchKey].totalOutput += material.outputQuantity;
     return groups;
   }, {} as Record<string, BatchGroup>);
-
-  // Calculate scrap for each batch
-  Object.values(batchGroups).forEach((batch) => {
-    batch.scrap = batch.inputQuantity - batch.totalOutput;
-  });
 
   // Sort batches by date (newest first)
   const sortedBatches = Object.values(batchGroups).sort(
@@ -95,17 +88,11 @@ export default function ProcessedRawMaterialList({
           </div>
 
           {/* Batch Summary - Compact */}
-          <div className="grid grid-cols-4 gap-4 mb-4 pb-4 border-b">
+          <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b">
             <div>
               <div className="text-xs text-gray-600 mb-1">{t('totalOutput', 'processedMaterial')}</div>
               <div className="text-lg font-bold text-brand-blue">
                 {batch.totalOutput.toFixed(2)} kgs
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-600 mb-1">{t('totalScrap', 'processedMaterial')}</div>
-              <div className={`text-lg font-bold ${batch.scrap >= 0 ? 'text-red-600' : 'text-red-800'}`}>
-                {batch.scrap.toFixed(2)} kgs
               </div>
             </div>
             <div>
@@ -154,7 +141,12 @@ export default function ProcessedRawMaterialList({
                         )}
                       </div>
                       <span className="text-sm text-gray-600 ml-2">
-                        ({material.numberOfBundles.toFixed(2)} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs = {material.outputQuantity.toFixed(2)} kgs)
+                        ({material.numberOfBundles.toFixed(2)} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs {t('safiWeightPerBundle', 'processedMaterial')} = {material.outputQuantity.toFixed(2)} kgs)
+                        {material.grossWeightPerBundle && (
+                          <span className="ml-1 text-gray-500">
+                            ({t('weightPerBundle', 'processedMaterial')}: {material.grossWeightPerBundle.toFixed(2)} kgs)
+                          </span>
+                        )}
                         {isUsed && (
                           <span className="ml-2 text-orange-600">
                             ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {usedBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({usedQuantity.toFixed(2)} kgs), {language === 'ur' ? 'دستیاب' : 'Available'}: {availableBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({availableQuantity.toFixed(2)} kgs))

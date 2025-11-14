@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS processed_materials (
   "inputQuantity" NUMERIC NOT NULL,
   "numberOfBundles" NUMERIC NOT NULL,
   "weightPerBundle" NUMERIC NOT NULL,
+  "grossWeightPerBundle" NUMERIC,
   "outputQuantity" NUMERIC NOT NULL,
   "usedQuantity" NUMERIC NOT NULL,
   date TIMESTAMPTZ NOT NULL,
@@ -30,6 +31,10 @@ CREATE TABLE IF NOT EXISTS processed_materials (
   "rawMaterialBatchesUsed" JSONB,
   "createdAt" TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration: Add grossWeightPerBundle column to existing processed_materials table
+-- Run this if the table already exists:
+-- ALTER TABLE processed_materials ADD COLUMN IF NOT EXISTS "grossWeightPerBundle" NUMERIC;
 
 -- Products Table
 CREATE TABLE IF NOT EXISTS products (
@@ -95,6 +100,31 @@ CREATE TABLE IF NOT EXISTS employees (
   "createdAt" TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Scrap Table
+CREATE TABLE IF NOT EXISTS scrap (
+  id BIGINT PRIMARY KEY,
+  amount NUMERIC NOT NULL,
+  "materialType" TEXT NOT NULL,
+  date TIMESTAMPTZ NOT NULL,
+  notes TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Custom Processed Raw Materials Table
+CREATE TABLE IF NOT EXISTS custom_processed_raw_materials (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  "priorRawMaterial" TEXT NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Custom Products Table
+CREATE TABLE IF NOT EXISTS custom_products (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_raw_materials_date ON raw_materials(date);
 CREATE INDEX IF NOT EXISTS idx_raw_materials_type ON raw_materials("materialType");
@@ -104,6 +134,10 @@ CREATE INDEX IF NOT EXISTS idx_purchases_date ON purchases(date);
 CREATE INDEX IF NOT EXISTS idx_purchases_customer ON purchases("customerId");
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
 CREATE INDEX IF NOT EXISTS idx_employees_salary_date ON employees("salaryDate");
+CREATE INDEX IF NOT EXISTS idx_scrap_date ON scrap(date);
+CREATE INDEX IF NOT EXISTS idx_scrap_material_type ON scrap("materialType");
+CREATE INDEX IF NOT EXISTS idx_custom_processed_raw_materials_name ON custom_processed_raw_materials(name);
+CREATE INDEX IF NOT EXISTS idx_custom_products_name ON custom_products(name);
 
 -- Enable Row Level Security (RLS) - Optional but recommended for production
 -- Uncomment these if you want to add authentication later

@@ -101,6 +101,7 @@
     "inputQuantity": "ان پٹ مقدار",
     "numberOfBundles": "بنڈلز کی تعداد",
     "weightPerBundle": "فی بنڈل وزن",
+    "safiWeightPerBundle": "صافی فی بنڈل وزن",
     "totalOutput": "کل آؤٹ پٹ",
     "bundles": "بنڈلز",
     "date": "تاریخ",
@@ -146,7 +147,11 @@
     "materialsCount": "مواد",
     "items": "اشیاء",
     "edit": "ترمیم",
-    "delete": "حذف"
+    "delete": "حذف",
+    "manageCustomMaterials": "کسٹم مواد مینج کریں",
+    "addCustomMaterial": "کسٹم مواد شامل کریں",
+    "editCustomMaterial": "کسٹم مواد میں ترمیم کریں",
+    "noCustomMaterialsFound": "کوئی کسٹم مواد نہیں ملا"
   },
   "product": {
     "title": "پروڈکٹس",
@@ -173,7 +178,51 @@
     "totalStockFoot": "کل اسٹاک (فٹ)",
     "totalStockBundles": "کل اسٹاک (بنڈلز)",
     "noProductionsFound": "کوئی پروڈکٹ پروڈکشن نہیں ملی",
-    "productionsFound": "پروڈکشنز ملیں"
+    "productionsFound": "پروڈکشنز ملیں",
+    "manageCustomProducts": "کسٹم پروڈکٹس مینج کریں",
+    "addCustomProduct": "کسٹم پروڈکٹ شامل کریں",
+    "editCustomProduct": "کسٹم پروڈکٹ میں ترمیم کریں",
+    "noCustomProductsFound": "کوئی کسٹم پروڈکٹ نہیں ملا"
+  },
+  "customProduct": {
+    "name": "پروڈکٹ کا نام",
+    "saving": "محفوظ ہو رہا ہے...",
+    "update": "اپڈیٹ",
+    "add": "شامل کریں",
+    "edit": "ترمیم",
+    "delete": "حذف",
+    "noCustomProductsFound": "کوئی کسٹم پروڈکٹ نہیں ملا"
+  },
+  "customProcessedMaterial": {
+    "name": "پروسیس شدہ مواد کا نام",
+    "priorRawMaterial": "پہلے خام مال",
+    "selectPriorRawMaterial": "پہلے خام مال کی قسم منتخب کریں",
+    "saving": "محفوظ ہو رہا ہے...",
+    "update": "اپڈیٹ",
+    "add": "شامل کریں",
+    "edit": "ترمیم",
+    "delete": "حذف",
+    "noCustomMaterialsFound": "کوئی کسٹم مواد نہیں ملا"
+  },
+  "scrap": {
+    "title": "سکریپ مینجمنٹ",
+    "addScrap": "سکریپ شامل کریں",
+    "editScrap": "سکریپ میں ترمیم کریں",
+    "materialType": "مواد کی قسم",
+    "selectMaterialType": "مواد کی قسم منتخب کریں",
+    "amount": "مقدار",
+    "date": "تاریخ",
+    "notes": "نوٹس",
+    "additionalNotes": "اضافی نوٹس (اختیاری)",
+    "totalScrap": "کل سکریپ",
+    "totalCopper": "کل تانبے کا سکریپ",
+    "totalSilver": "کل چاندی کا سکریپ",
+    "noScrapsFound": "کوئی سکریپ انٹری نہیں ملی",
+    "saving": "محفوظ ہو رہا ہے...",
+    "update": "اپڈیٹ",
+    "add": "شامل کریں",
+    "edit": "ترمیم",
+    "delete": "حذف"
   },
   "customer": {
     "title": "کسٹمرز",

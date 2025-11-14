@@ -11,6 +11,7 @@ interface ProcessedMaterialItem {
   name: string;
   numberOfBundles: string;
   weightPerBundle: string;
+  grossWeightPerBundle: string;
 }
 
 interface ProcessedRawMaterialFormProps {
@@ -31,9 +32,10 @@ export default function ProcessedRawMaterialForm({
   const updateProcessedMaterial = useProcessedRawMaterialStore(
     (state) => state.updateProcessedMaterial
   );
-  const processedMaterialNames = useProcessedRawMaterialStore(
-    (state) => state.processedMaterialNames
+  const getAllProcessedMaterialNames = useProcessedRawMaterialStore(
+    (state) => state.getAllProcessedMaterialNames
   );
+  const processedMaterialNames = getAllProcessedMaterialNames();
   const deductStock = useRawMaterialStore((state) => state.deductStock);
   const getAvailableStockByType = useRawMaterialStore(
     (state) => state.getAvailableStockByType
@@ -41,13 +43,12 @@ export default function ProcessedRawMaterialForm({
 
   const [formData, setFormData] = useState({
     materialType: '',
-    inputQuantity: '',
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
 
   const [processedMaterials, setProcessedMaterials] = useState<ProcessedMaterialItem[]>([
-    { name: '', numberOfBundles: '', weightPerBundle: '' },
+    { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '' },
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -60,7 +61,6 @@ export default function ProcessedRawMaterialForm({
       // For editing, populate single material (legacy support)
       setFormData({
         materialType: material.materialType,
-        inputQuantity: material.inputQuantity.toString(),
         date: material.date.toISOString().split('T')[0],
         notes: material.notes || '',
       });
@@ -69,10 +69,18 @@ export default function ProcessedRawMaterialForm({
           name: material.name,
           numberOfBundles: material.numberOfBundles.toString(),
           weightPerBundle: material.weightPerBundle.toString(),
+          grossWeightPerBundle: material.grossWeightPerBundle?.toString() || '',
         },
       ]);
     }
   }, [material]);
+
+  // Calculate total output for stock checking
+  const totalOutput = processedMaterials.reduce((sum, pm) => {
+    const bundles = parseFloat(pm.numberOfBundles) || 0;
+    const weight = parseFloat(pm.weightPerBundle) || 0;
+    return sum + bundles * weight;
+  }, 0);
 
   useEffect(() => {
     if (formData.materialType) {
@@ -81,12 +89,12 @@ export default function ProcessedRawMaterialForm({
     } else {
       setAvailableStock(0);
     }
-  }, [formData.materialType, getAvailableStockByType]);
+  }, [formData.materialType, getAvailableStockByType, totalOutput]);
 
   const addProcessedMaterialRow = () => {
     setProcessedMaterials([
       ...processedMaterials,
-      { name: '', numberOfBundles: '', weightPerBundle: '' },
+      { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '' },
     ]);
   };
 
@@ -125,11 +133,18 @@ export default function ProcessedRawMaterialForm({
       newErrors.date = language === 'ur' ? 'تاریخ درکار ہے' : 'Date is required';
     }
 
-    if (!formData.inputQuantity || parseFloat(formData.inputQuantity) <= 0) {
-      newErrors.inputQuantity =
+    // Calculate total output
+    const totalOutput = processedMaterials.reduce((sum, pm) => {
+      const bundles = parseFloat(pm.numberOfBundles) || 0;
+      const weight = parseFloat(pm.weightPerBundle) || 0;
+      return sum + bundles * weight;
+    }, 0);
+
+    if (totalOutput <= 0) {
+      newErrors.totalOutput =
         language === 'ur'
-          ? 'ان پٹ مقدار 0 سے زیادہ ہونی چاہیے'
-          : 'Input quantity must be greater than 0';
+          ? 'کم از کم ایک پروسیس شدہ مواد کا آؤٹ پٹ درکار ہے'
+          : 'At least one processed material output is required';
     }
 
     // Validate processed materials
@@ -147,37 +162,22 @@ export default function ProcessedRawMaterialForm({
       if (!pm.weightPerBundle || parseFloat(pm.weightPerBundle) <= 0) {
         rowErrors.weightPerBundle =
           language === 'ur'
-            ? 'فی بنڈل وزن 0 سے زیادہ ہونا چاہیے'
-            : 'Weight per bundle must be greater than 0';
+            ? 'صافی فی بنڈل وزن 0 سے زیادہ ہونا چاہیے'
+            : 'Safi weight per bundle must be greater than 0';
       }
       if (Object.keys(rowErrors).length > 0) {
         newMaterialErrors[index] = rowErrors;
       }
     });
 
-    // Check available stock
-    if (formData.materialType && !material) {
-      const inputQty = parseFloat(formData.inputQuantity);
-      if (inputQty > availableStock) {
-        newErrors.inputQuantity =
+    // Check available stock (input will be calculated from total output)
+    if (formData.materialType && !material && totalOutput > 0) {
+      if (totalOutput > availableStock) {
+        newErrors.totalOutput =
           language === 'ur'
             ? `دستیاب اسٹاک: ${availableStock.toFixed(2)} کلوگرام`
             : `Available stock: ${availableStock.toFixed(2)} kgs`;
       }
-    }
-
-    // Check if total output exceeds input
-    const totalOutput = processedMaterials.reduce((sum, pm) => {
-      const bundles = parseFloat(pm.numberOfBundles) || 0;
-      const weight = parseFloat(pm.weightPerBundle) || 0;
-      return sum + bundles * weight;
-    }, 0);
-    const inputQty = parseFloat(formData.inputQuantity) || 0;
-    if (totalOutput > inputQty) {
-      newErrors.totalOutput =
-        language === 'ur'
-          ? `کل آؤٹ پٹ ان پٹ سے زیادہ نہیں ہو سکتا`
-          : `Total output cannot exceed input quantity`;
     }
 
     setErrors(newErrors);
@@ -195,7 +195,14 @@ export default function ProcessedRawMaterialForm({
     setLoading(true);
 
     try {
-      const inputQty = parseFloat(formData.inputQuantity);
+      // Calculate input quantity from total output
+      const totalOutput = processedMaterials.reduce((sum, pm) => {
+        const bundles = parseFloat(pm.numberOfBundles) || 0;
+        const weight = parseFloat(pm.weightPerBundle) || 0;
+        return sum + bundles * weight;
+      }, 0);
+      const inputQty = totalOutput; // Input equals total output
+      
       const batchId = material ? material.batchId : generateBatchId(new Date(formData.date));
       const date = new Date(formData.date);
 
@@ -218,6 +225,7 @@ export default function ProcessedRawMaterialForm({
           inputQuantity: inputQty,
           numberOfBundles: numBundles,
           weightPerBundle: weightPerBundle,
+          grossWeightPerBundle: pm.grossWeightPerBundle ? parseFloat(pm.grossWeightPerBundle) : undefined,
           date,
           batchId,
           notes: formData.notes.trim() || undefined,
@@ -229,6 +237,7 @@ export default function ProcessedRawMaterialForm({
           name: pm.name.trim(),
           numberOfBundles: parseFloat(pm.numberOfBundles),
           weightPerBundle: parseFloat(pm.weightPerBundle),
+          grossWeightPerBundle: pm.grossWeightPerBundle ? parseFloat(pm.grossWeightPerBundle) : undefined,
         }));
 
         addProcessedMaterialBatch({
@@ -246,21 +255,15 @@ export default function ProcessedRawMaterialForm({
       onClose();
     } catch (error: any) {
       setErrors({
-        inputQuantity: error.message || 'Error processing material',
+        totalOutput: error.message || 'Error processing material',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Calculate totals
-  const totalOutput = processedMaterials.reduce((sum, pm) => {
-    const bundles = parseFloat(pm.numberOfBundles) || 0;
-    const weight = parseFloat(pm.weightPerBundle) || 0;
-    return sum + bundles * weight;
-  }, 0);
-  const inputQty = parseFloat(formData.inputQuantity) || 0;
-  const scrap = inputQty - totalOutput;
+  // Calculate totals (input is calculated from output)
+  const calculatedInput = totalOutput; // Input equals total output
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
@@ -289,18 +292,6 @@ export default function ProcessedRawMaterialForm({
           <p className="mt-1 text-sm text-red-600">{errors.materialType}</p>
         )}
       </div>
-
-      {/* Input Quantity */}
-      <Input
-        label={`${t('inputQuantity', 'processedMaterial')} (kgs) *`}
-        type="number"
-        step="0.01"
-        min="0"
-        value={formData.inputQuantity}
-        onChange={(e) => setFormData({ ...formData, inputQuantity: e.target.value })}
-        placeholder="0.00"
-        error={errors.inputQuantity}
-      />
 
       {/* Date */}
       <Input
@@ -361,7 +352,7 @@ export default function ProcessedRawMaterialForm({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Processed Material Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -431,11 +422,13 @@ export default function ProcessedRawMaterialForm({
                     </p>
                   )}
                 </div>
+              </div>
 
-                {/* Weight Per Bundle */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {/* Safi Weight Per Bundle (Net Weight) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('weightPerBundle', 'processedMaterial')} (kgs) *
+                    {t('safiWeightPerBundle', 'processedMaterial')} (kgs) *
                   </label>
                   <input
                     type="number"
@@ -453,6 +446,31 @@ export default function ProcessedRawMaterialForm({
                   {materialErrors[index]?.weightPerBundle && (
                     <p className="mt-1 text-sm text-red-600">
                       {materialErrors[index].weightPerBundle}
+                    </p>
+                  )}
+                </div>
+
+                {/* Weight Per Bundle (With Tool) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('weightPerBundle', 'processedMaterial')} (kgs)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={pm.grossWeightPerBundle}
+                    onChange={(e) =>
+                      updateProcessedMaterialRow(index, 'grossWeightPerBundle', e.target.value)
+                    }
+                    className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                      materialErrors[index]?.grossWeightPerBundle ? 'border-red-500' : ''
+                    }`}
+                    placeholder="0.00"
+                  />
+                  {materialErrors[index]?.grossWeightPerBundle && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {materialErrors[index].grossWeightPerBundle}
                     </p>
                   )}
                 </div>
@@ -478,7 +496,8 @@ export default function ProcessedRawMaterialForm({
         <div className="bg-gray-50 p-4 rounded-md space-y-2">
           <div className="flex justify-between">
             <span className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}:</span>
-            <span className="text-sm font-semibold">{inputQty.toFixed(2)} kgs</span>
+            <span className="text-sm font-semibold">{calculatedInput.toFixed(2)} kgs</span>
+            <span className="text-xs text-gray-500 ml-2">({language === 'ur' ? 'خودکار حساب' : 'Auto-calculated'})</span>
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}:</span>
@@ -486,21 +505,16 @@ export default function ProcessedRawMaterialForm({
               {totalOutput.toFixed(2)} kgs
             </span>
           </div>
-          <div className="flex justify-between border-t pt-2">
-            <span className="text-sm text-gray-600">{t('totalScrap', 'processedMaterial')}:</span>
-            <span className={`text-sm font-semibold ${scrap >= 0 ? 'text-red-600' : 'text-red-800'}`}>
-              {scrap.toFixed(2)} kgs
-            </span>
-          </div>
-          {scrap < 0 && (
-            <p className="text-xs text-red-600 mt-1">
-              {language === 'ur'
-                ? 'کل آؤٹ پٹ ان پٹ سے زیادہ ہے'
-                : 'Total output exceeds input quantity'}
-            </p>
+          {formData.materialType && (
+            <div className="flex justify-between border-t pt-2 mt-2">
+              <span className="text-xs text-gray-500">{t('availableStock', 'processedMaterial')}:</span>
+              <span className={`text-xs font-medium ${totalOutput > availableStock ? 'text-red-600' : 'text-gray-600'}`}>
+                {availableStock.toFixed(2)} kgs
+              </span>
+            </div>
           )}
           {errors.totalOutput && (
-            <p className="text-sm text-red-600">{errors.totalOutput}</p>
+            <p className="text-sm text-red-600 mt-1">{errors.totalOutput}</p>
           )}
         </div>
       )}

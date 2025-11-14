@@ -101,6 +101,7 @@
     "inputQuantity": "Input Quantity",
     "numberOfBundles": "Number of Bundles",
     "weightPerBundle": "Weight Per Bundle",
+    "safiWeightPerBundle": "Safi Weight Per Bundle",
     "totalOutput": "Total Output",
     "bundles": "Bundles",
     "date": "Date",
@@ -146,7 +147,11 @@
     "materialsCount": "Materials",
     "items": "items",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "manageCustomMaterials": "Manage Custom Materials",
+    "addCustomMaterial": "Add Custom Material",
+    "editCustomMaterial": "Edit Custom Material",
+    "noCustomMaterialsFound": "No custom materials found"
   },
   "product": {
     "title": "Products",
@@ -173,7 +178,51 @@
     "totalStockFoot": "Total Stock (Foot)",
     "totalStockBundles": "Total Stock (Bundles)",
     "noProductionsFound": "No product productions found",
-    "productionsFound": "Productions Found"
+    "productionsFound": "Productions Found",
+    "manageCustomProducts": "Manage Custom Products",
+    "addCustomProduct": "Add Custom Product",
+    "editCustomProduct": "Edit Custom Product",
+    "noCustomProductsFound": "No custom products found"
+  },
+  "customProduct": {
+    "name": "Product Name",
+    "saving": "Saving...",
+    "update": "Update",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noCustomProductsFound": "No custom products found"
+  },
+  "customProcessedMaterial": {
+    "name": "Processed Material Name",
+    "priorRawMaterial": "Prior Raw Material",
+    "selectPriorRawMaterial": "Select Prior Raw Material",
+    "saving": "Saving...",
+    "update": "Update",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noCustomMaterialsFound": "No custom materials found"
+  },
+  "scrap": {
+    "title": "Scrap Management",
+    "addScrap": "Add Scrap",
+    "editScrap": "Edit Scrap",
+    "materialType": "Material Type",
+    "selectMaterialType": "Select Material Type",
+    "amount": "Amount",
+    "date": "Date",
+    "notes": "Notes",
+    "additionalNotes": "Additional notes (optional)",
+    "totalScrap": "Total Scrap",
+    "totalCopper": "Total Copper Scrap",
+    "totalSilver": "Total Silver Scrap",
+    "noScrapsFound": "No scrap entries found",
+    "saving": "Saving...",
+    "update": "Update",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "customer": {
     "title": "Customers",

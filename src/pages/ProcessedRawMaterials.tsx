@@ -7,8 +7,12 @@ import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import ProcessedRawMaterialForm from '@/components/ProcessedRawMaterial/ProcessedRawMaterialForm';
 import ProcessedRawMaterialList from '@/components/ProcessedRawMaterial/ProcessedRawMaterialList';
+import CustomProcessedRawMaterialForm from '@/components/CustomProcessedRawMaterial/CustomProcessedRawMaterialForm';
+import CustomProcessedRawMaterialList from '@/components/CustomProcessedRawMaterial/CustomProcessedRawMaterialList';
 import { exportToPDF } from '@/utils/pdfExport';
 import type { ProcessedRawMaterial } from '@/types';
+import type { CustomProcessedRawMaterial } from '@/types';
+import { useCustomProcessedRawMaterialStore } from '@/store/useCustomProcessedRawMaterialStore';
 
 export default function ProcessedRawMaterials() {
   const { t, language } = useTranslation();
@@ -20,16 +24,23 @@ export default function ProcessedRawMaterials() {
     (state) => state.deleteProcessedMaterial
   );
   const restoreStock = useRawMaterialStore((state) => state.restoreStock);
-  const processedMaterialNames = useProcessedRawMaterialStore(
-    (state) => state.processedMaterialNames
+  const getAllProcessedMaterialNames = useProcessedRawMaterialStore(
+    (state) => state.getAllProcessedMaterialNames
   );
+  const processedMaterialNames = getAllProcessedMaterialNames();
 
   const [showProcessedMaterialForm, setShowProcessedMaterialForm] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<ProcessedRawMaterial | null>(null);
+  const [showCustomMaterialForm, setShowCustomMaterialForm] = useState(false);
+  const [editingCustomMaterial, setEditingCustomMaterial] = useState<CustomProcessedRawMaterial | null>(null);
   const [filterMaterialType, setFilterMaterialType] = useState<string>('all');
   const [filterProcessedMaterialName, setFilterProcessedMaterialName] = useState<string>('all');
   const [filterStartDate, setFilterStartDate] = useState<string>('');
   const [filterEndDate, setFilterEndDate] = useState<string>('');
+
+  const deleteCustomProcessedMaterial = useCustomProcessedRawMaterialStore(
+    (state) => state.deleteCustomProcessedMaterial
+  );
 
   const handleAddProcessedMaterial = () => {
     setEditingMaterial(null);
@@ -89,14 +100,12 @@ export default function ProcessedRawMaterials() {
   const copperOutput = allCopperBatches.reduce((sum, batch) => 
     sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
   );
-  const copperScrap = copperInput - copperOutput;
   
   const silverInput = allSilverBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
   // Calculate total output produced from all silver materials (sum of all outputQuantity)
   const silverOutput = allSilverBatches.reduce((sum, batch) => 
     sum + batch.materials.reduce((mSum, m) => mSum + m.outputQuantity, 0), 0
   );
-  const silverScrap = silverInput - silverOutput;
 
   // Filter materials for the list display only
   const filteredMaterials = processedMaterials.filter((m) => {
@@ -138,6 +147,27 @@ export default function ProcessedRawMaterials() {
     setFilterEndDate('');
   };
 
+  const handleAddCustomMaterial = () => {
+    setEditingCustomMaterial(null);
+    setShowCustomMaterialForm(true);
+  };
+
+  const handleEditCustomMaterial = (material: CustomProcessedRawMaterial) => {
+    setEditingCustomMaterial(material);
+    setShowCustomMaterialForm(true);
+  };
+
+  const handleDeleteCustomMaterial = (id: number) => {
+    if (window.confirm(language === 'ur' ? 'کیا آپ واقعی اس کسٹم مواد کو حذف کرنا چاہتے ہیں؟' : 'Are you sure you want to delete this custom material?')) {
+      deleteCustomProcessedMaterial(id);
+    }
+  };
+
+  const handleCustomMaterialSubmit = () => {
+    setShowCustomMaterialForm(false);
+    setEditingCustomMaterial(null);
+  };
+
   const reportSectionRef = useRef<HTMLDivElement>(null);
 
   // Print handler
@@ -169,6 +199,9 @@ export default function ProcessedRawMaterials() {
           >
             {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
           </Button>
+          <Button variant="secondary" onClick={handleAddCustomMaterial}>
+            {t('manageCustomMaterials', 'processedMaterial')}
+          </Button>
           <Button variant="primary" onClick={handleAddProcessedMaterial}>
             {t('addProcessedMaterial', 'processedMaterial')}
           </Button>
@@ -190,7 +223,7 @@ export default function ProcessedRawMaterials() {
       {/* Summary Stats - Copper */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Copper</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="text-sm text-gray-600">
               {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
@@ -203,17 +236,13 @@ export default function ProcessedRawMaterials() {
             </div>
             <div className="text-2xl font-bold text-brand-orange">{copperOutput.toFixed(2)} kgs</div>
           </div>
-          <div>
-            <div className="text-sm text-gray-600">{t('totalScrap', 'processedMaterial')}</div>
-            <div className="text-2xl font-bold text-red-600">{copperScrap.toFixed(2)} kgs</div>
-          </div>
         </div>
       </div>
 
       {/* Summary Stats - Silver */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Silver</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="text-sm text-gray-600">
               {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
@@ -225,10 +254,6 @@ export default function ProcessedRawMaterials() {
               {language === 'ur' ? 'دستیاب مقدار' : 'Amount Available'}
             </div>
             <div className="text-2xl font-bold text-brand-orange">{silverOutput.toFixed(2)} kgs</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-600">{t('totalScrap', 'processedMaterial')}</div>
-            <div className="text-2xl font-bold text-red-600">{silverScrap.toFixed(2)} kgs</div>
           </div>
         </div>
       </div>
@@ -361,6 +386,42 @@ export default function ProcessedRawMaterials() {
           }}
           onSubmit={handleProcessedMaterialSubmit}
         />
+      </Modal>
+
+      {/* Custom Processed Material Management Modal */}
+      <Modal
+        isOpen={showCustomMaterialForm}
+        onClose={() => {
+          setShowCustomMaterialForm(false);
+          setEditingCustomMaterial(null);
+        }}
+        title={editingCustomMaterial ? t('editCustomMaterial', 'processedMaterial') : t('manageCustomMaterials', 'processedMaterial')}
+      >
+        <div className="space-y-4">
+          {!editingCustomMaterial && (
+            <>
+              <div className="flex justify-end mb-4">
+                <Button variant="primary" onClick={() => setEditingCustomMaterial({ id: 0, name: '', priorRawMaterial: '', createdAt: new Date() })}>
+                  {t('addCustomMaterial', 'processedMaterial')}
+                </Button>
+              </div>
+              <CustomProcessedRawMaterialList
+                onEdit={handleEditCustomMaterial}
+                onDelete={handleDeleteCustomMaterial}
+              />
+            </>
+          )}
+          {editingCustomMaterial && (
+            <CustomProcessedRawMaterialForm
+              material={editingCustomMaterial.id === 0 ? null : editingCustomMaterial}
+              onClose={() => {
+                setShowCustomMaterialForm(false);
+                setEditingCustomMaterial(null);
+              }}
+              onSubmit={handleCustomMaterialSubmit}
+            />
+          )}
+        </div>
       </Modal>
     </div>
   );

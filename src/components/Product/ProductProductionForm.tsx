@@ -21,6 +21,7 @@ export default function ProductProductionForm({
   const { t, language } = useTranslation();
   const addProduction = useProductStore((state) => state.addProduction);
   const updateProduction = useProductStore((state) => state.updateProduction);
+  const getAllProductNames = useProductStore((state) => state.getAllProductNames);
   const processedMaterials = useProcessedRawMaterialStore(
     (state) => state.processedMaterials
   );
@@ -37,8 +38,7 @@ export default function ProductProductionForm({
     productNumber: '',
     productTara: '',
     processedMaterialId: '',
-    bundlesUsed: '',
-    weightUsed: '', // Custom weight in kgs
+    weightUsed: '', // Safi weight in kgs
     quantityFoot: '',
     quantityBundles: '',
     date: new Date().toISOString().split('T')[0],
@@ -61,7 +61,6 @@ export default function ProductProductionForm({
         productNumber: production.productNumber || '',
         productTara: production.productTara || '',
         processedMaterialId: production.processedMaterialId.toString(),
-        bundlesUsed: bundlesUsed.toString(),
         weightUsed: weightUsed,
         quantityFoot: (production.quantityFoot || 0).toString(),
         quantityBundles: (production.quantityBundles || 0).toString(),
@@ -75,7 +74,6 @@ export default function ProductProductionForm({
         productNumber: '',
         productTara: '',
         processedMaterialId: '',
-        bundlesUsed: '',
         weightUsed: '',
         quantityFoot: '',
         quantityBundles: '',
@@ -112,39 +110,25 @@ export default function ProductProductionForm({
         language === 'ur' ? 'پروسیس شدہ مواد درکار ہے' : 'Processed material is required';
     }
 
-    // Validate bundles or weight - at least one must be provided
-    const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
+    // Validate weight - must be provided
     const weightUsed = parseFloat(formData.weightUsed) || 0;
     
     if (!formData.processedMaterialId) {
       // Error already set above
-    } else if (bundlesUsed <= 0 && weightUsed <= 0) {
-      newErrors.bundlesUsed =
-        language === 'ur' ? 'بنڈلز یا وزن درکار ہے' : 'Bundles or weight is required';
+    } else if (weightUsed <= 0) {
       newErrors.weightUsed =
-        language === 'ur' ? 'بنڈلز یا وزن درکار ہے' : 'Bundles or weight is required';
+        language === 'ur' ? 'صافی وزن درکار ہے' : 'Safi weight is required';
     } else {
       const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
       if (selectedMaterial) {
-        // Use weight if provided, otherwise calculate from bundles
-        const finalWeight = weightUsed > 0 ? weightUsed : (bundlesUsed * selectedMaterial.weightPerBundle);
-        const finalBundles = bundlesUsed > 0 ? bundlesUsed : (weightUsed / selectedMaterial.weightPerBundle);
-        
         const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
         const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
         
-        if (finalBundles > availableBundles) {
-          newErrors.bundlesUsed =
-            language === 'ur' 
-              ? `دستیاب بنڈلز: ${availableBundles.toFixed(0)}`
-              : `Available bundles: ${availableBundles.toFixed(0)}`;
-        }
-        
-        if (finalWeight > availableWeight) {
+        if (weightUsed > availableWeight) {
           newErrors.weightUsed =
             language === 'ur' 
-              ? `دستیاب وزن: ${availableWeight.toFixed(2)} kgs`
-              : `Available weight: ${availableWeight.toFixed(2)} kgs`;
+              ? `دستیاب صافی وزن: ${availableWeight.toFixed(2)} کلوگرام`
+              : `Available safi weight: ${availableWeight.toFixed(2)} kgs`;
         }
       }
     }
@@ -208,7 +192,6 @@ export default function ProductProductionForm({
 
     try {
       const processedMaterialId = parseInt(formData.processedMaterialId);
-      const bundlesUsed = parseFloat(formData.bundlesUsed) || 0;
       const weightUsed = parseFloat(formData.weightUsed) || 0;
       const quantityFoot = parseFloat(formData.quantityFoot) || 0;
       const quantityBundles = parseFloat(formData.quantityBundles) || 0;
@@ -219,16 +202,17 @@ export default function ProductProductionForm({
         throw new Error('Processed material not found');
       }
 
-      // Calculate the quantity in kgs - use weight if provided, otherwise calculate from bundles
-      const quantityUsedKgs = weightUsed > 0 ? weightUsed : (bundlesUsed * processedMaterial.weightPerBundle);
-      // Calculate bundles from weight if weight was used, otherwise use bundles directly
-      const finalBundlesUsed = weightUsed > 0 ? (weightUsed / processedMaterial.weightPerBundle) : bundlesUsed;
+      // Calculate the quantity in kgs from weight
+      const quantityUsedKgs = weightUsed;
+      // Calculate bundles from weight
+      const finalBundlesUsed = weightUsed / processedMaterial.weightPerBundle;
 
-      // Check if this specific processed material entry has enough available bundles
+      // Check if this specific processed material entry has enough available weight
       const availableBundles = processedMaterial.numberOfBundles - ((processedMaterial.usedQuantity || 0) / processedMaterial.weightPerBundle);
-      if (bundlesUsed > availableBundles) {
+      const availableWeight = availableBundles * processedMaterial.weightPerBundle;
+      if (weightUsed > availableWeight) {
         throw new Error(
-          `Insufficient bundles for ${processedMaterial.name}. Available: ${availableBundles.toFixed(0)} bundles, Required: ${bundlesUsed.toFixed(0)} bundles`
+          `Insufficient safi weight for ${processedMaterial.name}. Available: ${availableWeight.toFixed(2)} kgs, Required: ${weightUsed.toFixed(2)} kgs`
         );
       }
 
@@ -275,16 +259,17 @@ export default function ProductProductionForm({
           }
         }
         
-        // Check if new material entry has enough bundles
+        // Check if new material entry has enough weight
         const availableBundles = processedMaterial.numberOfBundles - ((processedMaterial.usedQuantity || 0) / processedMaterial.weightPerBundle);
-        if (bundlesUsed > availableBundles) {
+        const availableWeight = availableBundles * processedMaterial.weightPerBundle;
+        if (weightUsed > availableWeight) {
           // Restore the old material back since we can't complete the update
           if (oldQuantityUsedKgs > 0 && oldProduction.processedMaterialSnapshot) {
             const oldMaterial = oldProduction.processedMaterialSnapshot;
             deductStockForProduct(oldMaterial.id, oldQuantityUsedKgs);
           }
           throw new Error(
-            `Insufficient bundles for ${processedMaterial.name}. Available: ${availableBundles.toFixed(0)} bundles, Required: ${bundlesUsed.toFixed(0)} bundles`
+            `Insufficient safi weight for ${processedMaterial.name}. Available: ${availableWeight.toFixed(2)} kgs, Required: ${weightUsed.toFixed(2)} kgs`
           );
         }
         
@@ -338,13 +323,42 @@ export default function ProductProductionForm({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('productName', 'product')} *
           </label>
-          <Input
-            type="text"
-            value={formData.productName}
-            onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-            placeholder={t('productName', 'product')}
-            error={errors.productName}
-          />
+          <div className="relative">
+            <input
+              type="text"
+              list="productNames"
+              value={formData.productName}
+              onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+              className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                errors.productName ? 'border-red-500' : ''
+              }`}
+              placeholder={t('typeOrSelect', 'product')}
+              autoComplete="off"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+            <datalist id="productNames">
+              {getAllProductNames().map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+          </div>
+          {errors.productName && (
+            <p className="mt-1 text-sm text-red-600">{errors.productName}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -380,7 +394,7 @@ export default function ProductProductionForm({
         <select
           value={formData.processedMaterialId}
           onChange={(e) => {
-            setFormData({ ...formData, processedMaterialId: e.target.value, bundlesUsed: '' });
+            setFormData({ ...formData, processedMaterialId: e.target.value, weightUsed: '' });
           }}
           className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
             errors.processedMaterialId ? 'border-red-500' : ''
@@ -401,95 +415,38 @@ export default function ProductProductionForm({
         )}
       </div>
 
-      {/* Bundles Used and Weight - Always visible, right after Processed Material */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {language === 'ur' ? 'استعمال شدہ بنڈلز' : 'Bundles Used'} *
-          </label>
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={formData.bundlesUsed}
-            onChange={(e) => {
-              const bundles = e.target.value;
-              setFormData({ ...formData, bundlesUsed: bundles });
-              
-              // Calculate weight from bundles if bundles are entered
-              if (bundles && parseFloat(bundles) > 0) {
-                const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
-                if (selectedMaterial) {
-                  const calculatedWeight = parseFloat(bundles) * selectedMaterial.weightPerBundle;
-                  setFormData((prev) => ({ ...prev, bundlesUsed: bundles, weightUsed: calculatedWeight.toFixed(2) }));
-                }
-              } else {
-                setFormData((prev) => ({ ...prev, bundlesUsed: bundles, weightUsed: '' }));
-              }
-            }}
-            placeholder={language === 'ur' ? 'بنڈلز کی تعداد' : 'Number of bundles from processed material'}
-            error={errors.bundlesUsed}
-            disabled={!formData.processedMaterialId}
-          />
-          {formData.processedMaterialId && (() => {
-            const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
-            if (selectedMaterial) {
-              const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
-              return (
-                <p className="mt-1 text-sm text-gray-500">
-                  {language === 'ur' 
-                    ? `دستیاب: ${availableBundles.toFixed(2)} بنڈلز`
-                    : `Available: ${availableBundles.toFixed(2)} bundles`}
-                </p>
-              );
-            }
-            return null;
-          })()}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {language === 'ur' ? 'وزن (کلوگرام)' : 'Weight (kgs)'} *
-          </label>
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={formData.weightUsed}
-            onChange={(e) => {
-              const weight = e.target.value;
-              setFormData({ ...formData, weightUsed: weight });
-              
-              // Calculate bundles from weight if weight is entered
-              if (weight && parseFloat(weight) > 0) {
-                const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
-                if (selectedMaterial) {
-                  const calculatedBundles = parseFloat(weight) / selectedMaterial.weightPerBundle;
-                  setFormData((prev) => ({ ...prev, weightUsed: weight, bundlesUsed: calculatedBundles.toFixed(2) }));
-                }
-              } else {
-                setFormData((prev) => ({ ...prev, weightUsed: weight, bundlesUsed: '' }));
-              }
-            }}
-            placeholder={language === 'ur' ? 'وزن کلوگرام میں' : 'Weight in kgs'}
-            error={errors.weightUsed}
-            disabled={!formData.processedMaterialId}
-          />
-          {formData.processedMaterialId && (() => {
-            const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
-            if (selectedMaterial) {
-              const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
-              const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
-              return (
-                <p className="mt-1 text-sm text-gray-500">
-                  {language === 'ur' 
-                    ? `دستیاب: ${availableWeight.toFixed(2)} کلوگرام`
-                    : `Available: ${availableWeight.toFixed(2)} kgs`}
-                </p>
-              );
-            }
-            return null;
-          })()}
-        </div>
+      {/* Safi Weight - Always visible, right after Processed Material */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t('safiWeightPerBundle', 'processedMaterial')} (kgs) *
+        </label>
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          value={formData.weightUsed}
+          onChange={(e) => {
+            setFormData({ ...formData, weightUsed: e.target.value });
+          }}
+          placeholder={language === 'ur' ? 'صافی وزن کلوگرام میں' : 'Safi weight in kgs'}
+          error={errors.weightUsed}
+          disabled={!formData.processedMaterialId}
+        />
+        {formData.processedMaterialId && (() => {
+          const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
+          if (selectedMaterial) {
+            const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
+            const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
+            return (
+              <p className="mt-1 text-sm text-gray-500">
+                {language === 'ur' 
+                  ? `دستیاب: ${availableWeight.toFixed(2)} کلوگرام`
+                  : `Available: ${availableWeight.toFixed(2)} kgs`}
+              </p>
+            );
+          }
+          return null;
+        })()}
       </div>
       {!formData.processedMaterialId && (
         <p className="text-sm text-gray-400 -mt-2">
