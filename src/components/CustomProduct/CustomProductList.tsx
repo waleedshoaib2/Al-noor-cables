@@ -22,7 +22,9 @@ export default function CustomProductList({ products, onEdit, onDelete }: Custom
       {displayProducts.map((product) => (
         <div key={product.id} className="border rounded-lg p-3 bg-white shadow-sm flex justify-between items-center">
           <div>
-            <div className="font-medium text-gray-900">{product.name}</div>
+            <div className="font-medium text-gray-900">
+              {language === 'ur' ? 'نام' : 'Name'}: {product.name}
+            </div>
             <div className="text-sm text-gray-600 mt-1">
               {language === 'ur' ? 'نمبر' : 'Number'}: {product.productNumber} | {language === 'ur' ? 'تارا' : 'Tara'}: {product.productTara}
             </div>

@@ -1,8 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useExpenseStore } from '@/store/useExpenseStore';
 import { useCategoryStore } from '@/store/useCategoryStore';
-import { Table } from '@/components/Common/Table';
-import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
 import { formatCurrency, formatDate } from '@/utils/helpers';
 import type { Expense } from '@/types';
@@ -53,7 +51,7 @@ export default function ExpenseList({ onEdit, onDelete }: ExpenseListProps) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -96,72 +94,101 @@ export default function ExpenseList({ onEdit, onDelete }: ExpenseListProps) {
       </div>
 
       {/* Total */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-semibold text-gray-900">Total Expenses:</span>
-          <span className="text-2xl font-bold text-blue-600">
-            {formatCurrency(totalAmount)}
-          </span>
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="bg-gray-50 rounded-lg p-4 shadow-md border border-gray-200">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">Total Expenses:</span>
+            <span className="text-2xl font-bold text-gray-900">
+              {formatCurrency(totalAmount)}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Table */}
       {filteredExpenses.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-md text-center text-gray-500">
-          No expenses found
+        <div className="bg-white p-12 rounded-xl shadow-lg border border-gray-200 text-center">
+          <p className="text-gray-500 text-lg">No expenses found</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <Table headers={['Title', 'Amount', 'Category', 'Date', 'Actions']}>
-            {filteredExpenses.map((expense) => {
-              const category = getCategory(expense.categoryId);
-              return (
-                <tr key={expense.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{expense.title}</div>
-                    {expense.description && (
-                      <div className="text-xs text-gray-500">{expense.description}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {formatCurrency(expense.amount)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {category && (
-                      <span
-                        className="px-2 py-1 text-xs font-medium rounded-full"
-                        style={{
-                          backgroundColor: `${category.color}20`,
-                          color: category.color,
-                        }}
-                      >
-                        {category.name}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(expense.date)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <Button
-                      variant="secondary"
-                      onClick={() => onEdit(expense)}
-                      className="text-xs"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => onDelete(expense)}
-                      className="text-xs"
-                    >
-                      Delete
-                    </Button>
-                  </td>
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              );
-            })}
-          </Table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredExpenses.map((expense) => {
+                  const category = getCategory(expense.categoryId);
+                  return (
+                    <tr key={expense.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="py-4 px-6">
+                        <div className="text-sm font-semibold text-gray-900">{expense.title}</div>
+                        {expense.description && (
+                          <div className="text-xs text-gray-500 mt-1">{expense.description}</div>
+                        )}
+                      </td>
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(expense.amount)}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        {category && (
+                          <span
+                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                            style={{
+                              backgroundColor: `${category.color}20`,
+                              color: category.color,
+                            }}
+                          >
+                            {category.name}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <div className="text-sm text-gray-600">
+                          {formatDate(expense.date)}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => onEdit(expense)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-150"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => onDelete(expense)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-150"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

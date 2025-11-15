@@ -54,7 +54,7 @@ export default function Scrap() {
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600 mb-1">{t('totalScrap', 'scrap')}</div>
+          <div className="text-sm text-gray-600 mb-1">{language === 'ur' ? 'کل سکریپ' : 'Total Scrap'}</div>
           <div className="text-2xl font-bold text-brand-orange">{totalScrap.toFixed(2)} kgs</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">

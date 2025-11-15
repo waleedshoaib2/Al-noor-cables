@@ -505,13 +505,20 @@ export default function ProcessedRawMaterialForm({
       {/* Summary */}
       {totalOutput > 0 && (
         <div className="bg-gray-50 p-4 rounded-md space-y-2">
+          {formData.materialType && (
+            <div className="flex justify-between">
+              <span className="text-sm text-gray-600">
+                {language === 'ur' 
+                  ? `دستیاب ${formData.materialType === 'Copper' ? 'تانبے' : 'چاندی'} کا اسٹاک`
+                  : `Available ${formData.materialType} Stock`}:
+              </span>
+              <span className={`text-sm font-semibold ${totalOutput > availableStock ? 'text-red-600' : 'text-gray-900'}`}>
+                {availableStock.toFixed(2)} kgs
+              </span>
+            </div>
+          )}
           <div className="flex justify-between">
-            <span className="text-sm text-gray-600">{t('totalInput', 'processedMaterial')}:</span>
-            <span className="text-sm font-semibold">{calculatedInput.toFixed(2)} kgs</span>
-            <span className="text-xs text-gray-500 ml-2">({language === 'ur' ? 'خودکار حساب' : 'Auto-calculated'})</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">{t('totalOutput', 'processedMaterial')}:</span>
+            <span className="text-sm text-gray-600">{language === 'ur' ? 'تیار شدہ صافی وزن' : 'Safi Weight Produced'}:</span>
             <span className="text-sm font-semibold text-brand-blue">
               {totalOutput.toFixed(2)} kgs
             </span>
@@ -520,7 +527,7 @@ export default function ProcessedRawMaterialForm({
             <div className="flex justify-between border-t pt-2 mt-2">
               <span className="text-xs text-gray-500">{t('availableStock', 'processedMaterial')}:</span>
               <span className={`text-xs font-medium ${totalOutput > availableStock ? 'text-red-600' : 'text-gray-600'}`}>
-                {availableStock.toFixed(2)} kgs
+                {Math.max(0, availableStock - totalOutput).toFixed(2)} kgs
               </span>
             </div>
           )}

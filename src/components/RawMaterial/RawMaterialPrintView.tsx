@@ -14,10 +14,11 @@ interface RawMaterialPrintViewProps {
 export default function RawMaterialPrintView({ materials, filters }: RawMaterialPrintViewProps) {
   const printDate = new Date().toLocaleString();
   
-  // Calculate totals
-  const totalQuantity = materials.reduce((sum, m) => sum + m.quantity, 0);
+  // Calculate totals using originalQuantity (supplied quantity)
+  const totalQuantity = materials.reduce((sum, m) => sum + m.originalQuantity, 0);
+  const totalAvailable = materials.reduce((sum, m) => sum + m.quantity, 0);
   const totalByMaterial = materials.reduce((acc, m) => {
-    acc[m.materialType] = (acc[m.materialType] || 0) + m.quantity;
+    acc[m.materialType] = (acc[m.materialType] || 0) + m.originalQuantity;
     return acc;
   }, {} as Record<string, number>);
 
@@ -27,7 +28,7 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
       {/* Header */}
       <div className="mb-6 border-b-2 border-gray-800 pb-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Al Noor Cables</h1>
-        <h2 className="text-2xl font-semibold text-gray-700">Raw Material Intake Report</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">Raw Material Stock Report</h2>
         <div className="text-sm text-gray-600 mt-2">
           Printed on: {printDate}
         </div>
@@ -101,6 +102,9 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
               <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
                 Quantity (kgs)
               </th>
+              <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                Available (kgs)
+              </th>
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
                 Notes
               </th>
@@ -122,6 +126,9 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
                   {formatDate(material.date)}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
+                  {material.originalQuantity.toFixed(2)}
+                </td>
+                <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
                   {material.quantity.toFixed(2)}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900">
@@ -138,6 +145,9 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
               <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
                 {totalQuantity.toFixed(2)} kgs
               </td>
+              <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
+                {totalAvailable.toFixed(2)} kgs
+              </td>
               <td className="border border-gray-300 px-3 py-2"></td>
             </tr>
           </tfoot>
@@ -146,7 +156,7 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
 
       {/* Footer */}
       <div className="mt-8 pt-4 border-t border-gray-300 text-xs text-gray-600 text-center">
-        <p>Al Noor Cables - Raw Material Intake Report</p>
+        <p>Al Noor Cables - Raw Material Stock Report</p>
         <p>Generated on {printDate}</p>
       </div>
     </div>

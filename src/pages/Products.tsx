@@ -168,22 +168,28 @@ export default function Products() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">
-            {language === 'ur' ? 'مصنوعات کی تعداد' : 'Number of Products'}
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'مصنوعات کی تعداد' : 'Number of Products'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{availableProductsCount}</div>
           </div>
-          <div className="text-3xl font-bold text-brand-orange">{availableProductsCount}</div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">{t('totalStockBundles', 'product')}</div>
-          <div className="text-3xl font-bold text-brand-blue">{totalStock.bundles.toFixed(2)}</div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'دستیاب اسٹاک (بنڈلز میں)' : 'Available Stock (in bundles)'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{totalStock.bundles.toFixed(2)}</div>
+          </div>
         </div>
       </div>
 
       {/* Productions List */}
-      <div id="products-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+      <div id="products-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-900">
             {productions.length === 0
               ? t('noProductionsFound', 'product')
               : `${productions.length} ${t('productionsFound', 'product')}`}
@@ -195,42 +201,41 @@ export default function Products() {
           )}
         </div>
         {productions.length === 0 ? (
-          <p className="text-gray-500">{t('noProductionsFound', 'product')}</p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">{t('noProductionsFound', 'product')}</p>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'نام' : 'Name'}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'نمبر' : 'Number'}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'تارا' : 'Tara'}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {t('foot', 'product')}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {t('bundles', 'product')}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                    {language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}
-                  </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'تاریخ' : 'Date'}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'دستیاب' : 'Available'}
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'اعمال' : 'Actions'}
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-gray-200">
                 {productions.map((production) => {
                   // Get purchases for this specific product production
                   const productPurchases = purchases.filter((p) => p.productProductionId === production.id);
@@ -244,32 +249,41 @@ export default function Products() {
                     <>
                       <tr
                         key={production.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        className="hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <td className="py-3 px-4 text-gray-900 font-medium">
-                          {production.productName}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {production.productName}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {production.productNumber || '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {production.productNumber || '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {production.productTara || '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {production.productTara || '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {production.quantityFoot > 0 ? production.quantityFoot.toFixed(2) : '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {production.quantityFoot > 0 ? production.quantityFoot.toFixed(2) : '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {production.quantityBundles > 0 ? production.quantityBundles.toFixed(2) : '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {production.quantityBundles > 0 ? production.quantityBundles.toFixed(2) : '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-600 text-sm">
-                          {production.batchId}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">
+                            {new Date(production.date).toLocaleDateString()}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-600 text-sm">
-                          {new Date(production.date).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-4">
+                        <td className="py-4 px-6 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                               isAvailable
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
@@ -280,17 +294,17 @@ export default function Products() {
                               : language === 'ur' ? 'دستیاب نہیں' : 'Not Available'}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-3">
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="flex gap-4">
                             <button
                               onClick={() => handleEditProduction(production)}
-                              className="text-brand-blue hover:text-brand-blue-dark text-sm font-medium"
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-150"
                             >
                               {t('edit', 'product')}
                             </button>
                             <button
                               onClick={() => handleDeleteProduction(production.id)}
-                              className="text-red-600 hover:text-red-700 text-sm font-medium"
+                              className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-150"
                             >
                               {t('delete', 'product')}
                             </button>
@@ -299,11 +313,11 @@ export default function Products() {
                       </tr>
                       {productPurchases.length > 0 && (
                         <tr className="bg-gray-50">
-                          <td colSpan={9} className="py-2 px-4">
-                            <div className="text-xs font-semibold text-gray-600 mb-1">
+                          <td colSpan={8} className="py-3 px-6">
+                            <div className="text-xs font-semibold text-gray-700 mb-2">
                               {language === 'ur' ? 'خریداری' : 'Purchases'} ({productPurchases.length}):
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                               {productPurchases.map((purchase) => {
                                 const customer = customers.find((c) => c.id === purchase.customerId);
                                 return (
@@ -316,14 +330,14 @@ export default function Products() {
                                   </div>
                                 );
                               })}
-                              <div className="text-xs font-medium text-gray-700 mt-1 flex items-center gap-2">
+                              <div className="text-xs font-semibold text-gray-800 mt-2 pt-2 border-t border-gray-300 flex items-center gap-2">
                                 <span>
                                   {language === 'ur' 
                                     ? `کل فروخت: ${totalPurchasedBundles.toFixed(2)} بنڈلز`
                                     : `Total Sold: ${totalPurchasedBundles.toFixed(2)} bundles`}
                                 </span>
                                 <span>•</span>
-                                <span className={isAvailable ? 'text-green-600' : 'text-red-600'}>
+                                <span className={isAvailable ? 'text-green-700' : 'text-red-700'}>
                                   {language === 'ur' 
                                     ? `دستیاب: ${productStockData.bundles.toFixed(2)} بنڈلز`
                                     : `Available: ${productStockData.bundles.toFixed(2)} bundles`}

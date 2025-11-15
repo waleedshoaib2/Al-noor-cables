@@ -132,24 +132,36 @@ export default function RawMaterials() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">{t('totalCopper')}</div>
-          <div className="text-3xl font-bold text-brand-orange">{Math.round(totalCopper)} kgs</div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {t('totalCopper')}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(totalCopper)} <span className="font-bold">kgs</span></div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">{t('totalSilver')}</div>
-          <div className="text-3xl font-bold text-brand-orange">{Math.round(totalSilver)} kgs</div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {t('totalSilver')}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(totalSilver)} <span className="font-bold">kgs</span></div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-sm text-gray-600">{t('totalAllMaterials')}</div>
-          <div className="text-3xl font-bold text-brand-blue">{Math.round(totalAll)} kgs</div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {t('totalAllMaterials')}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(totalAll)} <span className="font-bold">kgs</span></div>
+          </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('filters')}</h2>
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">{t('filters')}</h2>
           <Button variant="secondary" onClick={handleClearFilters} className="text-sm">
             {t('clearAll')}
           </Button>
@@ -222,9 +234,9 @@ export default function RawMaterials() {
       </div>
 
       {/* Raw Materials List */}
-      <div id="raw-materials-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+      <div id="raw-materials-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-900">
             {filteredMaterials.length === 0 
               ? t('noMaterialsFound')
               : `${filteredMaterials.length} ${filteredMaterials.length === 1 ? t('materialFound') : t('materialsFound')}`}
@@ -241,7 +253,9 @@ export default function RawMaterials() {
           )}
         </div>
         {filteredMaterials.length === 0 ? (
-          <p className="text-gray-500">{t('noMaterialsFound')}</p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">{t('noMaterialsFound')}</p>
+          </div>
         ) : (
           <RawMaterialList
             materials={filteredMaterials}

@@ -80,7 +80,7 @@ export default function ProcessedRawMaterialList({
             </div>
             <div className="text-right ml-4">
               <div className="text-xs text-gray-600 mb-1">{t('input', 'processedMaterial')}</div>
-              <div className="text-2xl font-bold text-brand-orange">{batch.inputQuantity.toFixed(2)} kgs</div>
+              <div className="text-2xl font-bold text-brand-orange">{Math.round(batch.inputQuantity)} kgs</div>
             </div>
           </div>
 
@@ -89,7 +89,7 @@ export default function ProcessedRawMaterialList({
             <div>
               <div className="text-xs text-gray-600 mb-1">{t('safiWeight', 'processedMaterial')}</div>
               <div className="text-lg font-bold text-brand-blue">
-                {batch.totalOutput.toFixed(2)} kgs
+                {Math.round(batch.totalOutput)} kgs
               </div>
             </div>
             <div>
@@ -138,10 +138,10 @@ export default function ProcessedRawMaterialList({
                         )}
                       </div>
                       <span className="text-sm text-gray-600 ml-2">
-                        {material.outputQuantity.toFixed(2)} kgs
+                        {Math.round(material.outputQuantity)} kgs
                         {isUsed && (
                           <span className="ml-2 text-orange-600">
-                            ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {usedBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({usedQuantity.toFixed(2)} kgs), {language === 'ur' ? 'دستیاب' : 'Available'}: {availableBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({availableQuantity.toFixed(2)} kgs))
+                            ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {Math.round(usedBundles)} {t('bundles', 'processedMaterial')} ({Math.round(usedQuantity)} kgs), {language === 'ur' ? 'دستیاب' : 'Available'}: {Math.round(availableBundles)} {t('bundles', 'processedMaterial')} ({Math.round(availableQuantity)} kgs))
                           </span>
                         )}
                       </span>

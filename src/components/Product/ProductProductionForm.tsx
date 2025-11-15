@@ -345,7 +345,9 @@ export default function ProductProductionForm({
             <option value="">{language === 'ur' ? 'پروڈکٹ منتخب کریں' : 'Select Product'}</option>
             {customProducts.map((product) => (
               <option key={product.id} value={product.name}>
-                {product.name} - {product.productNumber} - {product.productTara}
+                {language === 'ur' 
+                  ? `نام: ${product.name} - نمبر: ${product.productNumber} - تارا: ${product.productTara}`
+                  : `Name: ${product.name} - Number: ${product.productNumber} - Tara: ${product.productTara}`}
               </option>
             ))}
           </select>
@@ -400,7 +402,7 @@ export default function ProductProductionForm({
             const availableBundles = m.numberOfBundles - ((m.usedQuantity || 0) / m.weightPerBundle);
             return (
               <option key={m.id} value={m.id}>
-                {m.name} ({m.materialType}) - {getStockByName(m.name).toFixed(2)} kgs ({availableBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
+                {m.name} ({m.materialType}) - {Math.round(getStockByName(m.name))} kgs ({availableBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
               </option>
             );
           })}
@@ -413,7 +415,7 @@ export default function ProductProductionForm({
       {/* Safi Weight - Always visible, right after Processed Material */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t('safiWeightPerBundle', 'processedMaterial')} (kgs) *
+          {language === 'ur' ? 'صافی وزن' : 'Safi Weight'} (kgs) *
         </label>
         <input
           type="text"
@@ -429,7 +431,7 @@ export default function ProductProductionForm({
               : value;
             setFormData({ ...formData, weightUsed: filteredValue });
           }}
-          placeholder={language === 'ur' ? 'صافی وزن کلوگرام میں' : 'Safi weight in kgs'}
+          placeholder={language === 'ur' ? 'صافی وزن' : 'Safi Weight'}
           disabled={!formData.processedMaterialId}
           className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
             errors.weightUsed ? 'border-red-500' : ''
@@ -443,12 +445,21 @@ export default function ProductProductionForm({
           if (selectedMaterial) {
             const availableBundles = selectedMaterial.numberOfBundles - ((selectedMaterial.usedQuantity || 0) / selectedMaterial.weightPerBundle);
             const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
+            const weightUsed = parseFloat(formData.weightUsed) || 0;
+            const stockLeft = Math.max(0, Math.round(availableWeight - weightUsed));
             return (
-              <p className="mt-1 text-sm text-gray-500">
-                {language === 'ur' 
-                  ? `دستیاب: ${availableWeight.toFixed(2)} کلوگرام`
-                  : `Available: ${availableWeight.toFixed(2)} kgs`}
-              </p>
+              <div className="mt-1 space-y-1">
+                <p className="text-sm text-gray-500">
+                  {language === 'ur' 
+                    ? `دستیاب: ${Math.round(availableWeight)} کلوگرام`
+                    : `Available: ${Math.round(availableWeight)} kgs`}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {language === 'ur' 
+                    ? `باقی اسٹاک: ${stockLeft} کلوگرام`
+                    : `Stock Left: ${stockLeft} kgs`}
+                </p>
+              </div>
             );
           }
           return null;

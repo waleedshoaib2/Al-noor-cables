@@ -62,7 +62,7 @@
     "quickActions": "Quick Actions"
   },
   "rawMaterial": {
-    "title": "Raw Material Intake",
+    "title": "Raw Material Stock",
     "addRawMaterial": "Add Raw Material",
     "editRawMaterial": "Edit Raw Material",
     "materialType": "Material Type",

@@ -39,21 +39,26 @@ export default function ExpenseStats() {
       </div>
 
       {/* Category Totals */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Total by Category</h3>
-        <div className="space-y-2">
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-6">Total by Category</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {categoryTotals.map(({ category, total }) => (
-            <div key={category.id} className="flex justify-between items-center py-2 border-b">
-              <span
-                className="px-2 py-1 text-xs font-medium rounded-full"
-                style={{
-                  backgroundColor: `${category.color}20`,
-                  color: category.color,
-                }}
-              >
-                {category.name}
-              </span>
-              <span className="font-medium">{formatCurrency(total)}</span>
+            <div
+              key={category.id}
+              className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  className="px-2 py-1 text-xs font-medium rounded-full"
+                  style={{
+                    backgroundColor: `${category.color}20`,
+                    color: category.color,
+                  }}
+                >
+                  {category.name}
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{formatCurrency(total)}</div>
             </div>
           ))}
         </div>

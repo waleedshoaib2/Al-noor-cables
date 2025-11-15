@@ -116,14 +116,11 @@ export class DatabaseService {
 
       // Seed expense categories
       const expenseCategories = [
-        { name: 'Utilities', description: 'Electricity, water, internet', color: '#EF4444' },
-        { name: 'Rent', description: 'Office and warehouse rent', color: '#3B82F6' },
-        { name: 'Salaries', description: 'Employee salaries', color: '#10B981' },
-        { name: 'Transportation', description: 'Shipping and delivery', color: '#F59E0B' },
-        { name: 'Supplies', description: 'Office and warehouse supplies', color: '#8B5CF6' },
+        { name: 'Bills', description: 'Utility bills and payments', color: '#EF4444' },
+        { name: 'Factory Expenses', description: 'Factory operational expenses', color: '#3B82F6' },
+        { name: 'Stationary', description: 'Stationery and office supplies', color: '#8B5CF6' },
         { name: 'Maintenance', description: 'Equipment and facility maintenance', color: '#EC4899' },
-        { name: 'Marketing', description: 'Marketing and advertising', color: '#14B8A6' },
-        { name: 'Other', description: 'Miscellaneous expenses', color: '#6B7280' },
+        { name: 'Office Expenses', description: 'Office operational expenses', color: '#10B981' },
       ];
 
       for (const cat of expenseCategories) {

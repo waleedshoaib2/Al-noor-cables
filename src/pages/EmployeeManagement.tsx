@@ -127,31 +127,48 @@ export default function EmployeeManagement() {
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white bg-opacity-20 rounded-lg p-4">
-            <p className="text-sm opacity-90">{language === 'ur' ? 'کل ملازمین' : 'Total Employees'}</p>
-            <p className="text-2xl font-bold">{totalEmployees}</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'کل ملازمین' : 'Total Employees'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{totalEmployees}</div>
           </div>
-          <div className="bg-white bg-opacity-20 rounded-lg p-4">
-            <p className="text-sm opacity-90">{language === 'ur' ? 'کل تنخواہ' : 'Total Salary'}</p>
-            <p className="text-2xl font-bold">{totalSalary.toLocaleString()} PKR</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'کل تنخواہ' : 'Total Salary'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{totalSalary.toLocaleString()}</div>
+            <div className="text-sm text-gray-500 mt-1">PKR</div>
           </div>
-          <div className="bg-white bg-opacity-20 rounded-lg p-4">
-            <p className="text-sm opacity-90">{language === 'ur' ? 'کل ادائیگیاں' : 'Total Payouts'}</p>
-            <p className="text-2xl font-bold">{totalPayouts.toLocaleString()} PKR</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'کل ادائیگیاں' : 'Total Payouts'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{totalPayouts.toLocaleString()}</div>
+            <div className="text-sm text-gray-500 mt-1">PKR</div>
           </div>
-          <div className="bg-white bg-opacity-20 rounded-lg p-4">
-            <p className="text-sm opacity-90">{language === 'ur' ? 'باقی تنخواہ' : 'Remaining Salary'}</p>
-            <p className="text-2xl font-bold">{totalRemaining.toLocaleString()} PKR</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'باقی تنخواہ' : 'Remaining Salary'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{totalRemaining.toLocaleString()}</div>
+            <div className="text-sm text-gray-500 mt-1">PKR</div>
           </div>
         </div>
       </div>
 
       {/* Employees List */}
-      <div id="employees-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+      <div id="employees-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-900">
             {employees.length === 0
               ? (language === 'ur' ? 'کوئی ملازم نہیں ملا' : 'No employees found')
               : `${employees.length} ${language === 'ur' ? 'ملازم' : employees.length === 1 ? 'employee' : 'employees'}`}
@@ -163,30 +180,32 @@ export default function EmployeeManagement() {
           )}
         </div>
         {employees.length === 0 ? (
-          <p className="text-gray-500">
-            {language === 'ur' ? 'ابھی تک کوئی ملازم شامل نہیں کیا گیا۔' : 'No employees added yet.'}
-          </p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              {language === 'ur' ? 'ابھی تک کوئی ملازم شامل نہیں کیا گیا۔' : 'No employees added yet.'}
+            </p>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'نام' : 'Name'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'تنخواہ کی تاریخ' : 'Salary Date'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'کل تنخواہ' : 'Total Salary'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'کل ادائیگیاں' : 'Total Payouts'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'باقی تنخواہ' : 'Remaining Salary'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     {language === 'ur' ? 'اعمال' : 'Actions'}
                   </th>
                 </tr>
@@ -197,22 +216,22 @@ export default function EmployeeManagement() {
                   const totalPayouts = employee.dailyPayouts.reduce((sum, p) => sum + p.amount, 0);
                   return (
                     <>
-                      <tr key={employee.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                      <tr key={employee.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">{employee.name}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">
                             {format(new Date(employee.salaryDate), 'dd/MM/yyyy')}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
                             {employee.totalSalary.toLocaleString()} PKR
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
                             {totalPayouts.toLocaleString()} PKR
                             {employee.dailyPayouts.length > 0 && (
                               <span className="text-xs text-gray-500 ml-1">
@@ -221,30 +240,30 @@ export default function EmployeeManagement() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`text-sm font-medium ${remainingSalary > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className={`text-sm font-semibold ${remainingSalary > 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {remainingSalary.toLocaleString()} PKR
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex gap-2">
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="flex gap-3">
                             <button
                               onClick={() => handleAddPayout(employee)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
                               title={language === 'ur' ? 'روزانہ ادائیگی شامل کریں' : 'Add Daily Payout'}
                             >
                               💰
                             </button>
                             <button
                               onClick={() => handleEditEmployee(employee)}
-                              className="text-indigo-600 hover:text-indigo-900"
+                              className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
                               title={language === 'ur' ? 'ترمیم' : 'Edit'}
                             >
                               ✏️
                             </button>
                             <button
                               onClick={() => handleDeleteEmployee(employee.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-red-600 hover:text-red-800 transition-colors duration-150"
                               title={language === 'ur' ? 'حذف' : 'Delete'}
                             >
                               🗑️
@@ -254,11 +273,11 @@ export default function EmployeeManagement() {
                       </tr>
                       {employee.dailyPayouts.length > 0 && (
                         <tr className="bg-gray-50">
-                          <td colSpan={6} className="px-6 py-3">
-                            <div className="text-xs font-semibold text-gray-600 mb-2">
+                          <td colSpan={6} className="py-3 px-6">
+                            <div className="text-xs font-semibold text-gray-700 mb-2">
                               {language === 'ur' ? 'روزانہ ادائیگیاں' : 'Daily Payouts'} ({employee.dailyPayouts.length}):
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                               {employee.dailyPayouts.map((payout) => (
                                 <div key={payout.id} className="text-xs text-gray-600 flex items-center gap-2">
                                   <span>{format(new Date(payout.date), 'dd/MM/yyyy')}</span>
@@ -270,17 +289,17 @@ export default function EmployeeManagement() {
                                       <span className="text-gray-500">{payout.notes}</span>
                                     </>
                                   )}
-                                  <div className="flex gap-2 ml-auto">
+                                  <div className="flex gap-3 ml-auto">
                                     <button
                                       onClick={() => handleEditPayout(employee, payout)}
-                                      className="text-indigo-600 hover:text-indigo-900"
+                                      className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
                                       title={language === 'ur' ? 'ترمیم' : 'Edit'}
                                     >
                                       ✏️
                                     </button>
                                     <button
                                       onClick={() => handleDeletePayout(employee.id, payout.id)}
-                                      className="text-red-600 hover:text-red-900"
+                                      className="text-red-600 hover:text-red-800 transition-colors duration-150"
                                       title={language === 'ur' ? 'حذف' : 'Delete'}
                                     >
                                       🗑️

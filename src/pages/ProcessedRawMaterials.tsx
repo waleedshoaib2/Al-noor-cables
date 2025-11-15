@@ -24,6 +24,7 @@ export default function ProcessedRawMaterials() {
     (state) => state.deleteProcessedMaterial
   );
   const restoreStock = useRawMaterialStore((state) => state.restoreStock);
+  const getAvailableStockByType = useRawMaterialStore((state) => state.getAvailableStockByType);
   const getAllProcessedMaterialNames = useProcessedRawMaterialStore(
     (state) => state.getAllProcessedMaterialNames
   );
@@ -106,6 +107,10 @@ export default function ProcessedRawMaterials() {
   const silverOutput = allSilverBatches.reduce((sum, batch) => 
     sum + batch.materials.reduce((mSum, m) => mSum + (m.outputQuantity - (m.usedQuantity || 0)), 0), 0
   );
+
+  // Get available raw material stock by type
+  const copperRawMaterialAvailable = getAvailableStockByType('Copper');
+  const silverRawMaterialAvailable = getAvailableStockByType('Silver');
 
   // Filter materials for the list display only
   const filteredMaterials = processedMaterials.filter((m) => {
@@ -209,39 +214,51 @@ export default function ProcessedRawMaterials() {
       </div>
 
       {/* Summary Stats - Copper */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Copper</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div className="text-sm text-gray-600">
-              {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
+      <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Copper</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'کل پروسیس شدہ خام مال' : 'Total Processed Raw Material'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{Math.round(copperInput)} kgs</div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(copperInput)} <span className="font-bold">kgs</span></div>
           </div>
-          <div>
-            <div className="text-sm text-gray-600">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'دستیاب خام مال' : 'Raw Material Available'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(copperRawMaterialAvailable)} <span className="font-bold">kgs</span></div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
               {language === 'ur' ? 'دستیاب صافی وزن' : 'Safi Weight Available'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{Math.round(copperOutput)} kgs</div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(copperOutput)} <span className="font-bold">kgs</span></div>
           </div>
         </div>
       </div>
 
       {/* Summary Stats - Silver */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Silver</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <div className="text-sm text-gray-600">
-              {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
+      <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Silver</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'کل پروسیس شدہ خام مال' : 'Total Processed Raw Material'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{Math.round(silverInput)} kgs</div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(silverInput)} <span className="font-bold">kgs</span></div>
           </div>
-          <div>
-            <div className="text-sm text-gray-600">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'دستیاب خام مال' : 'Raw Material Available'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(silverRawMaterialAvailable)} <span className="font-bold">kgs</span></div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
               {language === 'ur' ? 'دستیاب صافی وزن' : 'Safi Weight Available'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{Math.round(silverOutput)} kgs</div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(silverOutput)} <span className="font-bold">kgs</span></div>
           </div>
         </div>
       </div>

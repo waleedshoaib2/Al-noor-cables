@@ -156,9 +156,9 @@ export default function Customers() {
       {activeTab === 'customers' ? (
         <>
       {/* Customers List */}
-      <div id="customers-list-report-section" className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+      <div id="customers-list-report-section" className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-900">
             {customers.length === 0
               ? t('noCustomersFound', 'customer')
               : `${customers.length} ${t('customersFound', 'customer')}`}
@@ -183,40 +183,52 @@ export default function Customers() {
           )}
         </div>
         {customers.length === 0 ? (
-          <p className="text-gray-500">{t('noCustomersFound', 'customer')}</p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">{t('noCustomersFound', 'customer')}</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {customers.map((customer) => (
               <div
                 key={customer.id}
-                className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="bg-gray-50 rounded-lg p-5 shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="font-medium text-gray-900">{customer.name}</div>
-                  <div className="flex gap-2">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">{customer.name}</h3>
+                  <div className="flex gap-3">
                     <button
                       onClick={() => handleEditCustomer(customer)}
-                      className="text-brand-blue hover:text-brand-blue-dark text-sm font-medium"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-150"
                     >
                       {t('edit', 'customer')}
                     </button>
                     <button
                       onClick={() => handleDeleteCustomer(customer.id)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium"
+                      className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-150"
                     >
                       {t('delete', 'customer')}
                     </button>
                   </div>
                 </div>
-                {customer.phone && (
-                  <div className="text-sm text-gray-600 mt-1">📞 {customer.phone}</div>
-                )}
-                {customer.address && (
-                  <div className="text-sm text-gray-600 mt-1">📍 {customer.address}</div>
-                )}
-                {customer.details && (
-                  <div className="text-xs text-gray-500 mt-1 italic">{customer.details}</div>
-                )}
+                <div className="space-y-2">
+                  {customer.phone && (
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <span className="text-gray-400">📞</span>
+                      <span>{customer.phone}</span>
+                    </div>
+                  )}
+                  {customer.address && (
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <span className="text-gray-400">📍</span>
+                      <span>{customer.address}</span>
+                    </div>
+                  )}
+                  {customer.details && (
+                    <div className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200 italic">
+                      {customer.details}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -285,9 +297,9 @@ export default function Customers() {
         </>
       ) : (
         /* Purchases/Transactions Tab */
-        <div id="customers-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+        <div id="customers-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">
               {purchases.length === 0
                 ? (language === 'ur' ? 'کوئی خریداری نہیں ملی' : 'No purchases found')
                 : `${purchases.length} ${language === 'ur' ? 'خریداری ملی' : 'Purchases Found'}`}
@@ -299,74 +311,92 @@ export default function Customers() {
             )}
           </div>
           {purchases.length === 0 ? (
-            <p className="text-gray-500">{language === 'ur' ? 'کوئی خریداری نہیں ملی' : 'No purchases found'}</p>
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">{language === 'ur' ? 'کوئی خریداری نہیں ملی' : 'No purchases found'}</p>
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'گاہک' : 'Customer'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'نام' : 'Name'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'نمبر' : 'Number'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'تارا' : 'Tara'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'مقدار (بنڈلز)' : 'Quantity (Bundles)'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'قیمت' : 'Price'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'تاریخ' : 'Date'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'نوٹس' : 'Notes'}
                     </th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       {language === 'ur' ? 'اعمال' : 'Actions'}
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white divide-y divide-gray-200">
                   {purchases.map((purchase) => {
                     const customer = customers.find((c) => c.id === purchase.customerId);
                     return (
                       <tr
                         key={purchase.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        className="hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <td className="py-3 px-4 text-gray-900 font-medium">
-                          {customer?.name || 'Unknown'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {customer?.name || 'Unknown'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {purchase.productName}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {purchase.productName}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {purchase.productNumber || '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {purchase.productNumber || '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {purchase.productTara || '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {purchase.productTara || '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {purchase.quantityBundles.toFixed(2)}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {purchase.quantityBundles.toFixed(2)}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {purchase.price > 0 ? Math.round(purchase.price).toLocaleString() : '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
+                            {purchase.price > 0 ? Math.round(purchase.price).toLocaleString() : '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-600 text-sm">
-                          {new Date(purchase.date).toLocaleDateString()}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">
+                            {new Date(purchase.date).toLocaleDateString()}
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-600 text-sm">
-                          {purchase.notes || '-'}
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <div className="text-sm text-gray-600 max-w-xs truncate">
+                            {purchase.notes || '-'}
+                          </div>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-4 px-6 whitespace-nowrap">
                           <button
                             onClick={() => {
                               if (window.confirm(language === 'ur' ? 'خریداری حذف کریں؟' : 'Delete purchase?')) {
@@ -385,7 +415,7 @@ export default function Customers() {
                                 deletePurchase(purchase.id);
                               }
                             }}
-                            className="text-red-600 hover:text-red-700 text-sm font-medium"
+                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-150"
                           >
                             {language === 'ur' ? 'حذف' : 'Delete'}
                           </button>
@@ -619,7 +649,9 @@ function PurchaseForm({ purchase, onClose, onSubmit }: PurchaseFormProps) {
             const stock = getStockByName(production.productName);
             return (
               <option key={production.id} value={production.id}>
-                {production.productName} ({production.productNumber}) - {production.productTara} - {stock.bundles.toFixed(2)} {language === 'ur' ? 'بنڈلز دستیاب' : 'bundles available'}
+                {language === 'ur' 
+                  ? `نام: ${production.productName} - نمبر: ${production.productNumber} - تارا: ${production.productTara} - ${stock.bundles.toFixed(2)} بنڈلز دستیاب`
+                  : `Name: ${production.productName} - Number: ${production.productNumber} - Tara: ${production.productTara} - ${stock.bundles.toFixed(2)} bundles available`}
               </option>
             );
           })}
