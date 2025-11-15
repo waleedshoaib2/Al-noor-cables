@@ -12,6 +12,7 @@ export default function Sidebar() {
     { path: '/expenses', label: 'Expenses', icon: '💰' },
     { path: '/employees', label: 'Employee Management', icon: '👔' },
     { path: '/scrap', label: 'Scrap', icon: '🗑️' },
+    { path: '/pvc-materials', label: 'PVC Materials', icon: '🧪' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];
 

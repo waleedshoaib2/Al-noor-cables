@@ -11,6 +11,7 @@ import ExpenseTracker from './pages/ExpenseTracker';
 import Reports from './pages/Reports';
 import EmployeeManagement from './pages/EmployeeManagement';
 import Scrap from './pages/Scrap';
+import PVCMaterials from './pages/PVCMaterials';
 import MainLayout from './components/Layout/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -176,6 +177,18 @@ function App() {
             isAuthenticated ? (
               <MainLayout>
                 <Scrap />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/pvc-materials"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <PVCMaterials />
               </MainLayout>
             ) : (
               <Navigate to="/login" replace />

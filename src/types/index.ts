@@ -192,3 +192,19 @@ export interface CustomProduct {
   productTara: string; // Product Tara
   createdAt: Date;
 }
+
+export interface PVCMaterial {
+  id: number;
+  name: string; // Custom PVC material name
+  quantity: number; // in kgs
+  date: Date;
+  batchId: string;
+  notes?: string;
+  createdAt: Date;
+}
+
+export interface CustomPVCMaterial {
+  id: number;
+  name: string; // Custom PVC material name
+  createdAt: Date;
+}

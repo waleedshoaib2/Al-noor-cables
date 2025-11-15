@@ -11,6 +11,7 @@ import { Modal } from '@/components/Common/Modal';
 import { Input } from '@/components/Common/Input';
 import CustomerPrintView from '@/components/Customer/CustomerPrintView';
 import PurchasePrintView from '@/components/Customer/PurchasePrintView';
+import PurchaseInvoiceView from '@/components/Customer/PurchaseInvoiceView';
 import { exportToPDF } from '@/utils/pdfExport';
 import type { Customer, CustomerPurchase } from '@/types';
 
@@ -46,11 +47,23 @@ export default function Customers() {
   const [filterProductName, setFilterProductName] = useState<string>('all');
   const [filterStartDate, setFilterStartDate] = useState<string>('');
   const [filterEndDate, setFilterEndDate] = useState<string>('');
+  const [printingInvoiceId, setPrintingInvoiceId] = useState<number | null>(null);
   const reportSectionRef = useRef<HTMLDivElement>(null);
 
   // Print handler
   const handlePrint = () => {
     window.print();
+  };
+
+  // Print invoice handler
+  const handlePrintInvoice = (purchaseId: number) => {
+    setPrintingInvoiceId(purchaseId);
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        setPrintingInvoiceId(null);
+      }, 100);
+    }, 100);
   };
 
   // Get unique customer names and product names for filters
@@ -530,28 +543,37 @@ export default function Customers() {
                           </div>
                         </td>
                         <td className="py-4 px-6 whitespace-nowrap">
-                          <button
-                            onClick={() => {
-                              if (window.confirm(language === 'ur' ? 'خریداری حذف کریں؟' : 'Delete purchase?')) {
-                                // Restore product stock
-                                const purchaseProduction = productions.find((p) => p.id === purchase.productProductionId);
-                                if (purchaseProduction) {
-                                  const updatedStock = { ...useProductStore.getState().stock };
-                                  if (!updatedStock[purchaseProduction.productName]) {
-                                    updatedStock[purchaseProduction.productName] = { foot: 0, bundles: 0 };
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => handlePrintInvoice(purchase.id)}
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-150"
+                              title={language === 'ur' ? 'بل پرنٹ کریں' : 'Print Invoice'}
+                            >
+                              🖨️
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(language === 'ur' ? 'خریداری حذف کریں؟' : 'Delete purchase?')) {
+                                  // Restore product stock
+                                  const purchaseProduction = productions.find((p) => p.id === purchase.productProductionId);
+                                  if (purchaseProduction) {
+                                    const updatedStock = { ...useProductStore.getState().stock };
+                                    if (!updatedStock[purchaseProduction.productName]) {
+                                      updatedStock[purchaseProduction.productName] = { foot: 0, bundles: 0 };
+                                    }
+                                    updatedStock[purchaseProduction.productName].bundles += purchase.quantityBundles;
+                                    useProductStore.setState({ stock: updatedStock });
+                                    useProductStore.getState().saveToStorage();
                                   }
-                                  updatedStock[purchaseProduction.productName].bundles += purchase.quantityBundles;
-                                  useProductStore.setState({ stock: updatedStock });
-                                  useProductStore.getState().saveToStorage();
+                                  
+                                  deletePurchase(purchase.id);
                                 }
-                                
-                                deletePurchase(purchase.id);
-                              }
-                            }}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-150"
-                          >
-                            {language === 'ur' ? 'حذف' : 'Delete'}
-                          </button>
+                              }}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-150"
+                            >
+                              {language === 'ur' ? 'حذف' : 'Delete'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -587,22 +609,38 @@ export default function Customers() {
       </Modal>
 
       {/* Print Views - Only visible when printing */}
-      <div className="print-view" style={{ display: 'none' }}>
-        {activeTab === 'customers' ? (
-          <CustomerPrintView customers={customers} />
-        ) : (
-          <PurchasePrintView 
-            purchases={filteredPurchases} 
-            customers={customers}
-            filters={{
-              customerName: filterCustomerName !== 'all' ? filterCustomerName : undefined,
-              productName: filterProductName !== 'all' ? filterProductName : undefined,
-              startDate: filterStartDate || undefined,
-              endDate: filterEndDate || undefined,
-            }}
-          />
-        )}
-      </div>
+      {printingInvoiceId ? (
+        (() => {
+          const purchase = purchases.find((p) => p.id === printingInvoiceId);
+          const customer = purchase ? customers.find((c) => c.id === purchase.customerId) : undefined;
+          return purchase ? (
+            <div className="print-view" style={{ display: 'none' }}>
+              <PurchaseInvoiceView 
+                purchase={purchase} 
+                customer={customer}
+                invoiceNumber={`No.${String(purchase.id).padStart(3, '0')}`}
+              />
+            </div>
+          ) : null;
+        })()
+      ) : (
+        <div className="print-view" style={{ display: 'none' }}>
+          {activeTab === 'customers' ? (
+            <CustomerPrintView customers={customers} />
+          ) : (
+            <PurchasePrintView 
+              purchases={filteredPurchases} 
+              customers={customers}
+              filters={{
+                customerName: filterCustomerName !== 'all' ? filterCustomerName : undefined,
+                productName: filterProductName !== 'all' ? filterProductName : undefined,
+                startDate: filterStartDate || undefined,
+                endDate: filterEndDate || undefined,
+              }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
