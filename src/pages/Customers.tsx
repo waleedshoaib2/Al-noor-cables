@@ -52,7 +52,12 @@ export default function Customers() {
 
   // Print handler
   const handlePrint = () => {
-    window.print();
+    // Clear any individual invoice print state to ensure we print all purchases
+    setPrintingInvoiceId(null);
+    // Small delay to ensure state is cleared before printing
+    setTimeout(() => {
+      window.print();
+    }, 50);
   };
 
   // Print invoice handler
@@ -360,11 +365,6 @@ export default function Customers() {
                 ? (language === 'ur' ? 'کوئی خریداری نہیں ملی' : 'No purchases found')
                 : `${filteredPurchases.length} ${language === 'ur' ? 'خریداری ملی' : 'Purchases Found'}`}
             </h2>
-            {filteredPurchases.length > 0 && (
-              <Button variant="secondary" onClick={handlePrint} className="no-print">
-                🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
-              </Button>
-            )}
           </div>
 
           {/* Filters Section */}
@@ -629,14 +629,8 @@ export default function Customers() {
             <CustomerPrintView customers={customers} />
           ) : (
             <PurchasePrintView 
-              purchases={filteredPurchases} 
+              purchases={purchases} 
               customers={customers}
-              filters={{
-                customerName: filterCustomerName !== 'all' ? filterCustomerName : undefined,
-                productName: filterProductName !== 'all' ? filterProductName : undefined,
-                startDate: filterStartDate || undefined,
-                endDate: filterEndDate || undefined,
-              }}
             />
           )}
         </div>
