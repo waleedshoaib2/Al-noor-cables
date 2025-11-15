@@ -105,17 +105,17 @@ export default function ReportPrintView({
   return (
     <div className="print-view p-8">
       {/* Header */}
-      <div className="mb-6 border-b-2 border-gray-800 pb-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Al Noor Cables</h1>
-        <h2 className="text-2xl font-semibold text-gray-700">{getReportTitle()}</h2>
-        <div className="text-sm text-gray-600 mt-2">
-          {language === 'ur' ? 'پرنٹ کی تاریخ:' : 'Printed on:'} {printDate}
+      <div className="mb-6 border-b-4 border-gray-800 pb-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">Al Noor Cables</h1>
+        <h2 className="text-3xl font-extrabold text-gray-800 mb-2">{getReportTitle()}</h2>
+        <div className="text-sm font-semibold text-gray-700 mt-2">
+          <span className="font-bold">{language === 'ur' ? 'پرنٹ کی تاریخ:' : 'Printed on:'}</span> {printDate}
         </div>
-        <div className="text-sm text-gray-600 mt-1">
-          {language === 'ur' ? 'مدت:' : 'Period:'} {getPeriodLabel()}
+        <div className="text-sm font-semibold text-gray-700 mt-1">
+          <span className="font-bold">{language === 'ur' ? 'مدت:' : 'Period:'}</span> {getPeriodLabel()}
         </div>
-        <div className="text-sm text-gray-600 mt-1">
-          {language === 'ur' ? 'زمرہ:' : 'Category:'} {getCategoryLabel()}
+        <div className="text-sm font-semibold text-gray-700 mt-1">
+          <span className="font-bold">{language === 'ur' ? 'زمرہ:' : 'Category:'}</span> {getCategoryLabel()}
         </div>
         {selectedRawMaterialType && selectedRawMaterialType !== 'all' && (
           <div className="text-sm text-gray-600 mt-1">
@@ -136,7 +136,7 @@ export default function ReportPrintView({
 
       {/* Summary Stats */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
           {language === 'ur' ? 'خلاصہ اعداد و شمار' : 'Summary Statistics'}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -222,22 +222,22 @@ export default function ReportPrintView({
       {/* Detailed Statistics by Item */}
       {reportCategory === 'raw-materials' && Object.keys(rawMaterialStats).length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
             {language === 'ur' ? 'مواد کی قسم کے لحاظ سے تفصیلات' : 'Statistics by Material Type'}
           </h3>
           <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-800">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'قسم' : 'Type'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'کل مقدار' : 'Total Quantity'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'بیچز' : 'Batches'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'اوسط فی بیچ' : 'Avg per Batch'}
                 </th>
               </tr>
@@ -264,22 +264,22 @@ export default function ReportPrintView({
 
       {reportCategory === 'processed-materials' && Object.keys(processedMaterialStats).length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
             {language === 'ur' ? 'مواد کے لحاظ سے تفصیلات' : 'Statistics by Material'}
           </h3>
           <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-800">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'نام' : 'Name'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'کل ان پٹ' : 'Total Input'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'کل آؤٹ پٹ' : 'Total Output'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'بیچز' : 'Batches'}
                 </th>
               </tr>
@@ -306,22 +306,22 @@ export default function ReportPrintView({
 
       {reportCategory === 'products' && Object.keys(productStats).length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
             {language === 'ur' ? 'مصنوعات کے لحاظ سے تفصیلات' : 'Statistics by Product'}
           </h3>
           <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-800">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'مصنوعات' : 'Product'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'کل فٹ' : 'Total Foot'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'کل بنڈلز' : 'Total Bundles'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'پروڈکشنز' : 'Productions'}
                 </th>
               </tr>
@@ -349,25 +349,25 @@ export default function ReportPrintView({
       {/* Detailed Tables */}
       {(reportCategory === 'all' || reportCategory === 'raw-materials') && filteredRawMaterials.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
             {language === 'ur' ? 'خام مال کی تفصیلات' : 'Raw Materials Details'}
           </h3>
-          <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+          <table className="w-full border-collapse border-2 border-gray-400" dir={language === 'ur' ? 'rtl' : 'ltr'}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-800">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'قسم' : 'Type'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'سپلائر' : 'Supplier'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'مقدار' : 'Quantity'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'تاریخ' : 'Date'}
                 </th>
               </tr>
@@ -393,28 +393,28 @@ export default function ReportPrintView({
 
       {(reportCategory === 'all' || reportCategory === 'processed-materials') && filteredProcessedMaterials.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
             {language === 'ur' ? 'پروسیس شدہ مواد کی تفصیلات' : 'Processed Materials Details'}
           </h3>
-          <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+          <table className="w-full border-collapse border-2 border-gray-400" dir={language === 'ur' ? 'rtl' : 'ltr'}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-800">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'نام' : 'Name'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'قسم' : 'Type'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'ان پٹ' : 'Input'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'آؤٹ پٹ' : 'Output'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'بنڈلز' : 'Bundles'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'تاریخ' : 'Date'}
                 </th>
               </tr>
@@ -443,31 +443,31 @@ export default function ReportPrintView({
         </div>
       )}
 
-      {(reportCategory === 'all' || reportCategory === 'products') && filteredProductions.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            {language === 'ur' ? 'مصنوعات کی تفصیلات' : 'Products Details'}
-          </h3>
-          <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'مصنوعات' : 'Product'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'پروسیس شدہ مواد' : 'Processed Material'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'فٹ' : 'Foot'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'بنڈلز' : 'Bundles'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'تاریخ' : 'Date'}
-                </th>
-              </tr>
-            </thead>
+        {(reportCategory === 'all' || reportCategory === 'products') && filteredProductions.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
+              {language === 'ur' ? 'مصنوعات کی تفصیلات' : 'Products Details'}
+            </h3>
+            <table className="w-full border-collapse border-2 border-gray-400" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+              <thead>
+                <tr className="bg-gray-800">
+                  <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'مصنوعات' : 'Product'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'پروسیس شدہ مواد' : 'Processed Material'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'فٹ' : 'Foot'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'بنڈلز' : 'Bundles'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'تاریخ' : 'Date'}
+                  </th>
+                </tr>
+              </thead>
             <tbody>
               {filteredProductions.map((p, index) => (
                 <tr key={p.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -491,25 +491,25 @@ export default function ReportPrintView({
 
       {(reportCategory === 'all' || reportCategory === 'purchases') && filteredPurchases.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
             {language === 'ur' ? 'خریداری کی تفصیلات' : 'Purchases Details'}
           </h3>
-          <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+          <table className="w-full border-collapse border-2 border-gray-400" dir={language === 'ur' ? 'rtl' : 'ltr'}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+              <tr className="bg-gray-800">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'گاہک' : 'Customer'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'مصنوعات' : 'Product'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'مقدار' : 'Quantity'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'قیمت' : 'Price'}
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
+                <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
                   {language === 'ur' ? 'تاریخ' : 'Date'}
                 </th>
               </tr>
@@ -540,28 +540,28 @@ export default function ReportPrintView({
         </div>
       )}
 
-      {(reportCategory === 'all' || reportCategory === 'expenses') && filteredExpenses.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            {language === 'ur' ? 'اخراجات کی تفصیلات' : 'Expenses Details'}
-          </h3>
-          <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'عنوان' : 'Title'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'قسم' : 'Category'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'رقم' : 'Amount'}
-                </th>
-                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                  {language === 'ur' ? 'تاریخ' : 'Date'}
-                </th>
-              </tr>
-            </thead>
+        {(reportCategory === 'all' || reportCategory === 'expenses') && filteredExpenses.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-4 pb-2 border-b-2 border-gray-400">
+              {language === 'ur' ? 'اخراجات کی تفصیلات' : 'Expenses Details'}
+            </h3>
+            <table className="w-full border-collapse border-2 border-gray-400" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+              <thead>
+                <tr className="bg-gray-800">
+                  <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'عنوان' : 'Title'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'قسم' : 'Category'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-right text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'رقم' : 'Amount'}
+                  </th>
+                  <th className="border border-gray-600 px-3 py-3 text-left text-sm font-bold text-white uppercase tracking-wider">
+                    {language === 'ur' ? 'تاریخ' : 'Date'}
+                  </th>
+                </tr>
+              </thead>
             <tbody>
               {filteredExpenses.map((e, index) => (
                 <tr key={e.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>

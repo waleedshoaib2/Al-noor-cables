@@ -393,22 +393,22 @@ export default function Reports() {
       {/* Report Summary */}
       <div id="reports-section" ref={reportSectionRef} className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 no-print">
         {/* Header */}
-        <div className="mb-8 pb-6 border-b-2 border-gray-200">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">{getReportTitle()}</h2>
-          <p className="text-lg text-gray-600">{getPeriodLabel()}</p>
+        <div className="mb-8 pb-6 border-b-4 border-gray-300">
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">{getReportTitle()}</h2>
+          <p className="text-xl font-semibold text-gray-700 mb-2">{getPeriodLabel()}</p>
           {reportCategory === 'raw-materials' && selectedRawMaterialType !== 'all' && (
-            <p className="text-md text-gray-500 mt-1">
-              {language === 'ur' ? `مواد کی قسم: ${selectedRawMaterialType}` : `Material Type: ${selectedRawMaterialType}`}
+            <p className="text-lg font-medium text-gray-600 mt-2">
+              <span className="font-bold">{language === 'ur' ? 'مواد کی قسم:' : 'Material Type:'}</span> {selectedRawMaterialType}
             </p>
           )}
           {reportCategory === 'processed-materials' && selectedProcessedMaterialName !== 'all' && (
-            <p className="text-md text-gray-500 mt-1">
-              {language === 'ur' ? `مواد: ${selectedProcessedMaterialName}` : `Material: ${selectedProcessedMaterialName}`}
+            <p className="text-lg font-medium text-gray-600 mt-2">
+              <span className="font-bold">{language === 'ur' ? 'مواد:' : 'Material:'}</span> {selectedProcessedMaterialName}
             </p>
           )}
           {reportCategory === 'products' && selectedProductName !== 'all' && (
-            <p className="text-md text-gray-500 mt-1">
-              {language === 'ur' ? `مصنوعات: ${selectedProductName}` : `Product: ${selectedProductName}`}
+            <p className="text-lg font-medium text-gray-600 mt-2">
+              <span className="font-bold">{language === 'ur' ? 'مصنوعات:' : 'Product:'}</span> {selectedProductName}
             </p>
           )}
         </div>
@@ -496,25 +496,25 @@ export default function Reports() {
         {/* Detailed Statistics by Item */}
         {reportCategory === 'raw-materials' && Object.keys(rawMaterialStats).length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'مواد کی قسم کے لحاظ سے تفصیلات' : 'Statistics by Material Type'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(rawMaterialStats).map(([type, stats]) => (
-                <div key={type} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-3">{type}</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'کل مقدار:' : 'Total Quantity:'}</span>
-                      <span className="font-semibold">{stats.total.toFixed(2)} kgs</span>
+                <div key={type} className="bg-gray-50 p-5 rounded-lg border-2 border-gray-300 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-300">{type}</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل مقدار:' : 'Total Quantity:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.total)} <span className="font-semibold">kgs</span></span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'بیچز:' : 'Batches:'}</span>
-                      <span className="font-semibold">{stats.batches}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'بیچز:' : 'Batches:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{stats.batches}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'اوسط فی بیچ:' : 'Avg per Batch:'}</span>
-                      <span className="font-semibold">{stats.avgPerBatch.toFixed(2)} kgs</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'اوسط فی بیچ:' : 'Avg per Batch:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.avgPerBatch)} <span className="font-semibold">kgs</span></span>
                     </div>
                   </div>
                 </div>
@@ -525,33 +525,33 @@ export default function Reports() {
 
         {reportCategory === 'processed-materials' && Object.keys(processedMaterialStats).length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'مواد کے لحاظ سے تفصیلات' : 'Statistics by Material'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(processedMaterialStats).map(([name, stats]) => (
-                <div key={name} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-3">{name}</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'کل ان پٹ:' : 'Total Input:'}</span>
-                      <span className="font-semibold">{stats.totalInput.toFixed(2)} kgs</span>
+                <div key={name} className="bg-gray-50 p-5 rounded-lg border-2 border-gray-300 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-300">{name}</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل ان پٹ:' : 'Total Input:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.totalInput)} <span className="font-semibold">kgs</span></span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'کل آؤٹ پٹ:' : 'Total Output:'}</span>
-                      <span className="font-semibold">{stats.totalOutput.toFixed(2)} kgs</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل آؤٹ پٹ:' : 'Total Output:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.totalOutput)} <span className="font-semibold">kgs</span></span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'کل بنڈلز:' : 'Total Bundles:'}</span>
-                      <span className="font-semibold">{stats.totalBundles}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل بنڈلز:' : 'Total Bundles:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{stats.totalBundles}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'بیچز:' : 'Batches:'}</span>
-                      <span className="font-semibold">{stats.batches}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'بیچز:' : 'Batches:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{stats.batches}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'اوسط وزن فی بنڈل:' : 'Avg Weight/Bundle:'}</span>
-                      <span className="font-semibold">{stats.avgWeightPerBundle.toFixed(2)} kgs</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'اوسط وزن فی بنڈل:' : 'Avg Weight/Bundle:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.avgWeightPerBundle)} <span className="font-semibold">kgs</span></span>
                     </div>
                   </div>
                 </div>
@@ -562,29 +562,29 @@ export default function Reports() {
 
         {reportCategory === 'products' && Object.keys(productStats).length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'مصنوعات کے لحاظ سے تفصیلات' : 'Statistics by Product'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(productStats).map(([name, stats]) => (
-                <div key={name} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-3">{name}</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'کل فٹ:' : 'Total Foot:'}</span>
-                      <span className="font-semibold">{stats.totalFoot.toFixed(2)}</span>
+                <div key={name} className="bg-gray-50 p-5 rounded-lg border-2 border-gray-300 shadow-sm hover:shadow-md transition-shadow">
+                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-300">{name}</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل فٹ:' : 'Total Foot:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.totalFoot)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'کل بنڈلز:' : 'Total Bundles:'}</span>
-                      <span className="font-semibold">{stats.totalBundles}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل بنڈلز:' : 'Total Bundles:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.totalBundles)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'پروڈکشنز:' : 'Productions:'}</span>
-                      <span className="font-semibold">{stats.batches}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'پروڈکشنز:' : 'Productions:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{stats.batches}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{language === 'ur' ? 'اوسط فٹ فی پروڈکشن:' : 'Avg Foot/Production:'}</span>
-                      <span className="font-semibold">{stats.avgFootPerBatch.toFixed(2)}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">{language === 'ur' ? 'اوسط فٹ فی پروڈکشن:' : 'Avg Foot/Production:'}</span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.avgFootPerBatch)}</span>
                     </div>
                   </div>
                 </div>
@@ -596,18 +596,18 @@ export default function Reports() {
         {/* Detailed Tables */}
         {(reportCategory === 'all' || reportCategory === 'raw-materials') && filteredRawMaterials.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'خام مال کی تفصیلات' : 'Raw Materials Details'}
             </h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
               <table className="w-full border-collapse">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'قسم' : 'Type'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'سپلائر' : 'Supplier'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'مقدار' : 'Quantity'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'قسم' : 'Type'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'سپلائر' : 'Supplier'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مقدار' : 'Quantity'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -628,20 +628,20 @@ export default function Reports() {
 
         {(reportCategory === 'all' || reportCategory === 'processed-materials') && filteredProcessedMaterials.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'پروسیس شدہ مواد کی تفصیلات' : 'Processed Materials Details'}
             </h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
               <table className="w-full border-collapse">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'نام' : 'Name'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'قسم' : 'Type'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'ان پٹ' : 'Input'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'آؤٹ پٹ' : 'Output'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'بنڈلز' : 'Bundles'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'نام' : 'Name'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'قسم' : 'Type'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'ان پٹ' : 'Input'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'آؤٹ پٹ' : 'Output'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'بنڈلز' : 'Bundles'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -664,19 +664,19 @@ export default function Reports() {
 
         {(reportCategory === 'all' || reportCategory === 'products') && filteredProductions.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'مصنوعات کی تفصیلات' : 'Products Details'}
             </h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
               <table className="w-full border-collapse">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'مصنوعات' : 'Product'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'پروسیس شدہ مواد' : 'Processed Material'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'فٹ' : 'Foot'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'بنڈلز' : 'Bundles'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مصنوعات' : 'Product'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'پروسیس شدہ مواد' : 'Processed Material'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'فٹ' : 'Foot'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'بنڈلز' : 'Bundles'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -698,18 +698,18 @@ export default function Reports() {
 
         {(reportCategory === 'all' || reportCategory === 'purchases') && filteredPurchases.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'خریداری کی تفصیلات' : 'Purchases Details'}
             </h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
               <table className="w-full border-collapse">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'گاہک' : 'Customer'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'مصنوعات' : 'Product'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'مقدار' : 'Quantity'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'قیمت' : 'Price'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'گاہک' : 'Customer'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مصنوعات' : 'Product'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مقدار' : 'Quantity'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'قیمت' : 'Price'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -730,17 +730,17 @@ export default function Reports() {
 
         {(reportCategory === 'all' || reportCategory === 'expenses') && filteredExpenses.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
               {language === 'ur' ? 'اخراجات کی تفصیلات' : 'Expenses Details'}
             </h3>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
               <table className="w-full border-collapse">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-800">
                   <tr>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'عنوان' : 'Title'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'قسم' : 'Category'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'رقم' : 'Amount'}</th>
-                    <th className="text-left py-4 px-6 font-semibold text-gray-700">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'عنوان' : 'Title'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'قسم' : 'Category'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'رقم' : 'Amount'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
                   </tr>
                 </thead>
                 <tbody>
