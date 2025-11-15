@@ -102,6 +102,8 @@
     "numberOfBundles": "Number of Bundles",
     "weightPerBundle": "Weight Per Bundle",
     "safiWeightPerBundle": "Safi Weight Per Bundle",
+    "totalSafiWeight": "Total Safi Weight",
+    "safiWeight": "Safi Weight",
     "totalOutput": "Total Output",
     "bundles": "Bundles",
     "date": "Date",

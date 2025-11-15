@@ -187,5 +187,7 @@ export interface CustomProcessedRawMaterial {
 export interface CustomProduct {
   id: number;
   name: string; // Custom product name
+  productNumber: string; // Product number
+  productTara: string; // Product Tara
   createdAt: Date;
 }

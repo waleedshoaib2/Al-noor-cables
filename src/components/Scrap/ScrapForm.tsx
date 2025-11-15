@@ -116,16 +116,33 @@ export default function ScrapForm({ scrap, onClose, onSubmit }: ScrapFormProps) 
       </div>
 
       {/* Amount */}
-      <Input
-        label={`${t('amount', 'scrap')} (kgs) *`}
-        type="number"
-        step="0.01"
-        min="0"
-        value={formData.amount}
-        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-        placeholder="0.00"
-        error={errors.amount}
-      />
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {`${t('amount', 'scrap')} (kgs) *`}
+        </label>
+        <input
+          type="text"
+          inputMode="decimal"
+          value={formData.amount}
+          onChange={(e) => {
+            // Allow numbers and one decimal point
+            const value = e.target.value.replace(/[^0-9.]/g, '');
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            const filteredValue = parts.length > 2 
+              ? parts[0] + '.' + parts.slice(1).join('')
+              : value;
+            setFormData({ ...formData, amount: filteredValue });
+          }}
+          placeholder="0.00"
+          className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+            errors.amount ? 'border-red-500' : ''
+          }`}
+        />
+        {errors.amount && (
+          <p className="mt-1 text-sm text-red-600">{errors.amount}</p>
+        )}
+      </div>
 
       {/* Date */}
       <Input

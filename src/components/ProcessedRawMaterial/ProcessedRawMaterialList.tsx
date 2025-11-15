@@ -72,9 +72,6 @@ export default function ProcessedRawMaterialList({
           <div className="flex justify-between items-start mb-4 pb-4 border-b">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <div className="font-bold text-lg text-gray-900">
-                  {t('batch', 'processedMaterial')}: {batch.batchId}
-                </div>
                 <span className="px-2 py-1 bg-brand-blue text-white text-xs font-semibold rounded">
                   {batch.materialType}
                 </span>
@@ -90,7 +87,7 @@ export default function ProcessedRawMaterialList({
           {/* Batch Summary - Compact */}
           <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b">
             <div>
-              <div className="text-xs text-gray-600 mb-1">{t('totalOutput', 'processedMaterial')}</div>
+              <div className="text-xs text-gray-600 mb-1">{t('safiWeight', 'processedMaterial')}</div>
               <div className="text-lg font-bold text-brand-blue">
                 {batch.totalOutput.toFixed(2)} kgs
               </div>
@@ -141,12 +138,7 @@ export default function ProcessedRawMaterialList({
                         )}
                       </div>
                       <span className="text-sm text-gray-600 ml-2">
-                        ({material.numberOfBundles.toFixed(2)} {t('bundles', 'processedMaterial')} × {material.weightPerBundle.toFixed(2)} kgs {t('safiWeightPerBundle', 'processedMaterial')} = {material.outputQuantity.toFixed(2)} kgs)
-                        {material.grossWeightPerBundle && (
-                          <span className="ml-1 text-gray-500">
-                            ({t('weightPerBundle', 'processedMaterial')}: {material.grossWeightPerBundle.toFixed(2)} kgs)
-                          </span>
-                        )}
+                        {material.outputQuantity.toFixed(2)} kgs
                         {isUsed && (
                           <span className="ml-2 text-orange-600">
                             ({language === 'ur' ? 'استعمال شدہ' : 'Used'}: {usedBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({usedQuantity.toFixed(2)} kgs), {language === 'ur' ? 'دستیاب' : 'Available'}: {availableBundles.toFixed(2)} {t('bundles', 'processedMaterial')} ({availableQuantity.toFixed(2)} kgs))

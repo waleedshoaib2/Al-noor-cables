@@ -127,13 +127,34 @@ export default function ExpenseForm({ isOpen, onClose, expense, onSubmit }: Expe
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
-            label="Amount *"
-            type="number"
-            step="0.01"
-            {...register('amount')}
-            error={hasAttemptedSubmit ? (errors.amount?.message as string) : undefined}
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Amount *
+            </label>
+            <input
+              type="text"
+              inputMode="decimal"
+              {...register('amount', {
+                onChange: (e) => {
+                  // Allow numbers and one decimal point
+                  const value = e.target.value.replace(/[^0-9.]/g, '');
+                  // Ensure only one decimal point
+                  const parts = value.split('.');
+                  const filteredValue = parts.length > 2 
+                    ? parts[0] + '.' + parts.slice(1).join('')
+                    : value;
+                  e.target.value = filteredValue;
+                }
+              })}
+              placeholder="0.00"
+              className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                hasAttemptedSubmit && errors.amount ? 'border-red-500' : ''
+              }`}
+            />
+            {hasAttemptedSubmit && errors.amount && (
+              <p className="mt-1 text-sm text-red-600">{errors.amount.message as string}</p>
+            )}
+          </div>
           <Input
             label="Date *"
             type="date"

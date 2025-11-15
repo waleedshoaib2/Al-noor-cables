@@ -18,6 +18,8 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
 
   const [formData, setFormData] = useState({
     name: '',
+    productNumber: '',
+    productTara: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -27,6 +29,8 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
     if (product) {
       setFormData({
         name: product.name,
+        productNumber: product.productNumber || '',
+        productTara: product.productTara || '',
       });
     }
   }, [product]);
@@ -36,6 +40,14 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
 
     if (!formData.name.trim()) {
       newErrors.name = language === 'ur' ? 'نام درکار ہے' : 'Name is required';
+    }
+
+    if (!formData.productNumber.trim()) {
+      newErrors.productNumber = language === 'ur' ? 'پروڈکٹ نمبر درکار ہے' : 'Product number is required';
+    }
+
+    if (!formData.productTara.trim()) {
+      newErrors.productTara = language === 'ur' ? 'پروڈکٹ تارا درکار ہے' : 'Product Tara is required';
     }
 
     setErrors(newErrors);
@@ -54,6 +66,8 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
     try {
       const productData = {
         name: formData.name.trim(),
+        productNumber: formData.productNumber.trim(),
+        productTara: formData.productTara.trim(),
       };
 
       if (product) {
@@ -83,6 +97,26 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         placeholder={language === 'ur' ? 'پروڈکٹ کا نام' : 'Product name'}
         error={errors.name}
+      />
+
+      {/* Product Number */}
+      <Input
+        label={language === 'ur' ? 'پروڈکٹ نمبر *' : 'Product Number *'}
+        type="text"
+        value={formData.productNumber}
+        onChange={(e) => setFormData({ ...formData, productNumber: e.target.value })}
+        placeholder={language === 'ur' ? 'پروڈکٹ نمبر' : 'Product Number'}
+        error={errors.productNumber}
+      />
+
+      {/* Product Tara */}
+      <Input
+        label={language === 'ur' ? 'پروڈکٹ تارا *' : 'Product Tara *'}
+        type="text"
+        value={formData.productTara}
+        onChange={(e) => setFormData({ ...formData, productTara: e.target.value })}
+        placeholder={language === 'ur' ? 'پروڈکٹ تارا' : 'Product Tara'}
+        error={errors.productTara}
       />
 
       {/* Buttons */}

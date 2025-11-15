@@ -102,6 +102,8 @@
     "numberOfBundles": "بنڈلز کی تعداد",
     "weightPerBundle": "فی بنڈل وزن",
     "safiWeightPerBundle": "صافی فی بنڈل وزن",
+    "totalSafiWeight": "کل صافی وزن",
+    "safiWeight": "صافی وزن",
     "totalOutput": "کل آؤٹ پٹ",
     "bundles": "بنڈلز",
     "date": "تاریخ",

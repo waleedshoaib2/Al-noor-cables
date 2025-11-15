@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
+import { useCustomProcessedRawMaterialStore } from '@/store/useCustomProcessedRawMaterialStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
@@ -32,10 +33,12 @@ export default function ProcessedRawMaterialForm({
   const updateProcessedMaterial = useProcessedRawMaterialStore(
     (state) => state.updateProcessedMaterial
   );
-  const getAllProcessedMaterialNames = useProcessedRawMaterialStore(
-    (state) => state.getAllProcessedMaterialNames
+  const processedMaterialsStore = useProcessedRawMaterialStore(
+    (state) => state.processedMaterials
   );
-  const processedMaterialNames = getAllProcessedMaterialNames();
+  const customProcessedMaterials = useCustomProcessedRawMaterialStore(
+    (state) => state.customProcessedMaterials
+  );
   const deductStock = useRawMaterialStore((state) => state.deductStock);
   const getAvailableStockByType = useRawMaterialStore(
     (state) => state.getAvailableStockByType
@@ -46,6 +49,27 @@ export default function ProcessedRawMaterialForm({
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
+
+  // Filter processed material names based on selected material type
+  const processedMaterialNames = useMemo(() => {
+    if (!formData.materialType) {
+      return [];
+    }
+    
+    // Get names from processed materials that match the material type
+    const namesFromProcessed = processedMaterialsStore
+      .filter((m) => m.materialType.toLowerCase() === formData.materialType.toLowerCase())
+      .map((m) => m.name);
+    
+    // Get names from custom processed materials that match the prior raw material type
+    const namesFromCustom = customProcessedMaterials
+      .filter((m) => m.priorRawMaterial.toLowerCase() === formData.materialType.toLowerCase())
+      .map((m) => m.name);
+    
+    // Combine and get unique names
+    const allNames = [...new Set([...namesFromProcessed, ...namesFromCustom])];
+    return allNames.sort();
+  }, [formData.materialType, processedMaterialsStore, customProcessedMaterials]);
 
   const [processedMaterials, setProcessedMaterials] = useState<ProcessedMaterialItem[]>([
     { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '' },
@@ -68,18 +92,18 @@ export default function ProcessedRawMaterialForm({
         {
           name: material.name,
           numberOfBundles: material.numberOfBundles.toString(),
-          weightPerBundle: material.weightPerBundle.toString(),
+          // Display total safi weight (weightPerBundle * numberOfBundles) when editing
+          weightPerBundle: (material.weightPerBundle * material.numberOfBundles).toString(),
           grossWeightPerBundle: material.grossWeightPerBundle?.toString() || '',
         },
       ]);
     }
   }, [material]);
 
-  // Calculate total output for stock checking
+  // Calculate total output for stock checking (weightPerBundle now stores total safi weight)
   const totalOutput = processedMaterials.reduce((sum, pm) => {
-    const bundles = parseFloat(pm.numberOfBundles) || 0;
-    const weight = parseFloat(pm.weightPerBundle) || 0;
-    return sum + bundles * weight;
+    const totalWeight = parseFloat(pm.weightPerBundle) || 0;
+    return sum + totalWeight;
   }, 0);
 
   useEffect(() => {
@@ -133,11 +157,10 @@ export default function ProcessedRawMaterialForm({
       newErrors.date = language === 'ur' ? 'تاریخ درکار ہے' : 'Date is required';
     }
 
-    // Calculate total output
+    // Calculate total output (weightPerBundle now stores total safi weight)
     const totalOutput = processedMaterials.reduce((sum, pm) => {
-      const bundles = parseFloat(pm.numberOfBundles) || 0;
-      const weight = parseFloat(pm.weightPerBundle) || 0;
-      return sum + bundles * weight;
+      const totalWeight = parseFloat(pm.weightPerBundle) || 0;
+      return sum + totalWeight;
     }, 0);
 
     if (totalOutput <= 0) {
@@ -153,7 +176,7 @@ export default function ProcessedRawMaterialForm({
       if (!pm.name.trim()) {
         rowErrors.name = language === 'ur' ? 'نام درکار ہے' : 'Name is required';
       }
-      if (!pm.numberOfBundles || parseFloat(pm.numberOfBundles) <= 0) {
+      if (!pm.numberOfBundles || parseInt(pm.numberOfBundles, 10) <= 0) {
         rowErrors.numberOfBundles =
           language === 'ur'
             ? 'بنڈلز کی تعداد 0 سے زیادہ ہونی چاہیے'
@@ -162,8 +185,8 @@ export default function ProcessedRawMaterialForm({
       if (!pm.weightPerBundle || parseFloat(pm.weightPerBundle) <= 0) {
         rowErrors.weightPerBundle =
           language === 'ur'
-            ? 'صافی فی بنڈل وزن 0 سے زیادہ ہونا چاہیے'
-            : 'Safi weight per bundle must be greater than 0';
+            ? 'کل صافی وزن 0 سے زیادہ ہونا چاہیے'
+            : 'Total safi weight must be greater than 0';
       }
       if (Object.keys(rowErrors).length > 0) {
         newMaterialErrors[index] = rowErrors;
@@ -195,11 +218,10 @@ export default function ProcessedRawMaterialForm({
     setLoading(true);
 
     try {
-      // Calculate input quantity from total output
+      // Calculate input quantity from total output (weightPerBundle now stores total safi weight)
       const totalOutput = processedMaterials.reduce((sum, pm) => {
-        const bundles = parseFloat(pm.numberOfBundles) || 0;
-        const weight = parseFloat(pm.weightPerBundle) || 0;
-        return sum + bundles * weight;
+        const totalWeight = parseFloat(pm.weightPerBundle) || 0;
+        return sum + totalWeight;
       }, 0);
       const inputQty = totalOutput; // Input equals total output
       
@@ -217,8 +239,10 @@ export default function ProcessedRawMaterialForm({
       if (material) {
         // Legacy: update single material
         const pm = processedMaterials[0];
-        const numBundles = parseFloat(pm.numberOfBundles);
-        const weightPerBundle = parseFloat(pm.weightPerBundle);
+        const numBundles = parseInt(pm.numberOfBundles, 10);
+        const totalSafiWeight = parseFloat(pm.weightPerBundle);
+        // Calculate weightPerBundle from total safi weight
+        const weightPerBundle = numBundles > 0 ? totalSafiWeight / numBundles : 0;
         updateProcessedMaterial(material.id, {
           name: pm.name.trim(),
           materialType: formData.materialType.trim(),
@@ -233,12 +257,18 @@ export default function ProcessedRawMaterialForm({
         });
       } else {
         // New: add batch with multiple processed materials
-        const materialsData = processedMaterials.map((pm) => ({
-          name: pm.name.trim(),
-          numberOfBundles: parseFloat(pm.numberOfBundles),
-          weightPerBundle: parseFloat(pm.weightPerBundle),
-          grossWeightPerBundle: pm.grossWeightPerBundle ? parseFloat(pm.grossWeightPerBundle) : undefined,
-        }));
+        const materialsData = processedMaterials.map((pm) => {
+          const numBundles = parseInt(pm.numberOfBundles, 10);
+          const totalSafiWeight = parseFloat(pm.weightPerBundle);
+          // Calculate weightPerBundle from total safi weight
+          const weightPerBundle = numBundles > 0 ? totalSafiWeight / numBundles : 0;
+          return {
+            name: pm.name.trim(),
+            numberOfBundles: numBundles,
+            weightPerBundle: weightPerBundle,
+            grossWeightPerBundle: pm.grossWeightPerBundle ? parseFloat(pm.grossWeightPerBundle) : undefined,
+          };
+        });
 
         addProcessedMaterialBatch({
           materialType: formData.materialType.trim(),
@@ -404,13 +434,15 @@ export default function ProcessedRawMaterialForm({
                     {t('numberOfBundles', 'processedMaterial')} *
                   </label>
                   <input
-                    type="number"
-                    step="1"
-                    min="1"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={pm.numberOfBundles}
-                    onChange={(e) =>
-                      updateProcessedMaterialRow(index, 'numberOfBundles', e.target.value)
-                    }
+                    onChange={(e) => {
+                      // Only allow integers (no decimals, no negative)
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      updateProcessedMaterialRow(index, 'numberOfBundles', value);
+                    }}
                     className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
                       materialErrors[index]?.numberOfBundles ? 'border-red-500' : ''
                     }`}
@@ -424,20 +456,26 @@ export default function ProcessedRawMaterialForm({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {/* Safi Weight Per Bundle (Net Weight) */}
+              <div className="mt-4">
+                {/* Total Safi Weight (Net Weight) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('safiWeightPerBundle', 'processedMaterial')} (kgs) *
+                    {t('totalSafiWeight', 'processedMaterial')} (kgs) *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
-                    min="0"
+                    type="text"
+                    inputMode="decimal"
                     value={pm.weightPerBundle}
-                    onChange={(e) =>
-                      updateProcessedMaterialRow(index, 'weightPerBundle', e.target.value)
-                    }
+                    onChange={(e) => {
+                      // Allow numbers and one decimal point
+                      const value = e.target.value.replace(/[^0-9.]/g, '');
+                      // Ensure only one decimal point
+                      const parts = value.split('.');
+                      const filteredValue = parts.length > 2 
+                        ? parts[0] + '.' + parts.slice(1).join('')
+                        : value;
+                      updateProcessedMaterialRow(index, 'weightPerBundle', filteredValue);
+                    }}
                     className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
                       materialErrors[index]?.weightPerBundle ? 'border-red-500' : ''
                     }`}
@@ -449,40 +487,13 @@ export default function ProcessedRawMaterialForm({
                     </p>
                   )}
                 </div>
-
-                {/* Weight Per Bundle (With Tool) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('weightPerBundle', 'processedMaterial')} (kgs)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={pm.grossWeightPerBundle}
-                    onChange={(e) =>
-                      updateProcessedMaterialRow(index, 'grossWeightPerBundle', e.target.value)
-                    }
-                    className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-                      materialErrors[index]?.grossWeightPerBundle ? 'border-red-500' : ''
-                    }`}
-                    placeholder="0.00"
-                  />
-                  {materialErrors[index]?.grossWeightPerBundle && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {materialErrors[index].grossWeightPerBundle}
-                    </p>
-                  )}
-                </div>
               </div>
 
               {/* Individual Output */}
-              {parseFloat(pm.numberOfBundles) > 0 && parseFloat(pm.weightPerBundle) > 0 && (
+              {parseInt(pm.numberOfBundles, 10) > 0 && parseFloat(pm.weightPerBundle) > 0 && (
                 <div className="mt-2 text-sm text-gray-600">
                   {t('output', 'processedMaterial')}:{' '}
-                  {(
-                    parseFloat(pm.numberOfBundles) * parseFloat(pm.weightPerBundle)
-                  ).toFixed(2)}{' '}
+                  {parseFloat(pm.weightPerBundle).toFixed(2)}{' '}
                   kgs ({pm.numberOfBundles} {t('bundles', 'processedMaterial')})
                 </div>
               )}

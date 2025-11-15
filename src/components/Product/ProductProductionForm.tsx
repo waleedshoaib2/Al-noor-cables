@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useProductStore } from '@/store/useProductStore';
 import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
+import { useCustomProductStore } from '@/store/useCustomProductStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Input } from '@/components/Common/Input';
@@ -21,7 +22,7 @@ export default function ProductProductionForm({
   const { t, language } = useTranslation();
   const addProduction = useProductStore((state) => state.addProduction);
   const updateProduction = useProductStore((state) => state.updateProduction);
-  const getAllProductNames = useProductStore((state) => state.getAllProductNames);
+  const customProducts = useCustomProductStore((state) => state.customProducts);
   const processedMaterials = useProcessedRawMaterialStore(
     (state) => state.processedMaterials
   );
@@ -90,6 +91,17 @@ export default function ProductProductionForm({
     return stock > 0;
   });
 
+  // Handle product selection - auto-populate productNumber and productTara
+  const handleProductNameChange = (productName: string) => {
+    const selectedProduct = customProducts.find((p) => p.name === productName);
+    setFormData({
+      ...formData,
+      productName: productName,
+      productNumber: selectedProduct?.productNumber || '',
+      productTara: selectedProduct?.productTara || '',
+    });
+  };
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
@@ -134,7 +146,7 @@ export default function ProductProductionForm({
     }
 
     const quantityFoot = parseFloat(formData.quantityFoot) || 0;
-    const quantityBundles = parseFloat(formData.quantityBundles) || 0;
+    const quantityBundles = parseInt(formData.quantityBundles, 10) || 0;
     
     if (quantityFoot < 0) {
       newErrors.quantityFoot =
@@ -194,7 +206,7 @@ export default function ProductProductionForm({
       const processedMaterialId = parseInt(formData.processedMaterialId);
       const weightUsed = parseFloat(formData.weightUsed) || 0;
       const quantityFoot = parseFloat(formData.quantityFoot) || 0;
-      const quantityBundles = parseFloat(formData.quantityBundles) || 0;
+      const quantityBundles = parseInt(formData.quantityBundles, 10) || 0;
 
       // Get the processed material
       const processedMaterial = processedMaterials.find((m) => m.id === processedMaterialId);
@@ -323,39 +335,20 @@ export default function ProductProductionForm({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('productName', 'product')} *
           </label>
-          <div className="relative">
-            <input
-              type="text"
-              list="productNames"
-              value={formData.productName}
-              onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-              className={`border border-gray-300 rounded-md px-3 py-2 pr-10 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-                errors.productName ? 'border-red-500' : ''
-              }`}
-              placeholder={t('typeOrSelect', 'product')}
-              autoComplete="off"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-            <datalist id="productNames">
-              {getAllProductNames().map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-          </div>
+          <select
+            value={formData.productName}
+            onChange={(e) => handleProductNameChange(e.target.value)}
+            className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+              errors.productName ? 'border-red-500' : ''
+            }`}
+          >
+            <option value="">{language === 'ur' ? 'پروڈکٹ منتخب کریں' : 'Select Product'}</option>
+            {customProducts.map((product) => (
+              <option key={product.id} value={product.name}>
+                {product.name} - {product.productNumber} - {product.productTara}
+              </option>
+            ))}
+          </select>
           {errors.productName && (
             <p className="mt-1 text-sm text-red-600">{errors.productName}</p>
           )}
@@ -367,7 +360,8 @@ export default function ProductProductionForm({
           <Input
             type="text"
             value={formData.productNumber}
-            onChange={(e) => setFormData({ ...formData, productNumber: e.target.value })}
+            readOnly
+            className="bg-gray-50 cursor-not-allowed"
             placeholder={language === 'ur' ? 'پروڈکٹ نمبر' : 'Product Number'}
             error={errors.productNumber}
           />
@@ -379,7 +373,8 @@ export default function ProductProductionForm({
           <Input
             type="text"
             value={formData.productTara}
-            onChange={(e) => setFormData({ ...formData, productTara: e.target.value })}
+            readOnly
+            className="bg-gray-50 cursor-not-allowed"
             placeholder={language === 'ur' ? 'پروڈکٹ تارا' : 'Product Tara'}
             error={errors.productTara}
           />
@@ -420,18 +415,29 @@ export default function ProductProductionForm({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {t('safiWeightPerBundle', 'processedMaterial')} (kgs) *
         </label>
-        <Input
-          type="number"
-          min="0"
-          step="0.01"
+        <input
+          type="text"
+          inputMode="decimal"
           value={formData.weightUsed}
           onChange={(e) => {
-            setFormData({ ...formData, weightUsed: e.target.value });
+            // Allow numbers and one decimal point
+            const value = e.target.value.replace(/[^0-9.]/g, '');
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            const filteredValue = parts.length > 2 
+              ? parts[0] + '.' + parts.slice(1).join('')
+              : value;
+            setFormData({ ...formData, weightUsed: filteredValue });
           }}
           placeholder={language === 'ur' ? 'صافی وزن کلوگرام میں' : 'Safi weight in kgs'}
-          error={errors.weightUsed}
           disabled={!formData.processedMaterialId}
+          className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+            errors.weightUsed ? 'border-red-500' : ''
+          } ${!formData.processedMaterialId ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         />
+        {errors.weightUsed && (
+          <p className="mt-1 text-sm text-red-600">{errors.weightUsed}</p>
+        )}
         {formData.processedMaterialId && (() => {
           const selectedMaterial = processedMaterials.find((m) => m.id === parseInt(formData.processedMaterialId));
           if (selectedMaterial) {
@@ -456,24 +462,45 @@ export default function ProductProductionForm({
 
       {/* Quantity Foot and Bundles */}
       <div className="grid grid-cols-2 gap-4">
-        <Input
-          label={`${t('quantity', 'product')} (${t('foot', 'product')})`}
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.quantityFoot}
-          onChange={(e) => setFormData({ ...formData, quantityFoot: e.target.value })}
-          placeholder="0.00"
-          error={errors.quantityFoot}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {`${t('quantity', 'product')} (${t('foot', 'product')})`}
+          </label>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={formData.quantityFoot}
+            onChange={(e) => {
+              // Allow numbers and one decimal point
+              const value = e.target.value.replace(/[^0-9.]/g, '');
+              // Ensure only one decimal point
+              const parts = value.split('.');
+              const filteredValue = parts.length > 2 
+                ? parts[0] + '.' + parts.slice(1).join('')
+                : value;
+              setFormData({ ...formData, quantityFoot: filteredValue });
+            }}
+            placeholder="0.00"
+            className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+              errors.quantityFoot ? 'border-red-500' : ''
+            }`}
+          />
+          {errors.quantityFoot && (
+            <p className="mt-1 text-sm text-red-600">{errors.quantityFoot}</p>
+          )}
+        </div>
         <Input
           label={`${t('quantity', 'product')} (${t('bundles', 'product')})`}
-          type="number"
-          step="0.01"
-          min="0"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={formData.quantityBundles}
-          onChange={(e) => setFormData({ ...formData, quantityBundles: e.target.value })}
-          placeholder="0.00"
+          onChange={(e) => {
+            // Only allow integers (no decimals, no negative)
+            const value = e.target.value.replace(/[^0-9]/g, '');
+            setFormData({ ...formData, quantityBundles: value });
+          }}
+          placeholder="0"
           error={errors.quantityBundles}
         />
       </div>
