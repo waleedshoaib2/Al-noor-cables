@@ -130,31 +130,19 @@ export default function RawMaterials() {
         </div>
       </div>
 
-      {/* Summary Section */}
-      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-3">
-          {language === 'ur' ? 'خام مال کا انتظام' : 'Raw Materials Management'}
-        </h2>
-        <p className="text-white/90 leading-relaxed">
-          {language === 'ur' 
-            ? 'یہ صفحہ آپ کو خام مال (Copper اور Silver) کی انٹری ریکارڈ کرنے، دیکھنے، فلٹر کرنے اور رپورٹس تیار کرنے کی سہولت فراہم کرتا ہے۔ آپ یہاں مٹیریل کی قسم، سپلائر، تاریخ، مقدار، بیچ آئی ڈی اور نوٹس شامل کر سکتے ہیں۔'
-            : 'This page allows you to record, view, filter, and generate reports for raw materials (Copper and Silver). You can add material type, supplier, date, quantity, batch ID, and notes here.'}
-        </p>
-      </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">{t('totalCopper')}</div>
-          <div className="text-3xl font-bold text-brand-orange">{totalCopper.toFixed(2)} kgs</div>
+          <div className="text-3xl font-bold text-brand-orange">{Math.round(totalCopper)} kgs</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">{t('totalSilver')}</div>
-          <div className="text-3xl font-bold text-brand-orange">{totalSilver.toFixed(2)} kgs</div>
+          <div className="text-3xl font-bold text-brand-orange">{Math.round(totalSilver)} kgs</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">{t('totalAllMaterials')}</div>
-          <div className="text-3xl font-bold text-brand-blue">{totalAll.toFixed(2)} kgs</div>
+          <div className="text-3xl font-bold text-brand-blue">{Math.round(totalAll)} kgs</div>
         </div>
       </div>
 

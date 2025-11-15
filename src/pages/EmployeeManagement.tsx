@@ -126,17 +126,9 @@ export default function EmployeeManagement() {
         </div>
       </div>
 
-      {/* Summary Section */}
+      {/* Summary Stats */}
       <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-3">
-          {language === 'ur' ? 'خلاصہ' : 'Summary'}
-        </h2>
-        <p className="text-sm mb-4 opacity-90">
-          {language === 'ur' 
-            ? 'یہ صفحہ ملازمین کی تنخواہوں اور روزانہ ادائیگیوں کو ٹریک کرنے کے لیے ہے۔ آپ ملازمین شامل کر سکتے ہیں، ان کی تنخواہیں مقرر کر سکتے ہیں، اور روزانہ ادائیگیاں ریکارڈ کر سکتے ہیں جو کل تنخواہ سے منہا کی جائیں گی۔'
-            : 'This page is for tracking employee fixed salaries and daily payouts. You can add employees, set their salaries, and record daily payouts that will be deducted from their total salary.'}
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white bg-opacity-20 rounded-lg p-4">
             <p className="text-sm opacity-90">{language === 'ur' ? 'کل ملازمین' : 'Total Employees'}</p>
             <p className="text-2xl font-bold">{totalEmployees}</p>

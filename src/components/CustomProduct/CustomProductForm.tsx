@@ -39,7 +39,7 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = language === 'ur' ? 'نام درکار ہے' : 'Name is required';
+      newErrors.name = language === 'ur' ? 'پروڈکٹ کا نام درکار ہے' : 'Product name is required';
     }
 
     if (!formData.productNumber.trim()) {
@@ -91,7 +91,7 @@ export default function CustomProductForm({ product, onClose, onSubmit }: Custom
     <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
       {/* Name */}
       <Input
-        label={`${t('name', 'customProduct')} *`}
+        label={language === 'ur' ? 'پروڈکٹ کا نام *' : 'Product Name *'}
         type="text"
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}

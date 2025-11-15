@@ -257,18 +257,6 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* Summary Section */}
-      <div className="bg-gradient-to-r from-brand-blue via-brand-blue-dark to-brand-blue text-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-3">
-          {language === 'ur' ? 'رپورٹس کا انتظام' : 'Reports Management'}
-        </h2>
-        <p className="text-white/90 leading-relaxed text-lg">
-          {language === 'ur' 
-            ? 'مکمل تفصیلی رپورٹس تیار کریں: روزانہ، ماہانہ، یا سالانہ۔ مخصوص خام مال، پروسیس شدہ مواد، یا مصنوعات کے لیے رپورٹس حاصل کریں۔'
-            : 'Generate comprehensive detailed reports: daily, monthly, or annual. Get reports for specific raw materials, processed materials, or products.'}
-        </p>
-      </div>
-
       {/* Report Filters */}
       <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">

@@ -166,18 +166,6 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Summary Section */}
-      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-3">
-          {language === 'ur' ? 'مصنوعات کا انتظام' : 'Products Management'}
-        </h2>
-        <p className="text-white/90 leading-relaxed">
-          {language === 'ur' 
-            ? 'یہ صفحہ آپ کو پروسیسڈ خام مال سے مصنوعات بنانے کی سہولت فراہم کرتا ہے۔ آپ یہاں پروڈکٹ کا نام، نمبر، تارا، مقدار (فٹ اور بنڈلز)، بیچ آئی ڈی اور نوٹس شامل کر سکتے ہیں۔ یہ سسٹم خود بخود پروسیسڈ خام مال کی اسٹاک کو اپڈیٹ کرتا ہے۔'
-            : 'This page allows you to create products from processed raw materials. You can add product name, number, tara, quantity (foot and bundles), batch ID, and notes here. The system automatically updates processed raw material stock.'}
-        </p>
-      </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">

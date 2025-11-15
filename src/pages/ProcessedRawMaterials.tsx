@@ -148,7 +148,7 @@ export default function ProcessedRawMaterials() {
   };
 
   const handleAddCustomMaterial = () => {
-    setEditingCustomMaterial(null);
+    setEditingCustomMaterial({ id: 0, name: '', priorRawMaterial: '', createdAt: new Date() });
     setShowCustomMaterialForm(true);
   };
 
@@ -208,18 +208,6 @@ export default function ProcessedRawMaterials() {
         </div>
       </div>
 
-      {/* Summary Section */}
-      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-3">
-          {language === 'ur' ? 'پروسیسڈ خام مال کا انتظام' : 'Processed Raw Materials Management'}
-        </h2>
-        <p className="text-white/90 leading-relaxed">
-          {language === 'ur' 
-            ? 'یہ صفحہ آپ کو خام مال سے پروسیسڈ خام مال بنانے کی سہولت فراہم کرتا ہے۔ آپ یہاں پروسیسڈ مٹیریل کا نام، ان پٹ مقدار، بنڈلز کی تعداد، فی بنڈل وزن، اور آؤٹ پٹ مقدار شامل کر سکتے ہیں۔ یہ سسٹم خود بخود خام مال کی اسٹاک کو اپڈیٹ کرتا ہے۔'
-            : 'This page allows you to create processed raw materials from raw materials. You can add processed material name, input quantity, number of bundles, weight per bundle, and output quantity here. The system automatically updates raw material stock.'}
-        </p>
-      </div>
-
       {/* Summary Stats - Copper */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Copper</h2>
@@ -228,13 +216,13 @@ export default function ProcessedRawMaterials() {
             <div className="text-sm text-gray-600">
               {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{copperInput.toFixed(2)} kgs</div>
+            <div className="text-2xl font-bold text-brand-orange">{Math.round(copperInput)} kgs</div>
           </div>
           <div>
             <div className="text-sm text-gray-600">
-              {language === 'ur' ? 'دستیاب مقدار' : 'Amount Available'}
+              {language === 'ur' ? 'دستیاب صافی وزن' : 'Safi Weight Available'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{copperOutput.toFixed(2)} kgs</div>
+            <div className="text-2xl font-bold text-brand-orange">{Math.round(copperOutput)} kgs</div>
           </div>
         </div>
       </div>
@@ -247,13 +235,13 @@ export default function ProcessedRawMaterials() {
             <div className="text-sm text-gray-600">
               {language === 'ur' ? 'استعمال شدہ مقدار' : 'Amount Utilized'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{silverInput.toFixed(2)} kgs</div>
+            <div className="text-2xl font-bold text-brand-orange">{Math.round(silverInput)} kgs</div>
           </div>
           <div>
             <div className="text-sm text-gray-600">
-              {language === 'ur' ? 'دستیاب مقدار' : 'Amount Available'}
+              {language === 'ur' ? 'دستیاب صافی وزن' : 'Safi Weight Available'}
             </div>
-            <div className="text-2xl font-bold text-brand-orange">{silverOutput.toFixed(2)} kgs</div>
+            <div className="text-2xl font-bold text-brand-orange">{Math.round(silverOutput)} kgs</div>
           </div>
         </div>
       </div>
@@ -395,33 +383,16 @@ export default function ProcessedRawMaterials() {
           setShowCustomMaterialForm(false);
           setEditingCustomMaterial(null);
         }}
-        title={editingCustomMaterial ? t('editCustomMaterial', 'processedMaterial') : t('manageCustomMaterials', 'processedMaterial')}
+        title={editingCustomMaterial ? (editingCustomMaterial.id === 0 ? t('addCustomMaterial', 'processedMaterial') : t('editCustomMaterial', 'processedMaterial')) : t('manageCustomMaterials', 'processedMaterial')}
       >
-        <div className="space-y-4">
-          {!editingCustomMaterial && (
-            <>
-              <div className="flex justify-end mb-4">
-                <Button variant="primary" onClick={() => setEditingCustomMaterial({ id: 0, name: '', priorRawMaterial: '', createdAt: new Date() })}>
-                  {t('addCustomMaterial', 'processedMaterial')}
-                </Button>
-              </div>
-              <CustomProcessedRawMaterialList
-                onEdit={handleEditCustomMaterial}
-                onDelete={handleDeleteCustomMaterial}
-              />
-            </>
-          )}
-          {editingCustomMaterial && (
-            <CustomProcessedRawMaterialForm
-              material={editingCustomMaterial.id === 0 ? null : editingCustomMaterial}
-              onClose={() => {
-                setShowCustomMaterialForm(false);
-                setEditingCustomMaterial(null);
-              }}
-              onSubmit={handleCustomMaterialSubmit}
-            />
-          )}
-        </div>
+        <CustomProcessedRawMaterialForm
+          material={editingCustomMaterial && editingCustomMaterial.id === 0 ? null : editingCustomMaterial}
+          onClose={() => {
+            setShowCustomMaterialForm(false);
+            setEditingCustomMaterial(null);
+          }}
+          onSubmit={handleCustomMaterialSubmit}
+        />
       </Modal>
     </div>
   );

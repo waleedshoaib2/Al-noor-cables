@@ -250,17 +250,34 @@ export default function RawMaterialForm({ material, onClose, onSubmit }: RawMate
           error={errors.date}
           disabled={isMaterialUsed}
         />
-        <Input
-          label={`${t('quantity')} *`}
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.quantity}
-          onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-          placeholder="0.00"
-          error={errors.quantity}
-          disabled={isMaterialUsed}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {`${t('quantity')} *`}
+          </label>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={formData.quantity}
+            onChange={(e) => {
+              // Allow numbers and one decimal point
+              const value = e.target.value.replace(/[^0-9.]/g, '');
+              // Ensure only one decimal point
+              const parts = value.split('.');
+              const filteredValue = parts.length > 2 
+                ? parts[0] + '.' + parts.slice(1).join('')
+                : value;
+              setFormData({ ...formData, quantity: filteredValue });
+            }}
+            placeholder="0.00"
+            disabled={isMaterialUsed}
+            className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+              errors.quantity ? 'border-red-500' : ''
+            } ${isMaterialUsed ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+          />
+          {errors.quantity && (
+            <p className="mt-1 text-sm text-red-600">{errors.quantity}</p>
+          )}
+        </div>
       </div>
 
       {/* Batch ID - Auto-generated, read-only */}

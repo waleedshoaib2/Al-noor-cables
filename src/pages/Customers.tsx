@@ -127,18 +127,6 @@ export default function Customers() {
         </div>
       </div>
 
-      {/* Summary Section */}
-      <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-3">
-          {language === 'ur' ? 'گاہکوں کا انتظام' : 'Customers Management'}
-        </h2>
-        <p className="text-white/90 leading-relaxed">
-          {language === 'ur' 
-            ? 'یہ صفحہ آپ کو گاہکوں کی معلومات ریکارڈ کرنے اور ان کی خریداری/لین دین کو ٹریک کرنے کی سہولت فراہم کرتا ہے۔ آپ یہاں گاہک کا نام، فون، پتہ، تفصیلات شامل کر سکتے ہیں اور ان کی خریداری کی تاریخ، مقدار، قیمت اور نوٹس ریکارڈ کر سکتے ہیں۔'
-            : 'This page allows you to record customer information and track their purchases/transactions. You can add customer name, phone, address, details, and record their purchase history, quantity, price, and notes here.'}
-        </p>
-      </div>
-
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8" aria-label="Tabs">
@@ -502,7 +490,7 @@ function PurchaseForm({ purchase, onClose, onSubmit }: PurchaseFormProps) {
     if (!formData.productProductionId) {
       newErrors.productProductionId = language === 'ur' ? 'پروڈکٹ منتخب کریں' : 'Please select a product';
     }
-    const quantityBundles = parseInt(formData.quantityBundles, 10) || 0;
+    const quantityBundles = parseFloat(formData.quantityBundles) || 0;
     if (quantityBundles <= 0) {
       newErrors.quantityBundles = language === 'ur' ? 'مقدار درکار ہے' : 'Quantity is required';
     } else {
@@ -652,15 +640,19 @@ function PurchaseForm({ purchase, onClose, onSubmit }: PurchaseFormProps) {
         </label>
         <input
           type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
+          inputMode="decimal"
           value={formData.quantityBundles}
           onChange={(e) => {
-            // Only allow integers (no decimals, no negative)
-            const value = e.target.value.replace(/[^0-9]/g, '');
-            setFormData({ ...formData, quantityBundles: value });
+            // Allow numbers and one decimal point
+            const value = e.target.value.replace(/[^0-9.]/g, '');
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            const filteredValue = parts.length > 2 
+              ? parts[0] + '.' + parts.slice(1).join('')
+              : value;
+            setFormData({ ...formData, quantityBundles: filteredValue });
           }}
-          placeholder="0"
+          placeholder="0.00"
           className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
             errors.quantityBundles ? 'border-red-500' : ''
           }`}

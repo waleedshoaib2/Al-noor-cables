@@ -45,7 +45,7 @@ export default function CustomProcessedRawMaterialForm({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = language === 'ur' ? 'نام درکار ہے' : 'Name is required';
+      newErrors.name = language === 'ur' ? 'پروڈکٹ کا نام درکار ہے' : 'Product name is required';
     }
 
     if (!formData.priorRawMaterial) {
@@ -93,18 +93,18 @@ export default function CustomProcessedRawMaterialForm({
     <form onSubmit={handleSubmit} className="space-y-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
       {/* Name */}
       <Input
-        label={`${t('name', 'customProcessedMaterial')} *`}
+        label={language === 'ur' ? 'پروڈکٹ کا نام *' : 'Product Name *'}
         type="text"
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        placeholder={language === 'ur' ? 'پروسیس شدہ مواد کا نام' : 'Processed material name'}
+        placeholder={language === 'ur' ? 'پروڈکٹ کا نام' : 'Product name'}
         error={errors.name}
       />
 
       {/* Prior Raw Material */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t('priorRawMaterial', 'customProcessedMaterial')} *
+          {language === 'ur' ? 'خام مال منتخب کریں' : 'Select Raw Material'} *
         </label>
         <select
           value={formData.priorRawMaterial}
@@ -113,7 +113,7 @@ export default function CustomProcessedRawMaterialForm({
             errors.priorRawMaterial ? 'border-red-500' : ''
           }`}
         >
-          <option value="">{t('selectPriorRawMaterial', 'customProcessedMaterial')}</option>
+          <option value="">{language === 'ur' ? 'منتخب کریں' : 'Select'}</option>
           <option value="Copper">Copper</option>
           <option value="Silver">Silver</option>
         </select>
