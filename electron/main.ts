@@ -27,7 +27,8 @@ function createWindow(): void {
   // Load the app
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
+    // DevTools can be opened manually with Ctrl+Shift+I (or Cmd+Option+I on Mac)
+    // mainWindow.webContents.openDevTools();
   } else {
     console.log('🔨 Production mode - loading from dist folder');
     const indexPath = join(__dirname, '../dist/index.html');
@@ -59,8 +60,8 @@ function createWindow(): void {
       });
     });
     
-    // Open DevTools in production for debugging (remove in final release)
-    mainWindow.webContents.openDevTools();
+    // DevTools disabled in production
+    // mainWindow.webContents.openDevTools();
   }
 
   // Emitted when the window is closed
