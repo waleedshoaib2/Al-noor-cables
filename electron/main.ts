@@ -20,6 +20,7 @@ function createWindow(): void {
       preload: join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
+      devTools: process.env.NODE_ENV === 'development', // Only enable DevTools in development
     },
     title: 'Al-Noor Cables - Stock & Expense Management',
   });

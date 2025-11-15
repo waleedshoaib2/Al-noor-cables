@@ -19,11 +19,9 @@ const INITIAL_CATEGORIES: Category[] = [
 ];
 
 const INITIAL_EXPENSE_CATEGORIES: ExpenseCategory[] = [
-  { id: 1, name: 'Bills', description: 'Utility bills and payments', color: '#EF4444' },
-  { id: 2, name: 'Factory Expenses', description: 'Factory operational expenses', color: '#3B82F6' },
-  { id: 3, name: 'Stationary', description: 'Stationery and office supplies', color: '#8B5CF6' },
-  { id: 4, name: 'Maintenance', description: 'Equipment and facility maintenance', color: '#EC4899' },
-  { id: 5, name: 'Office Expenses', description: 'Office operational expenses', color: '#10B981' },
+  { id: 1, name: 'kitchen', description: 'Kitchen expenses', color: '#EF4444' },
+  { id: 2, name: 'bill', description: 'Bills and payments', color: '#3B82F6' },
+  { id: 3, name: 'factory', description: 'Factory expenses', color: '#8B5CF6' },
 ];
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({

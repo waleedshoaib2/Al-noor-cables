@@ -76,6 +76,7 @@ export interface ProcessedRawMaterial {
   numberOfBundles: number;
   weightPerBundle: number; // in kgs - actual processed material weight (net weight)
   grossWeightPerBundle?: number; // in kgs - weight with tool/attachment (gross weight)
+  weight?: number; // in kgs - additional weight field
   outputQuantity: number; // numberOfBundles × weightPerBundle (in kgs) - original output
   usedQuantity: number; // in kgs - amount used in products (gets deducted from outputQuantity for stock calculation)
   date: Date;

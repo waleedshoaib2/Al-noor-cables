@@ -15,6 +15,7 @@ interface ProcessedMaterialBatchData {
     numberOfBundles: number;
     weightPerBundle: number;
     grossWeightPerBundle?: number;
+    weight?: number;
   }>;
 }
 
@@ -155,6 +156,7 @@ export const useProcessedRawMaterialStore = create<ProcessedRawMaterialState>((s
         numberOfBundles: pm.numberOfBundles,
         weightPerBundle: pm.weightPerBundle,
         grossWeightPerBundle: pm.grossWeightPerBundle,
+        weight: pm.weight,
         outputQuantity,
         usedQuantity: 0, // Initialize as unused
         date: batch.date,

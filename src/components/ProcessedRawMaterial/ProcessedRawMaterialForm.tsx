@@ -13,6 +13,7 @@ interface ProcessedMaterialItem {
   numberOfBundles: string;
   weightPerBundle: string;
   grossWeightPerBundle: string;
+  weight: string;
 }
 
 interface ProcessedRawMaterialFormProps {
@@ -72,7 +73,7 @@ export default function ProcessedRawMaterialForm({
   }, [formData.materialType, processedMaterialsStore, customProcessedMaterials]);
 
   const [processedMaterials, setProcessedMaterials] = useState<ProcessedMaterialItem[]>([
-    { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '' },
+    { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '', weight: '' },
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -95,6 +96,7 @@ export default function ProcessedRawMaterialForm({
           // Display total safi weight (weightPerBundle * numberOfBundles) when editing
           weightPerBundle: (material.weightPerBundle * material.numberOfBundles).toString(),
           grossWeightPerBundle: material.grossWeightPerBundle?.toString() || '',
+          weight: material.weight?.toString() || '',
         },
       ]);
     }
@@ -118,7 +120,7 @@ export default function ProcessedRawMaterialForm({
   const addProcessedMaterialRow = () => {
     setProcessedMaterials([
       ...processedMaterials,
-      { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '' },
+      { name: '', numberOfBundles: '', weightPerBundle: '', grossWeightPerBundle: '', weight: '' },
     ]);
   };
 
@@ -250,6 +252,7 @@ export default function ProcessedRawMaterialForm({
           numberOfBundles: numBundles,
           weightPerBundle: weightPerBundle,
           grossWeightPerBundle: pm.grossWeightPerBundle ? parseFloat(pm.grossWeightPerBundle) : undefined,
+          weight: pm.weight ? parseFloat(pm.weight) : undefined,
           date,
           batchId,
           notes: formData.notes.trim() || undefined,
@@ -267,6 +270,7 @@ export default function ProcessedRawMaterialForm({
             numberOfBundles: numBundles,
             weightPerBundle: weightPerBundle,
             grossWeightPerBundle: pm.grossWeightPerBundle ? parseFloat(pm.grossWeightPerBundle) : undefined,
+            weight: pm.weight ? parseFloat(pm.weight) : undefined,
           };
         });
 
@@ -456,7 +460,7 @@ export default function ProcessedRawMaterialForm({
                 </div>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 space-y-4">
                 {/* Total Safi Weight (Net Weight) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -484,6 +488,37 @@ export default function ProcessedRawMaterialForm({
                   {materialErrors[index]?.weightPerBundle && (
                     <p className="mt-1 text-sm text-red-600">
                       {materialErrors[index].weightPerBundle}
+                    </p>
+                  )}
+                </div>
+
+                {/* Weight */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Weight (kgs)
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={pm.weight}
+                    onChange={(e) => {
+                      // Allow numbers and one decimal point
+                      const value = e.target.value.replace(/[^0-9.]/g, '');
+                      // Ensure only one decimal point
+                      const parts = value.split('.');
+                      const filteredValue = parts.length > 2 
+                        ? parts[0] + '.' + parts.slice(1).join('')
+                        : value;
+                      updateProcessedMaterialRow(index, 'weight', filteredValue);
+                    }}
+                    className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                      materialErrors[index]?.weight ? 'border-red-500' : ''
+                    }`}
+                    placeholder="0.00"
+                  />
+                  {materialErrors[index]?.weight && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {materialErrors[index].weight}
                     </p>
                   )}
                 </div>

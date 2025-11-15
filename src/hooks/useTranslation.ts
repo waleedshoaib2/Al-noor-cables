@@ -6,9 +6,10 @@ type RawMaterialKey = keyof typeof enTranslations.rawMaterial;
 type ProcessedMaterialKey = keyof typeof enTranslations.processedMaterial;
 type ProductKey = keyof typeof enTranslations.product;
 type CustomerKey = keyof typeof enTranslations.customer;
+type ScrapKey = keyof typeof enTranslations.scrap;
 
-type TranslationKey = RawMaterialKey | ProcessedMaterialKey | ProductKey | CustomerKey;
-type TranslationSection = 'rawMaterial' | 'processedMaterial' | 'product' | 'customer';
+type TranslationKey = RawMaterialKey | ProcessedMaterialKey | ProductKey | CustomerKey | ScrapKey;
+type TranslationSection = 'rawMaterial' | 'processedMaterial' | 'product' | 'customer' | 'scrap';
 
 export function useTranslation() {
   const language = useLanguageStore((state) => state.language);
@@ -23,6 +24,9 @@ export function useTranslation() {
     }
     if (section === 'customer') {
       return translations.customer[key as CustomerKey] || key;
+    }
+    if (section === 'scrap') {
+      return translations.scrap[key as ScrapKey] || key;
     }
     return translations.rawMaterial[key as RawMaterialKey] || key;
   };

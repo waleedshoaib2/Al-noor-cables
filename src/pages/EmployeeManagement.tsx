@@ -1,11 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useEmployeeStore } from '@/store/useEmployeeStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import EmployeeForm from '@/components/Employee/EmployeeForm';
 import DailyPayoutForm from '@/components/Employee/DailyPayoutForm';
-import { exportToPDF } from '@/utils/pdfExport';
+import EmployeePrintView from '@/components/Employee/EmployeePrintView';
 import { format } from 'date-fns';
 import type { Employee, DailyPayout } from '@/types';
 
@@ -26,7 +26,6 @@ export default function EmployeeManagement() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [editingPayout, setEditingPayout] = useState<{ employee: Employee; payout: DailyPayout } | null>(null);
   const [selectedEmployeeForPayout, setSelectedEmployeeForPayout] = useState<Employee | null>(null);
-  const reportSectionRef = useRef<HTMLDivElement>(null);
 
   const handleAddEmployee = () => {
     setEditingEmployee(null);
@@ -88,15 +87,9 @@ export default function EmployeeManagement() {
     setSelectedEmployeeForPayout(null);
   };
 
-  // PDF Export handler
-  const handleExportPDF = async () => {
-    if (reportSectionRef.current) {
-      await exportToPDF(
-        'employees-report-section',
-        `Employees_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-        'Employee Management Report'
-      );
-    }
+  // Print handler
+  const handlePrint = () => {
+    window.print();
   };
 
   // Calculate totals
@@ -166,7 +159,7 @@ export default function EmployeeManagement() {
       </div>
 
       {/* Employees List */}
-      <div id="employees-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+      <div id="employees-report-section" className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 no-print">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">
             {employees.length === 0
@@ -174,8 +167,8 @@ export default function EmployeeManagement() {
               : `${employees.length} ${language === 'ur' ? 'ملازم' : employees.length === 1 ? 'employee' : 'employees'}`}
           </h2>
           {employees.length > 0 && (
-            <Button variant="secondary" onClick={handleExportPDF} className="no-print">
-              📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+            <Button variant="secondary" onClick={handlePrint} className="no-print">
+              🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
             </Button>
           )}
         </div>
@@ -346,6 +339,11 @@ export default function EmployeeManagement() {
           onSubmit={handlePayoutSubmit}
         />
       )}
+
+      {/* Print View - Only visible when printing */}
+      <div className="print-view" style={{ display: 'none' }}>
+        <EmployeePrintView employees={employees} />
+      </div>
     </div>
   );
 }
