@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useExpenseStore } from '@/store/useExpenseStore';
 import { useCategoryStore } from '@/store/useCategoryStore';
 import { Input } from '@/components/Common/Input';
@@ -8,14 +8,26 @@ import type { Expense } from '@/types';
 interface ExpenseListProps {
   onEdit: (expense: Expense) => void;
   onDelete: (expense: Expense) => void;
+  onFiltersChange?: (filters: { startDate?: string; endDate?: string; categoryId?: number }) => void;
 }
 
-export default function ExpenseList({ onEdit, onDelete }: ExpenseListProps) {
+export default function ExpenseList({ onEdit, onDelete, onFiltersChange }: ExpenseListProps) {
   const expenses = useExpenseStore((state) => state.expenses);
   const expenseCategories = useCategoryStore((state) => state.expenseCategories);
   const [categoryFilter, setCategoryFilter] = useState<number | ''>('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  // Notify parent of filter changes
+  useEffect(() => {
+    if (onFiltersChange) {
+      onFiltersChange({
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        categoryId: categoryFilter !== '' ? categoryFilter : undefined,
+      });
+    }
+  }, [startDate, endDate, categoryFilter, onFiltersChange]);
 
   const filteredExpenses = useMemo(() => {
     let filtered = [...expenses];
