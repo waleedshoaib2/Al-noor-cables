@@ -1,4 +1,5 @@
 import { formatDate } from '@/utils/helpers';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { RawMaterial } from '@/types';
 
 interface RawMaterialPrintViewProps {
@@ -12,6 +13,7 @@ interface RawMaterialPrintViewProps {
 }
 
 export default function RawMaterialPrintView({ materials, filters }: RawMaterialPrintViewProps) {
+  const { t, language } = useTranslation();
   const printDate = new Date().toLocaleString();
   
   // Calculate totals using originalQuantity (supplied quantity)
@@ -26,25 +28,35 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
     <div className="print-view p-8">
 
       {/* Header */}
-      <div className="mb-6 border-b-2 border-gray-800 pb-4">
+      <div className="mb-6 border-b-2 border-gray-800 pb-4" dir={language === 'ur' ? 'rtl' : 'ltr'}>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Al Noor Cables</h1>
-        <h2 className="text-2xl font-semibold text-gray-700">Raw Material Stock Report</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">
+          {language === 'ur' ? 'خام مال اسٹاک رپورٹ' : 'Raw Material Stock Report'}
+        </h2>
         <div className="text-sm text-gray-600 mt-2">
-          Printed on: {printDate}
+          {language === 'ur' ? 'پرنٹ کی تاریخ:' : 'Printed on:'} {printDate}
         </div>
         {filters && (
           <div className="text-sm text-gray-600 mt-2">
             {filters.materialType && filters.materialType !== 'all' && (
-              <span>Material Type: {filters.materialType} | </span>
+              <span>
+                {language === 'ur' ? 'مواد کی قسم:' : 'Material Type:'} {filters.materialType} |{' '}
+              </span>
             )}
             {filters.supplier && filters.supplier !== 'all' && (
-              <span>Supplier: {filters.supplier} | </span>
+              <span>
+                {language === 'ur' ? 'سپلائر:' : 'Supplier:'} {filters.supplier} |{' '}
+              </span>
             )}
             {filters.startDate && (
-              <span>From: {new Date(filters.startDate).toLocaleDateString()} | </span>
+              <span>
+                {language === 'ur' ? 'سے:' : 'From:'} {new Date(filters.startDate).toLocaleDateString()} |{' '}
+              </span>
             )}
             {filters.endDate && (
-              <span>To: {new Date(filters.endDate).toLocaleDateString()}</span>
+              <span>
+                {language === 'ur' ? 'تک:' : 'To:'} {new Date(filters.endDate).toLocaleDateString()}
+              </span>
             )}
           </div>
         )}
@@ -53,15 +65,21 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
       {/* Summary */}
       <div className="mb-6 grid grid-cols-3 gap-4">
         <div className="border border-gray-300 p-3">
-          <div className="text-sm text-gray-600">Total Entries</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'کل انٹریز' : 'Total Entries'}
+          </div>
           <div className="text-xl font-bold text-gray-900">{materials.length}</div>
         </div>
         <div className="border border-gray-300 p-3">
-          <div className="text-sm text-gray-600">Total Quantity</div>
-          <div className="text-xl font-bold text-gray-900">{totalQuantity.toFixed(2)} kgs</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'کل مقدار' : 'Total Quantity'}
+          </div>
+          <div className="text-xl font-bold text-gray-900">{Math.round(totalQuantity)} kgs</div>
         </div>
         <div className="border border-gray-300 p-3">
-          <div className="text-sm text-gray-600">Material Types</div>
+          <div className="text-sm text-gray-600">
+            {language === 'ur' ? 'مواد کی اقسام' : 'Material Types'}
+          </div>
           <div className="text-xl font-bold text-gray-900">{Object.keys(totalByMaterial).length}</div>
         </div>
       </div>
@@ -69,12 +87,14 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
       {/* Material Type Breakdown */}
       {Object.keys(totalByMaterial).length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Summary by Material Type</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+            {language === 'ur' ? 'مواد کی قسم کے لحاظ سے خلاصہ' : 'Summary by Material Type'}
+          </h3>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(totalByMaterial).map(([type, qty]) => (
               <div key={type} className="border border-gray-300 p-3">
                 <div className="text-sm text-gray-600">{type}</div>
-                <div className="text-lg font-bold text-gray-900">{qty.toFixed(2)} kgs</div>
+                <div className="text-lg font-bold text-gray-900">{Math.round(qty)} kgs</div>
               </div>
             ))}
           </div>
@@ -83,30 +103,32 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
 
       {/* Table */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Raw Material Entries</h3>
-        <table className="w-full border-collapse border border-gray-300">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          {language === 'ur' ? 'خام مال کی انٹریز' : 'Raw Material Entries'}
+        </h3>
+        <table className="w-full border-collapse border border-gray-300" dir={language === 'ur' ? 'rtl' : 'ltr'}>
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                Batch ID
+                {language === 'ur' ? 'بیچ آئی ڈی' : 'Batch ID'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                Material Type
+                {language === 'ur' ? 'مواد کی قسم' : 'Material Type'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                Supplier
+                {language === 'ur' ? 'سپلائر' : 'Supplier'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                Date
+                {language === 'ur' ? 'تاریخ' : 'Date'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                Quantity (kgs)
+                {language === 'ur' ? 'مقدار (کلوگرام)' : 'Quantity (kgs)'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                Available (kgs)
+                {language === 'ur' ? 'دستیاب (کلوگرام)' : 'Available (kgs)'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                Notes
+                {language === 'ur' ? 'نوٹس' : 'Notes'}
               </th>
             </tr>
           </thead>
@@ -126,10 +148,10 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
                   {formatDate(material.date)}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                  {material.originalQuantity.toFixed(2)}
+                  {Math.round(material.originalQuantity)}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                  {material.quantity.toFixed(2)}
+                  {Math.round(material.quantity)}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900">
                   {material.notes || '-'}
@@ -140,13 +162,13 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
           <tfoot>
             <tr className="bg-gray-100 font-semibold">
               <td colSpan={4} className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                Total:
+                {language === 'ur' ? 'کل:' : 'Total:'}
               </td>
               <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                {totalQuantity.toFixed(2)} kgs
+                {Math.round(totalQuantity)} kgs
               </td>
               <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                {totalAvailable.toFixed(2)} kgs
+                {Math.round(totalAvailable)} kgs
               </td>
               <td className="border border-gray-300 px-3 py-2"></td>
             </tr>
@@ -155,9 +177,9 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
       </div>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-gray-300 text-xs text-gray-600 text-center">
-        <p>Al Noor Cables - Raw Material Stock Report</p>
-        <p>Generated on {printDate}</p>
+      <div className="mt-8 pt-4 border-t border-gray-300 text-xs text-gray-600 text-center" dir={language === 'ur' ? 'rtl' : 'ltr'}>
+        <p>Al Noor Cables - {language === 'ur' ? 'خام مال اسٹاک رپورٹ' : 'Raw Material Stock Report'}</p>
+        <p>{language === 'ur' ? 'تاریخ پیدائش:' : 'Generated on'} {printDate}</p>
       </div>
     </div>
   );

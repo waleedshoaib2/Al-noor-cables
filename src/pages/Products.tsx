@@ -9,6 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import ProductProductionForm from '@/components/Product/ProductProductionForm';
+import ProductPrintView from '@/components/Product/ProductPrintView';
 import CustomProductForm from '@/components/CustomProduct/CustomProductForm';
 import CustomProductList from '@/components/CustomProduct/CustomProductList';
 import { exportToPDF } from '@/utils/pdfExport';
@@ -133,15 +134,9 @@ export default function Products() {
   const availableProductsCount = Object.values(productStock).filter(stock => stock.bundles > 0).length;
   const reportSectionRef = useRef<HTMLDivElement>(null);
 
-  // PDF Export handler
-  const handleExportPDF = async () => {
-    if (reportSectionRef.current) {
-      await exportToPDF(
-        'products-report-section',
-        `Products_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-        'Products Report'
-      );
-    }
+  // Print handler
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
@@ -187,7 +182,7 @@ export default function Products() {
       </div>
 
       {/* Productions List */}
-      <div id="products-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+      <div id="products-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 no-print">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">
             {productions.length === 0
@@ -195,8 +190,8 @@ export default function Products() {
               : `${productions.length} ${t('productionsFound', 'product')}`}
           </h2>
           {productions.length > 0 && (
-            <Button variant="secondary" onClick={handleExportPDF} className="no-print">
-              📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+            <Button variant="secondary" onClick={handlePrint} className="no-print">
+              🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
             </Button>
           )}
         </div>
@@ -420,6 +415,11 @@ export default function Products() {
           onSubmit={handleCustomProductSubmit}
         />
       </Modal>
+
+      {/* Print View - Only visible when printing */}
+      <div className="print-view" style={{ display: 'none' }}>
+        <ProductPrintView productions={productions} />
+      </div>
     </div>
   );
 }

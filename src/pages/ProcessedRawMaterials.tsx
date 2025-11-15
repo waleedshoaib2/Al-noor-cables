@@ -7,6 +7,7 @@ import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import ProcessedRawMaterialForm from '@/components/ProcessedRawMaterial/ProcessedRawMaterialForm';
 import ProcessedRawMaterialList from '@/components/ProcessedRawMaterial/ProcessedRawMaterialList';
+import ProcessedRawMaterialPrintView from '@/components/ProcessedRawMaterial/ProcessedRawMaterialPrintView';
 import CustomProcessedRawMaterialForm from '@/components/CustomProcessedRawMaterial/CustomProcessedRawMaterialForm';
 import CustomProcessedRawMaterialList from '@/components/CustomProcessedRawMaterial/CustomProcessedRawMaterialList';
 import { exportToPDF } from '@/utils/pdfExport';
@@ -336,7 +337,7 @@ export default function ProcessedRawMaterials() {
       </div>
 
       {/* Processed Materials List */}
-      <div id="processed-materials-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md">
+      <div id="processed-materials-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-lg shadow-md no-print">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">
             {filteredMaterials.length === 0
@@ -348,14 +349,9 @@ export default function ProcessedRawMaterials() {
                 }`}
           </h2>
           {filteredMaterials.length > 0 && (
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={handleExportPDF} className="no-print">
-                📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
-              </Button>
-              <Button variant="secondary" onClick={handlePrint} className="no-print">
-                🖨️ {t('print', 'processedMaterial')}
-              </Button>
-            </div>
+            <Button variant="secondary" onClick={handlePrint} className="no-print">
+              🖨️ {t('print', 'processedMaterial')}
+            </Button>
           )}
         </div>
         {filteredMaterials.length === 0 ? (
@@ -411,6 +407,19 @@ export default function ProcessedRawMaterials() {
           onSubmit={handleCustomMaterialSubmit}
         />
       </Modal>
+
+      {/* Print View - Only visible when printing */}
+      <div className="print-view" style={{ display: 'none' }}>
+        <ProcessedRawMaterialPrintView
+          materials={filteredMaterials}
+          filters={{
+            materialType: filterMaterialType,
+            processedMaterialName: filterProcessedMaterialName,
+            startDate: filterStartDate,
+            endDate: filterEndDate,
+          }}
+        />
+      </div>
     </div>
   );
 }

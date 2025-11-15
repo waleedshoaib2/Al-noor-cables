@@ -242,14 +242,9 @@ export default function RawMaterials() {
               : `${filteredMaterials.length} ${filteredMaterials.length === 1 ? t('materialFound') : t('materialsFound')}`}
           </h2>
           {filteredMaterials.length > 0 && (
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={handleExportPDF} className="no-print">
-                📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
-              </Button>
-              <Button variant="secondary" onClick={handlePrint} className="no-print">
-                🖨️ {t('print')}
-              </Button>
-            </div>
+            <Button variant="secondary" onClick={handlePrint} className="no-print">
+              🖨️ {t('print')}
+            </Button>
           )}
         </div>
         {filteredMaterials.length === 0 ? (

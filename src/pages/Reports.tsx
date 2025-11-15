@@ -3,11 +3,12 @@ import { useRawMaterialStore } from '@/store/useRawMaterialStore';
 import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { useProductStore } from '@/store/useProductStore';
 import { useCustomerPurchaseStore } from '@/store/useCustomerPurchaseStore';
+import { useCustomerStore } from '@/store/useCustomerStore';
 import { useExpenseStore } from '@/store/useExpenseStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
-import { exportToPDF } from '@/utils/pdfExport';
+import ReportPrintView from '@/components/Report/ReportPrintView';
 import { formatCurrency, formatDate } from '@/utils/helpers';
 import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, format } from 'date-fns';
 
@@ -37,6 +38,7 @@ export default function Reports() {
   const productions = useProductStore((state) => state.productions);
   const purchases = useCustomerPurchaseStore((state) => state.purchases);
   const expenses = useExpenseStore((state) => state.expenses);
+  const customers = useCustomerStore((state) => state.customers);
   const getAllProcessedMaterialNames = useProcessedRawMaterialStore((state) => state.getAllProcessedMaterialNames);
   const getAllProductNames = useProductStore((state) => state.getAllProductNames);
 
@@ -187,29 +189,9 @@ export default function Reports() {
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   const netProfit = totalPurchases - totalExpenses;
 
-  // PDF Export handler
-  const handleExportPDF = async () => {
-    if (reportSectionRef.current) {
-      let reportTitle = `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`;
-      
-      if (reportCategory !== 'all') {
-        reportTitle += ` - ${reportCategory}`;
-      }
-      
-      if (reportCategory === 'raw-materials' && selectedRawMaterialType !== 'all') {
-        reportTitle += ` - ${selectedRawMaterialType}`;
-      } else if (reportCategory === 'processed-materials' && selectedProcessedMaterialName !== 'all') {
-        reportTitle += ` - ${selectedProcessedMaterialName}`;
-      } else if (reportCategory === 'products' && selectedProductName !== 'all') {
-        reportTitle += ` - ${selectedProductName}`;
-      }
-      
-      await exportToPDF(
-        'reports-section',
-        `${reportType}_${reportCategory}_${format(new Date(), 'yyyy-MM-dd')}.pdf`,
-        reportTitle
-      );
-    }
+  // Print handler
+  const handlePrint = () => {
+    window.print();
   };
 
   const getReportTitle = () => {
@@ -241,7 +223,7 @@ export default function Reports() {
 
   return (
     <div className="space-y-6" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center no-print">
         <h1 className="text-3xl font-bold text-gray-900">
           {language === 'ur' ? 'پیشہ ورانہ رپورٹس' : 'Professional Reports'}
         </h1>
@@ -258,7 +240,7 @@ export default function Reports() {
       </div>
 
       {/* Report Filters */}
-      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 no-print">
         <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
           <span className="text-2xl">📊</span>
           {language === 'ur' ? 'رپورٹ فلٹرز' : 'Report Filters'}
@@ -400,16 +382,16 @@ export default function Reports() {
           </div>
         )}
 
-        {/* Export Button */}
+        {/* Print Button */}
         <div className="mt-6">
-          <Button variant="primary" onClick={handleExportPDF} className="px-6 py-3 text-lg font-semibold">
-            📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+          <Button variant="primary" onClick={handlePrint} className="px-6 py-3 text-lg font-semibold no-print">
+            🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
           </Button>
         </div>
       </div>
 
       {/* Report Summary */}
-      <div id="reports-section" ref={reportSectionRef} className="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+      <div id="reports-section" ref={reportSectionRef} className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 no-print">
         {/* Header */}
         <div className="mb-8 pb-6 border-b-2 border-gray-200">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">{getReportTitle()}</h2>
@@ -788,6 +770,36 @@ export default function Reports() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Print View - Only visible when printing */}
+      <div className="print-view" style={{ display: 'none' }}>
+        <ReportPrintView
+          reportType={reportType}
+          reportCategory={reportCategory}
+          selectedDate={selectedDate}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          selectedRawMaterialType={selectedRawMaterialType}
+          selectedProcessedMaterialName={selectedProcessedMaterialName}
+          selectedProductName={selectedProductName}
+          filteredRawMaterials={filteredRawMaterials}
+          filteredProcessedMaterials={filteredProcessedMaterials}
+          filteredProductions={filteredProductions}
+          filteredPurchases={filteredPurchases}
+          filteredExpenses={filteredExpenses}
+          rawMaterialStats={rawMaterialStats}
+          processedMaterialStats={processedMaterialStats}
+          productStats={productStats}
+          totalRawMaterials={totalRawMaterials}
+          totalProcessedMaterials={totalProcessedMaterials}
+          totalProductsFoot={totalProductsFoot}
+          totalProductsBundles={totalProductsBundles}
+          totalPurchases={totalPurchases}
+          totalExpenses={totalExpenses}
+          netProfit={netProfit}
+          customers={customers}
+        />
       </div>
     </div>
   );

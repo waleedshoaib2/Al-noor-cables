@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useCustomerStore } from '@/store/useCustomerStore';
 import { useCustomerPurchaseStore } from '@/store/useCustomerPurchaseStore';
 import { useProductStore } from '@/store/useProductStore';
@@ -9,6 +9,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
 import { Modal } from '@/components/Common/Modal';
 import { Input } from '@/components/Common/Input';
+import CustomerPrintView from '@/components/Customer/CustomerPrintView';
+import PurchasePrintView from '@/components/Customer/PurchasePrintView';
 import { exportToPDF } from '@/utils/pdfExport';
 import type { Customer, CustomerPurchase } from '@/types';
 
@@ -40,18 +42,68 @@ export default function Customers() {
     details: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [filterCustomerName, setFilterCustomerName] = useState<string>('all');
+  const [filterProductName, setFilterProductName] = useState<string>('all');
+  const [filterStartDate, setFilterStartDate] = useState<string>('');
+  const [filterEndDate, setFilterEndDate] = useState<string>('');
   const reportSectionRef = useRef<HTMLDivElement>(null);
 
-  // PDF Export handler
-  const handleExportPDF = async () => {
-    if (reportSectionRef.current) {
-      await exportToPDF(
-        'customers-report-section',
-        `Customers_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-        activeTab === 'customers' ? 'Customers Report' : 'Purchases/Transactions Report'
-      );
-    }
+  // Print handler
+  const handlePrint = () => {
+    window.print();
   };
+
+  // Get unique customer names and product names for filters
+  const uniqueCustomerNames = useMemo(() => {
+    const names = new Set(customers.map(c => c.name));
+    return Array.from(names).sort();
+  }, [customers]);
+
+  const uniqueProductNames = useMemo(() => {
+    const names = new Set(purchases.map(p => p.productName));
+    return Array.from(names).sort();
+  }, [purchases]);
+
+  // Filter purchases
+  const filteredPurchases = useMemo(() => {
+    return purchases.filter((purchase) => {
+      // Filter by customer name
+      if (filterCustomerName !== 'all') {
+        const customer = customers.find(c => c.id === purchase.customerId);
+        if (customer?.name !== filterCustomerName) {
+          return false;
+        }
+      }
+
+      // Filter by product name
+      if (filterProductName !== 'all') {
+        if (purchase.productName !== filterProductName) {
+          return false;
+        }
+      }
+
+      // Filter by date range
+      if (filterStartDate) {
+        const purchaseDate = new Date(purchase.date);
+        const startDate = new Date(filterStartDate);
+        startDate.setHours(0, 0, 0, 0);
+        if (purchaseDate < startDate) {
+          return false;
+        }
+      }
+
+      if (filterEndDate) {
+        const purchaseDate = new Date(purchase.date);
+        const endDate = new Date(filterEndDate);
+        endDate.setHours(23, 59, 59, 999);
+        if (purchaseDate > endDate) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [purchases, customers, filterCustomerName, filterProductName, filterStartDate, filterEndDate]);
 
   const handleAddCustomer = () => {
     setEditingCustomer(null);
@@ -104,7 +156,7 @@ export default function Customers() {
 
   return (
     <div className="space-y-6" dir={language === 'ur' ? 'rtl' : 'ltr'}>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center no-print">
         <h1 className="text-2xl font-bold text-gray-900">{t('title', 'customer')}</h1>
         <div className="flex gap-2">
           <Button
@@ -128,7 +180,7 @@ export default function Customers() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 no-print">
         <nav className="flex space-x-8" aria-label="Tabs">
           <button
             onClick={() => setActiveTab('customers')}
@@ -156,7 +208,7 @@ export default function Customers() {
       {activeTab === 'customers' ? (
         <>
       {/* Customers List */}
-      <div id="customers-list-report-section" className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+      <div id="customers-list-report-section" className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 no-print">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">
             {customers.length === 0
@@ -166,19 +218,10 @@ export default function Customers() {
           {customers.length > 0 && (
             <Button 
               variant="secondary" 
-              onClick={() => {
-                const element = document.getElementById('customers-list-report-section');
-                if (element) {
-                  exportToPDF(
-                    'customers-list-report-section',
-                    `Customers_List_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-                    'Customers List Report'
-                  );
-                }
-              }} 
+              onClick={handlePrint}
               className="no-print"
             >
-              📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+              🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
             </Button>
           )}
         </div>
@@ -297,20 +340,110 @@ export default function Customers() {
         </>
       ) : (
         /* Purchases/Transactions Tab */
-        <div id="customers-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div id="customers-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 no-print">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">
-              {purchases.length === 0
+              {filteredPurchases.length === 0
                 ? (language === 'ur' ? 'کوئی خریداری نہیں ملی' : 'No purchases found')
-                : `${purchases.length} ${language === 'ur' ? 'خریداری ملی' : 'Purchases Found'}`}
+                : `${filteredPurchases.length} ${language === 'ur' ? 'خریداری ملی' : 'Purchases Found'}`}
             </h2>
-            {purchases.length > 0 && (
-              <Button variant="secondary" onClick={handleExportPDF} className="no-print">
-                📄 {language === 'ur' ? 'PDF برآمد کریں' : 'Export PDF'}
+            {filteredPurchases.length > 0 && (
+              <Button variant="secondary" onClick={handlePrint} className="no-print">
+                🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
               </Button>
             )}
           </div>
-          {purchases.length === 0 ? (
+
+          {/* Filters Section */}
+          <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
+              {language === 'ur' ? 'فلٹرز' : 'Filters'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Customer Name Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ur' ? 'گاہک کا نام' : 'Customer Name'}
+                </label>
+                <select
+                  value={filterCustomerName}
+                  onChange={(e) => setFilterCustomerName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent text-sm"
+                >
+                  <option value="all">{language === 'ur' ? 'تمام' : 'All'}</option>
+                  {uniqueCustomerNames.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Product Name Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ur' ? 'مصنوعات' : 'Product'}
+                </label>
+                <select
+                  value={filterProductName}
+                  onChange={(e) => setFilterProductName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent text-sm"
+                >
+                  <option value="all">{language === 'ur' ? 'تمام' : 'All'}</option>
+                  {uniqueProductNames.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Start Date Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ur' ? 'شروع کی تاریخ' : 'Start Date'}
+                </label>
+                <input
+                  type="date"
+                  value={filterStartDate}
+                  onChange={(e) => setFilterStartDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent text-sm"
+                />
+              </div>
+
+              {/* End Date Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ur' ? 'آخر کی تاریخ' : 'End Date'}
+                </label>
+                <input
+                  type="date"
+                  value={filterEndDate}
+                  onChange={(e) => setFilterEndDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            {(filterCustomerName !== 'all' || filterProductName !== 'all' || filterStartDate || filterEndDate) && (
+              <div className="mt-4">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setFilterCustomerName('all');
+                    setFilterProductName('all');
+                    setFilterStartDate('');
+                    setFilterEndDate('');
+                  }}
+                  className="text-sm"
+                >
+                  {language === 'ur' ? 'فلٹرز صاف کریں' : 'Clear Filters'}
+                </Button>
+              </div>
+            )}
+          </div>
+          {filteredPurchases.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">{language === 'ur' ? 'کوئی خریداری نہیں ملی' : 'No purchases found'}</p>
             </div>
@@ -349,7 +482,7 @@ export default function Customers() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {purchases.map((purchase) => {
+                  {filteredPurchases.map((purchase) => {
                     const customer = customers.find((c) => c.id === purchase.customerId);
                     return (
                       <tr
@@ -452,6 +585,24 @@ export default function Customers() {
           }}
         />
       </Modal>
+
+      {/* Print Views - Only visible when printing */}
+      <div className="print-view" style={{ display: 'none' }}>
+        {activeTab === 'customers' ? (
+          <CustomerPrintView customers={customers} />
+        ) : (
+          <PurchasePrintView 
+            purchases={filteredPurchases} 
+            customers={customers}
+            filters={{
+              customerName: filterCustomerName !== 'all' ? filterCustomerName : undefined,
+              productName: filterProductName !== 'all' ? filterProductName : undefined,
+              startDate: filterStartDate || undefined,
+              endDate: filterEndDate || undefined,
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
