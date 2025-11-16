@@ -29,10 +29,10 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
         backgroundColor: '#E6A756',
         border: '2px solid black'
       }}>
-        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '14px' }}>
+        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '16px' }}>
           {bill.billNumber}
         </div>
-        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '16px', direction: 'rtl' }}>
+        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '18px', direction: 'rtl' }}>
           النور کیبل ہاؤس
         </div>
       </div>
@@ -47,13 +47,13 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
         backgroundColor: '#B8D7E8',
         border: '2px solid black'
       }}>
-        <div style={{ fontSize: '12px', color: '#000' }}>
+        <div style={{ fontSize: '14px', color: '#000' }}>
           تاریخ: {formattedDate}
         </div>
-        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '14px', flex: 1, textAlign: 'center' }}>
+        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '16px', flex: 1, textAlign: 'center' }}>
           {bill.customerName}
         </div>
-        <div style={{ fontSize: '12px', color: '#000' }}>
+        <div style={{ fontSize: '14px', color: '#000' }}>
           : نام خریدار
         </div>
       </div>
@@ -65,7 +65,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
           fontWeight: 'bold', 
           color: '#000', 
           textAlign: 'center',
-          fontSize: '14px',
+          fontSize: '16px',
           backgroundColor: '#B8D7E8',
           border: '2px solid black',
           borderBottom: 'none'
@@ -77,7 +77,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
           fontWeight: 'bold', 
           color: '#000', 
           textAlign: 'center',
-          fontSize: '14px',
+          fontSize: '16px',
           backgroundColor: '#E6A756',
           border: '2px solid black',
           borderLeft: 'none',
@@ -97,7 +97,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
           <tr>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -108,7 +108,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             </th>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -119,7 +119,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             </th>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -130,7 +130,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             </th>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -141,7 +141,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             </th>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -152,7 +152,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             </th>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -163,7 +163,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             </th>
             <th style={{ 
               padding: '4px 8px', 
-              fontSize: '11px',
+              fontSize: '14px',
               fontWeight: 'bold',
               color: '#000',
               border: '1px solid black',
@@ -179,7 +179,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             <tr key={index}>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -189,7 +189,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
               </td>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -199,7 +199,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
               </td>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -210,7 +210,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
               </td>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -220,7 +220,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
               </td>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -230,7 +230,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
               </td>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -240,7 +240,7 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
               </td>
               <td style={{ 
                 padding: '4px 8px', 
-                fontSize: '11px',
+                fontSize: '14px',
                 color: '#000',
                 border: '1px solid black',
                 textAlign: 'center',
@@ -253,13 +253,13 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
           ))}
           {/* Single empty row */}
           <tr>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', height: '24px', backgroundColor: '#fff' }}>&nbsp;</td>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
-            <td style={{ padding: '4px 8px', fontSize: '11px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', height: '24px', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
+            <td style={{ padding: '4px 8px', fontSize: '14px', border: '1px solid black', backgroundColor: '#fff' }}>&nbsp;</td>
           </tr>
         </tbody>
       </table>
@@ -274,17 +274,17 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
         border: '2px solid black',
         borderTop: 'none'
       }}>
-        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '14px' }}>
+        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '16px' }}>
           {bill.total.toLocaleString()}
         </div>
-        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '14px', direction: 'rtl' }}>
+        <div style={{ fontWeight: 'bold', color: '#000', fontSize: '16px', direction: 'rtl' }}>
           :ٹوٹل
         </div>
       </div>
 
       {/* Footer */}
       <div style={{ textAlign: 'center', marginTop: '4px' }}>
-        <p style={{ fontSize: '11px', color: '#000', margin: 0 }}>
+        <p style={{ fontSize: '14px', color: '#000', margin: 0 }}>
           {bill.address || 'بلائر موڑ سمال انڈسٹری واہ کینٹ'}
         </p>
       </div>

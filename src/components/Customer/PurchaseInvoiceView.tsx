@@ -73,23 +73,23 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
     }}>
       {/* Top Header Bar with Invoice Number and Company Name */}
       <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6A756', border: '2px solid black', marginBottom: '2px' }}>
-        <div className="font-bold text-black text-sm">No.{invoiceNum.replace('2024-ALN-', '')}</div>
-        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '16px' }}>النور کیبل ہاؤس</div>
+        <div className="font-bold text-black" style={{ fontSize: '16px' }}>No.{invoiceNum.replace('2024-ALN-', '')}</div>
+        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '18px' }}>النور کیبل ہاؤس</div>
       </div>
 
       {/* Second Header Bar with Customer Name and Date */}
       <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', marginBottom: '2px' }}>
-        <div className="text-xs text-black">{language === 'ur' ? `تاریخ: ${formattedDate}` : `Date: ${formattedDate}`}</div>
-        <div className="font-bold text-black text-center flex-1" style={{ direction: 'rtl' }}>{customer?.name || 'Unknown Customer'}</div>
-        <div className="text-xs text-black">{language === 'ur' ? 'نام خریدار:' : 'Customer Name:'}</div>
+        <div className="text-black" style={{ fontSize: '14px' }}>{language === 'ur' ? `تاریخ: ${formattedDate}` : `Date: ${formattedDate}`}</div>
+        <div className="font-bold text-black text-center flex-1" style={{ direction: 'rtl', fontSize: '16px' }}>{customer?.name || 'Unknown Customer'}</div>
+        <div className="text-black" style={{ fontSize: '14px' }}>{language === 'ur' ? 'نام خریدار:' : 'Customer Name:'}</div>
       </div>
 
       {/* Table Section Headers */}
       <div className="grid grid-cols-2 gap-0">
-        <div className="px-3 py-1 font-bold text-black text-center text-sm" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', borderBottom: 'none' }}>
+        <div className="px-3 py-1 font-bold text-black text-center" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', borderBottom: 'none', fontSize: '16px' }}>
           {language === 'ur' ? 'رقم' : 'Amount'}
         </div>
-        <div className="px-3 py-1 font-bold text-black text-center text-sm" style={{ backgroundColor: '#E6A756', border: '2px solid black', borderLeft: 'none', borderBottom: 'none' }}>
+        <div className="px-3 py-1 font-bold text-black text-center" style={{ backgroundColor: '#E6A756', border: '2px solid black', borderLeft: 'none', borderBottom: 'none', fontSize: '16px' }}>
           {language === 'ur' ? 'تفصیل' : 'Details'}
         </div>
       </div>
@@ -98,25 +98,25 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
       <table className="w-full" style={{ borderCollapse: 'collapse', border: '2px solid black' }}>
         <thead>
           <tr>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '8%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '8%', fontSize: '14px' }}>
               {language === 'ur' ? 'بنڈل' : 'Bundle'}
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '15%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '14px' }}>
               {language === 'ur' ? 'نام' : 'Name'}
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '15%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '14px' }}>
               {language === 'ur' ? 'تار' : 'Wire'}
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '12%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '12%', fontSize: '14px' }}>
               {language === 'ur' ? 'فٹ' : 'Feet'}
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '15%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '14px' }}>
               {language === 'ur' ? 'ٹوٹل فٹ' : 'Total Ft'}
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '12%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '12%', fontSize: '14px' }}>
               {language === 'ur' ? 'پٹ' : 'Rate'}
             </th>
-            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '18%' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '18%', fontSize: '14px' }}>
               {language === 'ur' ? 'رقم' : 'Amount'}
             </th>
           </tr>
@@ -124,50 +124,50 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
         <tbody>
           {/* Product Entry */}
           <tr>
-            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
               {purchase.quantityBundles.toFixed(0)}
             </td>
-            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
               {purchase.productName}
             </td>
-            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black', direction: 'rtl' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', direction: 'rtl', fontSize: '14px' }}>
               {purchase.productTara || '-'}
             </td>
-            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
               {feetPerBundle > 0 ? Math.round(feetPerBundle) : '-'}
             </td>
-            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
               {totalFeet > 0 ? Math.round(totalFeet) : '-'}
             </td>
-            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
               {ratePerFoot > 0 ? Math.round(ratePerFoot) : '-'}
             </td>
-            <td className="px-1 py-1 text-xs text-black text-center font-bold" style={{ border: '1px solid black' }}>
+            <td className="px-1 py-1 text-black text-center font-bold" style={{ border: '1px solid black', fontSize: '14px' }}>
               {totalAmount.toLocaleString()}
             </td>
           </tr>
           {/* Single empty row */}
           <tr>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black', height: '24px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', height: '24px', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
           </tr>
         </tbody>
       </table>
 
       {/* Total Section */}
       <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6E6E6', border: '2px solid black', borderTop: 'none' }}>
-        <div className="font-bold text-black">{totalAmount.toLocaleString()}</div>
-        <div className="font-bold text-black" style={{ direction: 'rtl' }}>{language === 'ur' ? ':ٹوٹل' : 'Total:'}</div>
+        <div className="font-bold text-black" style={{ fontSize: '16px' }}>{totalAmount.toLocaleString()}</div>
+        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '16px' }}>{language === 'ur' ? ':ٹوٹل' : 'Total:'}</div>
       </div>
 
       {/* Footer */}
       <div className="text-center" style={{ marginTop: '4px' }}>
-        <p className="text-xs text-black">{language === 'ur' ? 'بلائر موڑ سمال انڈسٹری واہ کینٹ' : 'Blair Mor Small Industry Wah Cantt'}</p>
+        <p className="text-black" style={{ fontSize: '14px' }}>{language === 'ur' ? 'بلائر موڑ سمال انڈسٹری واہ کینٹ' : 'Blair Mor Small Industry Wah Cantt'}</p>
       </div>
 
       {/* Print styles */}
