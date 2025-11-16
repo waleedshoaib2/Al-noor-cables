@@ -13,11 +13,10 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
     <div className="print-view" style={{ 
       fontFamily: 'Arial, sans-serif', 
       backgroundColor: '#ffffff', 
-      width: '100%',
-      maxWidth: '148mm',
+      width: '148mm',
       height: '210mm',
       margin: '0 auto',
-      padding: '8mm',
+      padding: '6mm',
       boxSizing: 'border-box'
     }}>
       {/* Top Header Bar with Bill Number and Company Name */}
@@ -297,12 +296,27 @@ export default function BillPrintView({ bill }: BillPrintViewProps) {
             size: A5 portrait;
             margin: 0;
           }
+          body {
+            margin: 0;
+            padding: 0;
+          }
           .print-view {
             width: 148mm !important;
             height: 210mm !important;
-            padding: 8mm !important;
+            min-height: 210mm !important;
+            max-height: 210mm !important;
+            padding: 6mm !important;
+            margin: 0 !important;
             page-break-after: always;
+            box-sizing: border-box !important;
           }
+          .no-print {
+            display: none !important;
+          }
+        }
+        @page {
+          size: A5 portrait;
+          margin: 0;
         }
       `}</style>
     </div>
