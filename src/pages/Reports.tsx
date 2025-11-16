@@ -18,7 +18,6 @@ type ReportCategory = 'all' | 'raw-materials' | 'processed-materials' | 'product
 
 export default function Reports() {
   const { t, language } = useTranslation();
-  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   
   const [reportType, setReportType] = useState<ReportType>('daily');
   const [reportCategory, setReportCategory] = useState<ReportCategory>('all');
@@ -239,16 +238,6 @@ export default function Reports() {
         <h1 className="text-3xl font-bold text-gray-900">
           {language === 'ur' ? 'پیشہ ورانہ رپورٹس' : 'Professional Reports'}
         </h1>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={toggleLanguage}
-            className="text-sm"
-            title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
-          >
-            {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
-          </Button>
-        </div>
       </div>
 
       {/* Report Filters */}

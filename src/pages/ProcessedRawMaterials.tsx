@@ -17,7 +17,6 @@ import { useCustomProcessedRawMaterialStore } from '@/store/useCustomProcessedRa
 
 export default function ProcessedRawMaterials() {
   const { t, language } = useTranslation();
-  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   const processedMaterials = useProcessedRawMaterialStore(
     (state) => state.processedMaterials
   );
@@ -197,14 +196,6 @@ export default function ProcessedRawMaterials() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">{t('title', 'processedMaterial')}</h1>
         <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={toggleLanguage}
-            className="text-sm"
-            title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
-          >
-            {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
-          </Button>
           <Button variant="secondary" onClick={handleAddCustomMaterial}>
             {t('manageCustomMaterials', 'processedMaterial')}
           </Button>

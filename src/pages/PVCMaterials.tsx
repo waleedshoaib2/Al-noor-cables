@@ -14,7 +14,6 @@ import type { PVCMaterial, CustomPVCMaterial } from '@/types';
 
 export default function PVCMaterials() {
   const { t, language } = useTranslation();
-  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   const pvcMaterials = usePVCMaterialStore((state) => state.pvcMaterials);
   const deletePVCMaterial = usePVCMaterialStore((state) => state.deletePVCMaterial);
   const getTotalQuantity = usePVCMaterialStore((state) => state.getTotalQuantity);
@@ -94,14 +93,6 @@ export default function PVCMaterials() {
           {language === 'ur' ? 'PVC مواد' : 'PVC Materials'}
         </h1>
         <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={toggleLanguage}
-            className="text-sm"
-            title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
-          >
-            {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
-          </Button>
           <Button variant="secondary" onClick={handleManageCustomMaterials}>
             {language === 'ur' ? 'کسٹم مواد مینج کریں' : 'Manage Custom Materials'}
           </Button>

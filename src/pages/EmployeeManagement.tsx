@@ -11,7 +11,6 @@ import type { Employee, DailyPayout } from '@/types';
 
 export default function EmployeeManagement() {
   const { t, language } = useTranslation();
-  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   const employees = useEmployeeStore((state) => state.employees);
   const addEmployee = useEmployeeStore((state) => state.addEmployee);
   const updateEmployee = useEmployeeStore((state) => state.updateEmployee);
@@ -105,14 +104,6 @@ export default function EmployeeManagement() {
           {language === 'ur' ? 'ملازمین کا انتظام' : 'Employee Management'}
         </h1>
         <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={toggleLanguage}
-            className="text-sm"
-            title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
-          >
-            {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
-          </Button>
           <Button variant="primary" onClick={handleAddEmployee}>
             {language === 'ur' ? '+ ملازم شامل کریں' : '+ Add Employee'}
           </Button>

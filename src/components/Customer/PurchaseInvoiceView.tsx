@@ -68,28 +68,28 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
       width: '148mm',
       height: '210mm',
       margin: '0 auto',
-      padding: '6mm',
+      padding: '3mm',
       boxSizing: 'border-box'
     }}>
       {/* Top Header Bar with Invoice Number and Company Name */}
-      <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6A756', border: '2px solid black', marginBottom: '2px' }}>
-        <div className="font-bold text-black" style={{ fontSize: '16px' }}>No.{invoiceNum.replace('2024-ALN-', '')}</div>
-        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '18px' }}>النور کیبل ہاؤس</div>
+      <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6A756', border: '2px solid black', marginBottom: '2px', marginTop: '0' }}>
+        <div className="font-bold text-black" style={{ fontSize: '18px' }}>No.{invoiceNum.replace('2024-ALN-', '')}</div>
+        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '20px' }}>النور کیبل ہاؤس</div>
       </div>
 
       {/* Second Header Bar with Customer Name and Date */}
       <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', marginBottom: '2px' }}>
-        <div className="text-black" style={{ fontSize: '14px' }}>{language === 'ur' ? `تاریخ: ${formattedDate}` : `Date: ${formattedDate}`}</div>
-        <div className="font-bold text-black text-center flex-1" style={{ direction: 'rtl', fontSize: '16px' }}>{customer?.name || 'Unknown Customer'}</div>
-        <div className="text-black" style={{ fontSize: '14px' }}>{language === 'ur' ? 'نام خریدار:' : 'Customer Name:'}</div>
+        <div className="text-black" style={{ fontSize: '15px' }}>{language === 'ur' ? `تاریخ: ${formattedDate}` : `Date: ${formattedDate}`}</div>
+        <div className="font-bold text-black text-center flex-1" style={{ direction: 'rtl', fontSize: '18px' }}>{customer?.name || 'Unknown Customer'}</div>
+        <div className="text-black" style={{ fontSize: '15px' }}>{language === 'ur' ? 'نام خریدار:' : 'Customer Name:'}</div>
       </div>
 
       {/* Table Section Headers */}
       <div className="grid grid-cols-2 gap-0">
-        <div className="px-3 py-1 font-bold text-black text-center" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', borderBottom: 'none', fontSize: '16px' }}>
+        <div className="px-3 py-1 font-bold text-black text-center" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', borderBottom: 'none', fontSize: '18px' }}>
           {language === 'ur' ? 'رقم' : 'Amount'}
         </div>
-        <div className="px-3 py-1 font-bold text-black text-center" style={{ backgroundColor: '#E6A756', border: '2px solid black', borderLeft: 'none', borderBottom: 'none', fontSize: '16px' }}>
+        <div className="px-3 py-1 font-bold text-black text-center" style={{ backgroundColor: '#E6A756', border: '2px solid black', borderLeft: 'none', borderBottom: 'none', fontSize: '18px' }}>
           {language === 'ur' ? 'تفصیل' : 'Details'}
         </div>
       </div>
@@ -98,95 +98,88 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
       <table className="w-full" style={{ borderCollapse: 'collapse', border: '2px solid black' }}>
         <thead>
           <tr>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '8%', fontSize: '14px' }}>
-              {language === 'ur' ? 'بنڈل' : 'Bundle'}
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '18%', fontSize: '15px' }}>
+              {language === 'ur' ? 'رقم' : 'Amount'}
             </th>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '14px' }}>
-              {language === 'ur' ? 'نام' : 'Name'}
-            </th>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '14px' }}>
-              {language === 'ur' ? 'تار' : 'Wire'}
-            </th>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '12%', fontSize: '14px' }}>
-              {language === 'ur' ? 'فٹ' : 'Feet'}
-            </th>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '14px' }}>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '15px' }}>
               {language === 'ur' ? 'ٹوٹل فٹ' : 'Total Ft'}
             </th>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '12%', fontSize: '14px' }}>
-              {language === 'ur' ? 'پٹ' : 'Rate'}
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '12%', fontSize: '15px' }}>
+              {language === 'ur' ? 'فٹ' : 'Feet'}
             </th>
-            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '18%', fontSize: '14px' }}>
-              {language === 'ur' ? 'رقم' : 'Amount'}
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '15px' }}>
+              {language === 'ur' ? 'تار' : 'Wire'}
+            </th>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '15%', fontSize: '15px' }}>
+              {language === 'ur' ? 'نام' : 'Name'}
+            </th>
+            <th className="px-1 py-1 font-bold text-black text-center" style={{ border: '1px solid black', width: '8%', fontSize: '15px' }}>
+              {language === 'ur' ? 'بنڈل' : 'Bundle'}
             </th>
           </tr>
         </thead>
         <tbody>
           {/* Product Entry */}
           <tr>
-            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
-              {purchase.quantityBundles.toFixed(0)}
+            <td className="px-1 py-1 text-black text-center font-bold" style={{ border: '1px solid black', fontSize: '15px' }}>
+              {totalAmount.toLocaleString()}
             </td>
-            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
-              {purchase.productName}
-            </td>
-            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', direction: 'rtl', fontSize: '14px' }}>
-              {purchase.productTara || '-'}
-            </td>
-            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
-              {feetPerBundle > 0 ? Math.round(feetPerBundle) : '-'}
-            </td>
-            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '15px' }}>
               {totalFeet > 0 ? Math.round(totalFeet) : '-'}
             </td>
-            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '14px' }}>
-              {ratePerFoot > 0 ? Math.round(ratePerFoot) : '-'}
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '15px' }}>
+              {feetPerBundle > 0 ? Math.round(feetPerBundle) : '-'}
             </td>
-            <td className="px-1 py-1 text-black text-center font-bold" style={{ border: '1px solid black', fontSize: '14px' }}>
-              {totalAmount.toLocaleString()}
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', direction: 'rtl', fontSize: '15px' }}>
+              {purchase.productTara || '-'}
+            </td>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '15px' }}>
+              {purchase.productName}
+            </td>
+            <td className="px-1 py-1 text-black text-center" style={{ border: '1px solid black', fontSize: '15px' }}>
+              {purchase.quantityBundles.toFixed(0)}
             </td>
           </tr>
           {/* Single empty row */}
           <tr>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', height: '24px', fontSize: '14px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
-            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '14px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '15px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '15px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '15px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '15px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', fontSize: '15px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-black" style={{ border: '1px solid black', height: '24px', fontSize: '15px' }}>&nbsp;</td>
           </tr>
         </tbody>
       </table>
 
       {/* Total Section */}
       <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6E6E6', border: '2px solid black', borderTop: 'none' }}>
-        <div className="font-bold text-black" style={{ fontSize: '16px' }}>{totalAmount.toLocaleString()}</div>
-        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '16px' }}>{language === 'ur' ? ':ٹوٹل' : 'Total:'}</div>
+        <div className="font-bold text-black" style={{ fontSize: '18px' }}>{totalAmount.toLocaleString()}</div>
+        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '18px' }}>{language === 'ur' ? ':ٹوٹل' : 'Total:'}</div>
       </div>
 
       {/* Footer */}
       <div className="text-center" style={{ marginTop: '4px' }}>
-        <p className="text-black" style={{ fontSize: '14px' }}>{language === 'ur' ? 'بلائر موڑ سمال انڈسٹری واہ کینٹ' : 'Blair Mor Small Industry Wah Cantt'}</p>
+        <p className="text-black" style={{ fontSize: '15px' }}>{language === 'ur' ? 'بلائر موڑ سمال انڈسٹری واہ کینٹ' : 'Blair Mor Small Industry Wah Cantt'}</p>
       </div>
 
       {/* Print styles */}
       <style>{`
         @media print {
           @page {
-            size: A5 portrait;
-            margin: 0;
+            margin: 3mm;
           }
-          body {
+          html, body {
             margin: 0;
             padding: 0;
           }
           .print-view {
-            width: 148mm !important;
-            height: 210mm !important;
-            min-height: 210mm !important;
-            max-height: 210mm !important;
-            padding: 6mm !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
+            padding: 3mm !important;
             margin: 0 !important;
             page-break-after: always;
             box-sizing: border-box !important;
@@ -196,8 +189,31 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
           }
         }
         @page {
-          size: A5 portrait;
-          margin: 0;
+          margin: 3mm;
+        }
+        
+        /* A5 specific */
+        @media print and (width: 148mm) and (height: 210mm) {
+          @page {
+            size: A5 portrait;
+            margin: 3mm;
+          }
+          .print-view {
+            padding: 3mm !important;
+          }
+        }
+        
+        /* Letter size specific */
+        @media print and (width: 8.5in) and (height: 11in) {
+          @page {
+            size: letter portrait;
+            margin: 5mm;
+          }
+          .print-view {
+            padding: 5mm !important;
+            max-width: 148mm !important;
+            margin: 0 auto !important;
+          }
         }
       `}</style>
     </div>

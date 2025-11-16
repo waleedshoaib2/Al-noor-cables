@@ -14,7 +14,6 @@ import { format } from 'date-fns';
 
 export default function Customers() {
   const { t, language } = useTranslation();
-  const toggleLanguage = useLanguageStore((state) => state.toggleLanguage);
   
   // Customer store
   const customers = useCustomerStore((state) => state.customers);
@@ -226,16 +225,6 @@ export default function Customers() {
     <div className="space-y-6" dir={language === 'ur' ? 'rtl' : 'ltr'}>
       <div className="flex justify-between items-center no-print">
         <h1 className="text-2xl font-bold text-gray-900">{t('title', 'customer')}</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={toggleLanguage}
-            className="text-sm"
-            title={language === 'en' ? 'Switch to Urdu' : 'Switch to English'}
-          >
-            {language === 'en' ? '🇵🇰 اردو' : '🇬🇧 English'}
-          </Button>
-        </div>
       </div>
 
       {/* Tabs */}
@@ -452,12 +441,6 @@ export default function Customers() {
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => handlePrintInvoice(purchase.id, purchase.customerId)}
-                              className="text-brand-blue hover:text-brand-blue-dark font-medium"
-                            >
-                              🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
-                            </button>
                             <button
                               onClick={() => handleDeletePurchase(purchase.id)}
                               className="text-red-600 hover:text-red-800 font-medium"
