@@ -62,149 +62,130 @@ export default function PurchaseInvoiceView({ purchase, customer, invoiceNumber 
   const amountInWords = numberToWords(Math.floor(totalAmount)) + ' RUPEES ONLY';
 
   return (
-    <div className="print-view p-10" style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#ffffff' }}>
-      {/* Header */}
-      <div className="mb-8 pb-6 border-b-2 border-black">
-        <div className="flex justify-between items-start mb-6">
-                <div className="flex-1">
-                  <h1 className="text-4xl font-bold mb-2 text-black">
-                    {language === 'ur' ? 'بل' : 'Work Order Invoice'}
-                  </h1>
-                  <p className="text-3xl text-black font-bold">Al Noor Cables</p>
-                </div>
-          <div className="text-right" style={{ minWidth: '200px' }}>
-            <div className="bg-gray-50 p-4 rounded-lg border border-black">
-              <div className="text-xs font-bold text-black uppercase mb-2">
-                {language === 'ur' ? 'بل نمبر' : 'Invoice Number'}
-              </div>
-              <div className="text-lg font-bold text-black">#{invoiceNum}</div>
-                    <div className="text-xs font-bold text-black uppercase mt-3 mb-1">
-                      {language === 'ur' ? 'بل کی تاریخ' : 'Invoice Date'}
-                    </div>
-                    <div className="text-sm text-black font-bold">{formattedDate}</div>
-            </div>
-          </div>
+    <div className="print-view" style={{ 
+      fontFamily: 'Arial, sans-serif', 
+      backgroundColor: '#ffffff', 
+      width: '100%',
+      maxWidth: '148mm',
+      height: '210mm',
+      margin: '0 auto',
+      padding: '8mm',
+      boxSizing: 'border-box'
+    }}>
+      {/* Top Header Bar with Invoice Number and Company Name */}
+      <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6A756', border: '2px solid black', marginBottom: '2px' }}>
+        <div className="font-bold text-black text-sm">No.{invoiceNum.replace('2024-ALN-', '')}</div>
+        <div className="font-bold text-black" style={{ direction: 'rtl', fontSize: '16px' }}>النور کیبل ہاؤس</div>
+      </div>
+
+      {/* Second Header Bar with Customer Name and Date */}
+      <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', marginBottom: '2px' }}>
+        <div className="text-xs text-black">{language === 'ur' ? `تاریخ: ${formattedDate}` : `Date: ${formattedDate}`}</div>
+        <div className="font-bold text-black text-center flex-1" style={{ direction: 'rtl' }}>{customer?.name || 'Unknown Customer'}</div>
+        <div className="text-xs text-black">{language === 'ur' ? 'نام خریدار:' : 'Customer Name:'}</div>
+      </div>
+
+      {/* Table Section Headers */}
+      <div className="grid grid-cols-2 gap-0">
+        <div className="px-3 py-1 font-bold text-black text-center text-sm" style={{ backgroundColor: '#B8D7E8', border: '2px solid black', borderBottom: 'none' }}>
+          {language === 'ur' ? 'رقم' : 'Amount'}
+        </div>
+        <div className="px-3 py-1 font-bold text-black text-center text-sm" style={{ backgroundColor: '#E6A756', border: '2px solid black', borderLeft: 'none', borderBottom: 'none' }}>
+          {language === 'ur' ? 'تفصیل' : 'Details'}
         </div>
       </div>
 
-      {/* Billed By / Billed To Sections */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        {/* Billed By */}
-        <div className="p-5 rounded-lg border-2 border-black bg-white">
-          <h3 className="text-lg font-bold mb-3 text-black">
-            {language === 'ur' ? 'بل دینے والا' : 'Billed By'}
-          </h3>
-                <div className="text-sm text-black space-y-1">
-                  <p className="font-bold">Al Noor Cables</p>
-                  <p className="font-bold">Bahatar Mor</p>
-                  <p className="font-bold">Wah Cantt, Pakistan</p>
-                  <p className="mt-3 text-xs font-bold">
-                    {language === 'ur' ? 'فون:' : 'Phone:'} +92 319 3374381
-                  </p>
-                </div>
-        </div>
+      {/* Main Table */}
+      <table className="w-full" style={{ borderCollapse: 'collapse', border: '2px solid black' }}>
+        <thead>
+          <tr>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '8%' }}>
+              {language === 'ur' ? 'بنڈل' : 'Bundle'}
+            </th>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '15%' }}>
+              {language === 'ur' ? 'نام' : 'Name'}
+            </th>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '15%' }}>
+              {language === 'ur' ? 'تار' : 'Wire'}
+            </th>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '12%' }}>
+              {language === 'ur' ? 'فٹ' : 'Feet'}
+            </th>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '15%' }}>
+              {language === 'ur' ? 'ٹوٹل فٹ' : 'Total Ft'}
+            </th>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '12%' }}>
+              {language === 'ur' ? 'پٹ' : 'Rate'}
+            </th>
+            <th className="px-1 py-1 text-xs font-bold text-black text-center" style={{ border: '1px solid black', width: '18%' }}>
+              {language === 'ur' ? 'رقم' : 'Amount'}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Product Entry */}
+          <tr>
+            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+              {purchase.quantityBundles.toFixed(0)}
+            </td>
+            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+              {purchase.productName}
+            </td>
+            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black', direction: 'rtl' }}>
+              {purchase.productTara || '-'}
+            </td>
+            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+              {feetPerBundle > 0 ? Math.round(feetPerBundle) : '-'}
+            </td>
+            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+              {totalFeet > 0 ? Math.round(totalFeet) : '-'}
+            </td>
+            <td className="px-1 py-1 text-xs text-black text-center" style={{ border: '1px solid black' }}>
+              {ratePerFoot > 0 ? Math.round(ratePerFoot) : '-'}
+            </td>
+            <td className="px-1 py-1 text-xs text-black text-center font-bold" style={{ border: '1px solid black' }}>
+              {totalAmount.toLocaleString()}
+            </td>
+          </tr>
+          {/* Single empty row */}
+          <tr>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black', height: '24px' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+            <td className="px-1 py-1 text-xs text-black" style={{ border: '1px solid black' }}>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
 
-        {/* Billed To */}
-        <div className="p-5 rounded-lg border-2 border-black bg-white">
-          <h3 className="text-lg font-bold mb-3 text-black">
-            {language === 'ur' ? 'بل وصول کنندہ' : 'Billed To'}
-          </h3>
-          <div className="text-sm text-black space-y-1">
-            <p className="font-bold">{customer?.name || 'Unknown Customer'}</p>
-            {customer?.address && <p className="font-bold">{customer.address}</p>}
-            {customer?.phone && (
-              <p className="mt-3 text-xs font-bold">
-                {language === 'ur' ? 'فون:' : 'Phone:'} {customer.phone}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Itemized Table */}
-      <div className="mb-8">
-        <table className="w-full border-collapse border-2 border-black" style={{ borderSpacing: 0 }}>
-          <thead>
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-bold text-black border-2 border-black">
-                {language === 'ur' ? 'آئٹم' : 'Item'}
-              </th>
-              <th className="px-4 py-3 text-center text-sm font-bold text-black border-2 border-black">
-                {language === 'ur' ? 'مقدار' : 'Quantity'}
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-bold text-black border-2 border-black">
-                {language === 'ur' ? 'ریٹ' : 'Rate'}
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-bold text-black border-2 border-black">
-                {language === 'ur' ? 'رقم' : 'Amount'}
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-bold text-black border-2 border-black">
-                {language === 'ur' ? 'کل' : 'Total'}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="px-4 py-3 text-sm text-black border-2 border-black">
-                <div className="font-bold">{purchase.productName}</div>
-                <div className="text-xs font-bold mt-1">
-                  {language === 'ur' ? 'تار:' : 'Wire:'} {purchase.productTara || '-'} | {language === 'ur' ? 'فٹ:' : 'Feet:'} {totalFeet > 0 ? Math.round(totalFeet).toLocaleString() : '-'}
-                </div>
-              </td>
-              <td className="px-4 py-3 text-sm text-black text-center border-2 border-black font-bold">
-                {purchase.quantityBundles.toFixed(0)} {language === 'ur' ? 'بنڈل' : 'bundles'}
-              </td>
-              <td className="px-4 py-3 text-sm text-black text-right border-2 border-black font-bold">
-                {ratePerFoot > 0 ? `PKR ${Math.round(ratePerFoot).toLocaleString()}/${language === 'ur' ? 'فٹ' : 'ft'}` : '-'}
-              </td>
-              <td className="px-4 py-3 text-sm text-black text-right border-2 border-black font-bold">
-                PKR {totalAmount.toLocaleString()}.00
-              </td>
-              <td className="px-4 py-3 text-sm text-black text-right border-2 border-black font-bold">
-                PKR {totalAmount.toLocaleString()}.00
-              </td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={3} className="px-4 py-3 text-sm font-bold text-black border-2 border-black">
-                {language === 'ur' ? 'کل' : 'Total'}
-              </td>
-              <td className="px-4 py-3 text-sm font-bold text-black text-right border-2 border-black">
-                PKR {totalAmount.toLocaleString()}.00
-              </td>
-              <td className="px-4 py-3 text-sm font-bold text-black text-right border-2 border-black">
-                PKR {totalAmount.toLocaleString()}.00
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-            {/* Summary Section */}
-            <div className="mb-6">
-              <p className="text-sm text-black mb-2 font-bold">
-                <span className="font-bold">{language === 'ur' ? 'کل (الفاظ میں):' : 'Total (in words):'}</span>{' '}
-                <span className="uppercase font-bold">{amountInWords}</span>
-              </p>
-            </div>
-
-      {/* Final Total */}
-      <div className="border-t-2 border-black pt-4">
-        <div className="flex justify-between items-center">
-          <span className="text-xl font-bold text-black">
-            {language === 'ur' ? 'کل (PKR)' : 'Total (PKR)'}
-          </span>
-          <span className="text-2xl font-bold text-black">
-            PKR {totalAmount.toLocaleString()}.00
-          </span>
-        </div>
+      {/* Total Section */}
+      <div className="flex justify-between items-center px-3 py-1" style={{ backgroundColor: '#E6E6E6', border: '2px solid black', borderTop: 'none' }}>
+        <div className="font-bold text-black">{totalAmount.toLocaleString()}</div>
+        <div className="font-bold text-black" style={{ direction: 'rtl' }}>{language === 'ur' ? ':ٹوٹل' : 'Total:'}</div>
       </div>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-black text-center text-xs text-black font-bold">
-        <p>Al Noor Cables - {language === 'ur' ? 'بہاتر موڑ واہ کینٹ' : 'Bahatar Mor Wah Cantt'}</p>
+      <div className="text-center" style={{ marginTop: '4px' }}>
+        <p className="text-xs text-black">{language === 'ur' ? 'بلائر موڑ سمال انڈسٹری واہ کینٹ' : 'Blair Mor Small Industry Wah Cantt'}</p>
       </div>
+
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          @page {
+            size: A5 portrait;
+            margin: 0;
+          }
+          .print-view {
+            width: 148mm !important;
+            height: 210mm !important;
+            padding: 8mm !important;
+            page-break-after: always;
+          }
+        }
+      `}</style>
     </div>
   );
 }
