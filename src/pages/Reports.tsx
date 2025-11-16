@@ -5,6 +5,7 @@ import { useProductStore } from '@/store/useProductStore';
 import { useCustomerPurchaseStore } from '@/store/useCustomerPurchaseStore';
 import { useCustomerStore } from '@/store/useCustomerStore';
 import { useExpenseStore } from '@/store/useExpenseStore';
+import { useBillStore } from '@/store/useBillStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/Common/Button';
@@ -37,6 +38,7 @@ export default function Reports() {
   const processedMaterials = useProcessedRawMaterialStore((state) => state.processedMaterials);
   const productions = useProductStore((state) => state.productions);
   const purchases = useCustomerPurchaseStore((state) => state.purchases);
+  const bills = useBillStore((state) => state.bills);
   const expenses = useExpenseStore((state) => state.expenses);
   const customers = useCustomerStore((state) => state.customers);
   const getAllProcessedMaterialNames = useProcessedRawMaterialStore((state) => state.getAllProcessedMaterialNames);
@@ -108,6 +110,14 @@ export default function Reports() {
       return purchaseDate >= start && purchaseDate <= end;
     });
   }, [purchases, reportCategory, start, end]);
+
+  const filteredBills = useMemo(() => {
+    return bills.filter((b) => {
+      if (reportCategory !== 'all' && reportCategory !== 'purchases') return false;
+      const billDate = new Date(b.date);
+      return billDate >= start && billDate <= end;
+    });
+  }, [bills, reportCategory, start, end]);
 
   const filteredExpenses = useMemo(() => {
     return expenses.filter((e) => {
@@ -186,8 +196,10 @@ export default function Reports() {
   const totalProductsFoot = filteredProductions.reduce((sum, p) => sum + p.quantityFoot, 0);
   const totalProductsBundles = filteredProductions.reduce((sum, p) => sum + p.quantityBundles, 0);
   const totalPurchases = filteredPurchases.reduce((sum, p) => sum + (p.price || 0), 0);
+  const totalBills = filteredBills.reduce((sum, b) => sum + (b.total || 0), 0);
+  const totalSales = totalPurchases + totalBills; // Combined sales from purchases and bills
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const netProfit = totalPurchases - totalExpenses;
+  const netProfit = totalSales - totalExpenses;
 
   // Print handler
   const handlePrint = () => {
@@ -416,78 +428,86 @@ export default function Reports() {
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {(reportCategory === 'all' || reportCategory === 'raw-materials') && (
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border-2 border-orange-200">
-              <div className="text-sm font-semibold text-orange-700 mb-2">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border-2 border-orange-200 hover:shadow-lg transition-shadow duration-300">
+              <div className="text-sm font-semibold text-orange-700 mb-2 uppercase tracking-wide">
                 {language === 'ur' ? 'کل خام مال' : 'Total Raw Materials'}
               </div>
-              <div className="text-3xl font-bold text-orange-900">{totalRawMaterials.toFixed(2)} kgs</div>
-              <div className="text-xs text-orange-600 mt-2">
+              <div className="text-3xl font-bold text-orange-900 mb-1">{totalRawMaterials.toFixed(2)} kgs</div>
+              <div className="text-xs text-orange-600">
                 {filteredRawMaterials.length} {language === 'ur' ? 'بیچز' : 'batches'}
               </div>
             </div>
           )}
           {(reportCategory === 'all' || reportCategory === 'processed-materials') && (
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
-              <div className="text-sm font-semibold text-blue-700 mb-2">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200 hover:shadow-lg transition-shadow duration-300">
+              <div className="text-sm font-semibold text-blue-700 mb-2 uppercase tracking-wide">
                 {language === 'ur' ? 'کل پروسیسڈ مال' : 'Total Processed Materials'}
               </div>
-              <div className="text-3xl font-bold text-blue-900">{totalProcessedMaterials.toFixed(2)} kgs</div>
-              <div className="text-xs text-blue-600 mt-2">
+              <div className="text-3xl font-bold text-blue-900 mb-1">{totalProcessedMaterials.toFixed(2)} kgs</div>
+              <div className="text-xs text-blue-600">
                 {filteredProcessedMaterials.length} {language === 'ur' ? 'بیچز' : 'batches'}
               </div>
             </div>
           )}
           {(reportCategory === 'all' || reportCategory === 'products') && (
             <>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border-2 border-green-200">
-                <div className="text-sm font-semibold text-green-700 mb-2">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border-2 border-green-200 hover:shadow-lg transition-shadow duration-300">
+                <div className="text-sm font-semibold text-green-700 mb-2 uppercase tracking-wide">
                   {language === 'ur' ? 'کل مصنوعات (فٹ)' : 'Total Products (Foot)'}
                 </div>
-                <div className="text-3xl font-bold text-green-900">{totalProductsFoot.toFixed(2)}</div>
-                <div className="text-xs text-green-600 mt-2">
+                <div className="text-3xl font-bold text-green-900 mb-1">{totalProductsFoot.toFixed(2)}</div>
+                <div className="text-xs text-green-600">
                   {filteredProductions.length} {language === 'ur' ? 'پروڈکشنز' : 'productions'}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border-2 border-emerald-200">
-                <div className="text-sm font-semibold text-emerald-700 mb-2">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border-2 border-emerald-200 hover:shadow-lg transition-shadow duration-300">
+                <div className="text-sm font-semibold text-emerald-700 mb-2 uppercase tracking-wide">
                   {language === 'ur' ? 'کل مصنوعات (بنڈلز)' : 'Total Products (Bundles)'}
                 </div>
-                <div className="text-3xl font-bold text-emerald-900">{totalProductsBundles.toFixed(2)}</div>
-                <div className="text-xs text-emerald-600 mt-2">
+                <div className="text-3xl font-bold text-emerald-900 mb-1">{totalProductsBundles.toFixed(2)}</div>
+                <div className="text-xs text-emerald-600">
                   {filteredProductions.length} {language === 'ur' ? 'پروڈکشنز' : 'productions'}
                 </div>
               </div>
             </>
           )}
           {(reportCategory === 'all' || reportCategory === 'purchases') && (
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200">
-              <div className="text-sm font-semibold text-purple-700 mb-2">
-                {language === 'ur' ? 'کل خریداری' : 'Total Purchases'}
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200 hover:shadow-lg transition-shadow duration-300">
+              <div className="text-sm font-semibold text-purple-700 mb-2 uppercase tracking-wide">
+                {language === 'ur' ? 'کل فروخت' : 'Total Sales'}
               </div>
-              <div className="text-3xl font-bold text-purple-900">{formatCurrency(totalPurchases)}</div>
-              <div className="text-xs text-purple-600 mt-2">
-                {filteredPurchases.length} {language === 'ur' ? 'خریداری' : 'purchases'}
+              <div className="text-3xl font-bold text-purple-900 mb-1">{formatCurrency(totalSales)}</div>
+              <div className="text-xs text-purple-600">
+                {filteredPurchases.length + filteredBills.length} {language === 'ur' ? 'لین دین' : 'transactions'}
+              </div>
+              <div className="text-xs text-purple-500 mt-1">
+                {language === 'ur' ? 
+                  `(${filteredPurchases.length} خریداری + ${filteredBills.length} بل)` : 
+                  `(${filteredPurchases.length} purchases + ${filteredBills.length} bills)`}
               </div>
             </div>
           )}
           {(reportCategory === 'all' || reportCategory === 'expenses') && (
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border-2 border-red-200">
-              <div className="text-sm font-semibold text-red-700 mb-2">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border-2 border-red-200 hover:shadow-lg transition-shadow duration-300">
+              <div className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
                 {language === 'ur' ? 'کل اخراجات' : 'Total Expenses'}
               </div>
-              <div className="text-3xl font-bold text-red-900">{formatCurrency(totalExpenses)}</div>
-              <div className="text-xs text-red-600 mt-2">
+              <div className="text-3xl font-bold text-red-900 mb-1">{formatCurrency(totalExpenses)}</div>
+              <div className="text-xs text-red-600">
                 {filteredExpenses.length} {language === 'ur' ? 'خرچ' : 'expenses'}
               </div>
             </div>
           )}
           {reportCategory === 'all' && (
-            <div className={`bg-gradient-to-br p-6 rounded-xl border-2 ${netProfit >= 0 ? 'from-green-50 to-green-100 border-green-200' : 'from-red-50 to-red-100 border-red-200'}`}>
-              <div className={`text-sm font-semibold mb-2 ${netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+            <div className={`bg-gradient-to-br p-6 rounded-xl border-2 hover:shadow-lg transition-shadow duration-300 ${netProfit >= 0 ? 'from-green-50 to-green-100 border-green-200' : 'from-red-50 to-red-100 border-red-200'}`}>
+              <div className={`text-sm font-semibold mb-2 uppercase tracking-wide ${netProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                 {language === 'ur' ? 'خالص منافع' : 'Net Profit'}
               </div>
-              <div className={`text-3xl font-bold ${netProfit >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+              <div className={`text-3xl font-bold mb-1 ${netProfit >= 0 ? 'text-green-900' : 'text-red-900'}`}>
                 {formatCurrency(netProfit)}
+              </div>
+              <div className={`text-xs ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {netProfit >= 0 ? (language === 'ur' ? 'منافع میں' : 'In Profit') : (language === 'ur' ? 'نقصان میں' : 'In Loss')}
               </div>
             </div>
           )}
@@ -699,7 +719,7 @@ export default function Reports() {
         {(reportCategory === 'all' || reportCategory === 'purchases') && filteredPurchases.length > 0 && (
           <div className="mb-8">
             <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
-              {language === 'ur' ? 'خریداری کی تفصیلات' : 'Purchases Details'}
+              {language === 'ur' ? 'خریداری کی تفصیلات' : 'Customer Purchases Details'}
             </h3>
             <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
               <table className="w-full border-collapse">
@@ -707,21 +727,59 @@ export default function Reports() {
                   <tr>
                     <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'گاہک' : 'Customer'}</th>
                     <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مصنوعات' : 'Product'}</th>
-                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مقدار' : 'Quantity'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'مقدار (بنڈلز)' : 'Quantity (Bundles)'}</th>
                     <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'قیمت' : 'Price'}</th>
                     <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPurchases.map((p) => (
-                    <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-6">{p.customerId}</td>
-                      <td className="py-3 px-6">{p.productName}</td>
-                      <td className="py-3 px-6">{p.quantityBundles.toFixed(2)}</td>
-                      <td className="py-3 px-6 font-semibold">{formatCurrency(p.price || 0)}</td>
-                      <td className="py-3 px-6">{formatDate(p.date)}</td>
-                    </tr>
-                  ))}
+                  {filteredPurchases.map((p) => {
+                    const customer = customers.find(c => c.id === p.customerId);
+                    return (
+                      <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-6 font-medium">{customer?.name || 'Unknown Customer'}</td>
+                        <td className="py-3 px-6">{p.productName}</td>
+                        <td className="py-3 px-6">{p.quantityBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'}</td>
+                        <td className="py-3 px-6 font-semibold text-green-600">{formatCurrency(p.price || 0)}</td>
+                        <td className="py-3 px-6">{formatDate(p.date)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {(reportCategory === 'all' || reportCategory === 'purchases') && filteredBills.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
+              {language === 'ur' ? 'بل کی تفصیلات' : 'Bills Details'}
+            </h3>
+            <div className="overflow-x-auto rounded-lg border-2 border-gray-300 shadow-md">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-800">
+                  <tr>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'بل نمبر' : 'Bill Number'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'گاہک کا نام' : 'Customer Name'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'اشیاء' : 'Items'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'کل رقم' : 'Total Amount'}</th>
+                    <th className="text-left py-4 px-6 font-bold text-white uppercase tracking-wider text-sm">{language === 'ur' ? 'تاریخ' : 'Date'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBills.map((b) => {
+                    const itemCount = Array.isArray(b.items) ? b.items.length : 0;
+                    return (
+                      <tr key={b.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-6 font-medium">{b.billNumber}</td>
+                        <td className="py-3 px-6">{b.customerName}</td>
+                        <td className="py-3 px-6 text-gray-600">{itemCount} {language === 'ur' ? 'اشیاء' : 'items'}</td>
+                        <td className="py-3 px-6 font-semibold text-green-600">{formatCurrency(b.total || 0)}</td>
+                        <td className="py-3 px-6">{formatDate(b.date)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -787,6 +845,7 @@ export default function Reports() {
           filteredProcessedMaterials={filteredProcessedMaterials}
           filteredProductions={filteredProductions}
           filteredPurchases={filteredPurchases}
+          filteredBills={filteredBills}
           filteredExpenses={filteredExpenses}
           rawMaterialStats={rawMaterialStats}
           processedMaterialStats={processedMaterialStats}
@@ -796,6 +855,8 @@ export default function Reports() {
           totalProductsFoot={totalProductsFoot}
           totalProductsBundles={totalProductsBundles}
           totalPurchases={totalPurchases}
+          totalBills={totalBills}
+          totalSales={totalSales}
           totalExpenses={totalExpenses}
           netProfit={netProfit}
           customers={customers}

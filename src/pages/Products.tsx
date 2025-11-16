@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useProductStore } from '@/store/useProductStore';
 import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialStore';
 import { useRawMaterialStore } from '@/store/useRawMaterialStore';
@@ -34,6 +34,12 @@ export default function Products() {
   const [showCustomProductForm, setShowCustomProductForm] = useState(false);
   const [editingCustomProduct, setEditingCustomProduct] = useState<CustomProduct | null>(null);
   const [showCustomProductList, setShowCustomProductList] = useState(false);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const deleteCustomProduct = useCustomProductStore((state) => state.deleteCustomProduct);
 
@@ -130,9 +136,36 @@ export default function Products() {
   };
 
   const totalStock = getTotalStock();
-  // Count products with bundles > 0 (available products)
-  const availableProductsCount = Object.values(productStock).filter(stock => stock.bundles > 0).length;
   const reportSectionRef = useRef<HTMLDivElement>(null);
+
+  // Filter productions based on search term, availability, and date range
+  const filteredProductions = useMemo(() => {
+    return productions.filter((production) => {
+      // Search filter
+      const matchesSearch = searchTerm === '' || 
+        production.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        production.productNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        production.productTara?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Availability filter
+      const productStockData = productStock[production.productName] || { foot: 0, bundles: 0 };
+      const isAvailable = productStockData.bundles > 0;
+      const matchesAvailability = 
+        availabilityFilter === 'all' ||
+        (availabilityFilter === 'available' && isAvailable) ||
+        (availabilityFilter === 'unavailable' && !isAvailable);
+
+      // Date range filter
+      const productionDate = new Date(production.date);
+      const matchesStartDate = startDate === '' || productionDate >= new Date(startDate);
+      const matchesEndDate = endDate === '' || productionDate <= new Date(endDate);
+
+      return matchesSearch && matchesAvailability && matchesStartDate && matchesEndDate;
+    });
+  }, [productions, searchTerm, availabilityFilter, startDate, endDate, productStock]);
+
+  // Count total productions (not just unique products)
+  const totalProductionsCount = productions.length;
 
   // Print handler
   const handlePrint = () => {
@@ -168,7 +201,7 @@ export default function Products() {
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
               {language === 'ur' ? 'مصنوعات کی تعداد' : 'Number of Products'}
             </div>
-            <div className="text-3xl font-bold text-gray-900">{availableProductsCount}</div>
+            <div className="text-3xl font-bold text-gray-900">{totalProductionsCount}</div>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
@@ -181,23 +214,108 @@ export default function Products() {
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          {language === 'ur' ? 'فلٹرز' : 'Filters'}
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {language === 'ur' ? 'تلاش کریں' : 'Search'}
+            </label>
+            <input
+              type="text"
+              placeholder={language === 'ur' ? 'نام، نمبر یا تارا' : 'Name, Number or Tara'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Availability Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {language === 'ur' ? 'دستیابی' : 'Availability'}
+            </label>
+            <select
+              value={availabilityFilter}
+              onChange={(e) => setAvailabilityFilter(e.target.value as 'all' | 'available' | 'unavailable')}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">{language === 'ur' ? 'تمام' : 'All'}</option>
+              <option value="available">{language === 'ur' ? 'دستیاب' : 'Available'}</option>
+              <option value="unavailable">{language === 'ur' ? 'دستیاب نہیں' : 'Unavailable'}</option>
+            </select>
+          </div>
+
+          {/* Start Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {language === 'ur' ? 'شروع کی تاریخ' : 'Start Date'}
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* End Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {language === 'ur' ? 'آخری تاریخ' : 'End Date'}
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Clear Filters Button */}
+        {(searchTerm || availabilityFilter !== 'all' || startDate || endDate) && (
+          <div className="mt-4 flex justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setSearchTerm('');
+                setAvailabilityFilter('all');
+                setStartDate('');
+                setEndDate('');
+              }}
+            >
+              {language === 'ur' ? 'فلٹرز صاف کریں' : 'Clear Filters'}
+            </Button>
+          </div>
+        )}
+      </div>
+
       {/* Productions List */}
       <div id="products-report-section" ref={reportSectionRef} className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 no-print">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">
-            {productions.length === 0
+            {filteredProductions.length === 0
               ? t('noProductionsFound', 'product')
-              : `${productions.length} ${t('productionsFound', 'product')}`}
+              : `${filteredProductions.length} ${t('productionsFound', 'product')}`}
           </h2>
-          {productions.length > 0 && (
+          {filteredProductions.length > 0 && (
             <Button variant="secondary" onClick={handlePrint} className="no-print">
               🖨️ {language === 'ur' ? 'پرنٹ' : 'Print'}
             </Button>
           )}
         </div>
-        {productions.length === 0 ? (
+        {filteredProductions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">{t('noProductionsFound', 'product')}</p>
+            <p className="text-gray-500 text-lg">
+              {searchTerm || availabilityFilter !== 'all' || startDate || endDate
+                ? (language === 'ur' ? 'کوئی نتیجہ نہیں ملا' : 'No results found')
+                : t('noProductionsFound', 'product')}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -231,7 +349,7 @@ export default function Products() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {productions.map((production) => {
+                {filteredProductions.map((production) => {
                   // Get purchases for this specific product production
                   const productPurchases = purchases.filter((p) => p.productProductionId === production.id);
                   const totalPurchasedBundles = productPurchases.reduce((sum, p) => sum + p.quantityBundles, 0);

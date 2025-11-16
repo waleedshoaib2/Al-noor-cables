@@ -1,6 +1,6 @@
 import { formatDate, formatCurrency } from '@/utils/helpers';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { RawMaterial, ProcessedRawMaterial, ProductProduction, CustomerPurchase, Expense } from '@/types';
+import type { RawMaterial, ProcessedRawMaterial, ProductProduction, CustomerPurchase, Expense, Bill } from '@/types';
 import { format } from 'date-fns';
 
 interface ReportPrintViewProps {
@@ -16,6 +16,7 @@ interface ReportPrintViewProps {
   filteredProcessedMaterials: ProcessedRawMaterial[];
   filteredProductions: ProductProduction[];
   filteredPurchases: CustomerPurchase[];
+  filteredBills: Bill[];
   filteredExpenses: Expense[];
   rawMaterialStats: Record<string, { total: number; batches: number; avgPerBatch: number }>;
   processedMaterialStats: Record<string, { 
@@ -36,6 +37,8 @@ interface ReportPrintViewProps {
   totalProductsFoot: number;
   totalProductsBundles: number;
   totalPurchases: number;
+  totalBills: number;
+  totalSales: number;
   totalExpenses: number;
   netProfit: number;
   customers?: Array<{ id: number; name: string }>;
@@ -54,6 +57,7 @@ export default function ReportPrintView({
   filteredProcessedMaterials,
   filteredProductions,
   filteredPurchases,
+  filteredBills,
   filteredExpenses,
   rawMaterialStats,
   processedMaterialStats,
@@ -63,6 +67,8 @@ export default function ReportPrintView({
   totalProductsFoot,
   totalProductsBundles,
   totalPurchases,
+  totalBills,
+  totalSales,
   totalExpenses,
   netProfit,
   customers = [],
@@ -187,11 +193,16 @@ export default function ReportPrintView({
           {(reportCategory === 'all' || reportCategory === 'purchases') && (
             <div className="border border-gray-300 p-3">
               <div className="text-sm text-gray-600">
-                {language === 'ur' ? 'کل خریداری' : 'Total Purchases'}
+                {language === 'ur' ? 'کل فروخت' : 'Total Sales'}
               </div>
-              <div className="text-xl font-bold text-gray-900">{formatCurrency(totalPurchases)}</div>
+              <div className="text-xl font-bold text-gray-900">{formatCurrency(totalSales)}</div>
               <div className="text-xs text-gray-500 mt-1">
-                {filteredPurchases.length} {language === 'ur' ? 'خریداری' : 'purchases'}
+                {filteredPurchases.length + filteredBills.length} {language === 'ur' ? 'لین دین' : 'transactions'}
+              </div>
+              <div className="text-xs text-gray-400">
+                {language === 'ur' ? 
+                  `(${filteredPurchases.length} خریداری + ${filteredBills.length} بل)` : 
+                  `(${filteredPurchases.length} purchases + ${filteredBills.length} bills)`}
               </div>
             </div>
           )}

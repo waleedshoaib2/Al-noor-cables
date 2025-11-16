@@ -7,7 +7,8 @@ import type {
   CustomerPurchase, 
   Expense, 
   Employee,
-  Scrap
+  Scrap,
+  Bill
 } from '@/types';
 
 interface SyncStatus {
@@ -22,6 +23,7 @@ interface SyncStatus {
     expenses: number;
     employees: number;
     scrap: number;
+    bills: number;
   };
   isSyncing: boolean;
   error: string | null;
@@ -40,6 +42,7 @@ class SupabaseSyncService {
       expenses: 0,
       employees: 0,
       scrap: 0,
+      bills: 0,
     },
     isSyncing: false,
     error: null,
@@ -55,6 +58,43 @@ class SupabaseSyncService {
       this.saveSyncStatus();
     });
     this.loadSyncStatus();
+  }
+
+  // Helper methods for case conversion between TypeScript (camelCase) and PostgreSQL (snake_case)
+  private camelToSnake(str: string): string {
+    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  }
+
+  private snakeToCamel(str: string): string {
+    return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+  }
+
+  private convertKeysToSnakeCase(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    if (obj instanceof Date) return obj;
+    if (Array.isArray(obj)) return obj.map(item => this.convertKeysToSnakeCase(item));
+    if (typeof obj !== 'object') return obj;
+
+    const converted: any = {};
+    Object.keys(obj).forEach(key => {
+      const snakeKey = this.camelToSnake(key);
+      converted[snakeKey] = this.convertKeysToSnakeCase(obj[key]);
+    });
+    return converted;
+  }
+
+  private convertKeysToCamelCase(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    if (obj instanceof Date) return obj;
+    if (Array.isArray(obj)) return obj.map(item => this.convertKeysToCamelCase(item));
+    if (typeof obj !== 'object') return obj;
+
+    const converted: any = {};
+    Object.keys(obj).forEach(key => {
+      const camelKey = this.snakeToCamel(key);
+      converted[camelKey] = this.convertKeysToCamelCase(obj[key]);
+    });
+    return converted;
   }
 
   isOnline(): boolean {
@@ -144,6 +184,7 @@ class SupabaseSyncService {
       const expenses = this.loadFromStorage<Expense>('alnoor_expenses');
       const employees = this.loadFromStorage<Employee>('alnoor_employees');
       const scrap = this.loadFromStorage<Scrap>('alnoor_scrap');
+      const bills = this.loadFromStorage<Bill>('bill-storage');
       
       console.log('📊 Data loaded:', {
         rawMaterials: rawMaterials.length,
@@ -154,6 +195,7 @@ class SupabaseSyncService {
         expenses: expenses.length,
         employees: employees.length,
         scrap: scrap.length,
+        bills: bills.length,
       });
 
       // Sync each collection
@@ -166,6 +208,7 @@ class SupabaseSyncService {
       await this.syncCollection('expenses', expenses);
       await this.syncCollection('employees', employees);
       await this.syncCollection('scrap', scrap);
+      await this.syncCollection('bills', bills);
       console.log('✅ All collections synced successfully!');
 
       this.syncStatus.lastSyncTime = new Date();
@@ -178,6 +221,7 @@ class SupabaseSyncService {
         expenses: 0,
         employees: 0,
         scrap: 0,
+        bills: 0,
       };
       this.saveSyncStatus();
 
@@ -223,6 +267,8 @@ class SupabaseSyncService {
         return parsed.rawMaterials;
       } else if (parsed.processedMaterials) {
         return parsed.processedMaterials;
+      } else if (parsed.bills) {
+        return parsed.bills;
       }
       
       console.log(`Unknown format for key ${key}:`, parsed);
@@ -274,10 +320,13 @@ class SupabaseSyncService {
       return normalized;
     });
 
+    // Convert camelCase keys to snake_case for PostgreSQL
+    const snakeCaseData = normalizedData.map(item => this.convertKeysToSnakeCase(item));
+
     // Use upsert to handle conflicts (update if exists, insert if not)
     const { data: result, error } = await supabase
       .from(collectionName)
-      .upsert(normalizedData, {
+      .upsert(snakeCaseData, {
         onConflict: 'id',
         ignoreDuplicates: false,
       });
@@ -310,6 +359,7 @@ class SupabaseSyncService {
         'expenses',
         'employees',
         'scrap',
+        'bills',
       ];
 
       const cloudData: Record<string, any[]> = {};
@@ -321,7 +371,8 @@ class SupabaseSyncService {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        cloudData[collection] = data || [];
+        // Convert snake_case keys from database to camelCase for TypeScript
+        cloudData[collection] = (data || []).map(item => this.convertKeysToCamelCase(item));
       }
 
       return { success: true, data: cloudData };

@@ -5,6 +5,7 @@ import { useProcessedRawMaterialStore } from '@/store/useProcessedRawMaterialSto
 import { useProductStore } from '@/store/useProductStore';
 import { useCustomerStore } from '@/store/useCustomerStore';
 import { useCustomerPurchaseStore } from '@/store/useCustomerPurchaseStore';
+import { useBillStore } from '@/store/useBillStore';
 import { useExpenseStore } from '@/store/useExpenseStore';
 import { useLanguageStore } from '@/store/useLanguageStore';
 import { Button } from '@/components/Common/Button';
@@ -34,6 +35,7 @@ export default function Dashboard() {
   
   const customers = useCustomerStore((state) => state.customers);
   const purchases = useCustomerPurchaseStore((state) => state.purchases);
+  const bills = useBillStore((state) => state.bills);
   
   const expenses = useExpenseStore((state) => state.expenses);
   const getTotalByPeriod = useExpenseStore((state) => state.getTotalByPeriod);
@@ -46,6 +48,13 @@ export default function Dashboard() {
     (p) => new Date(p.date) >= startOfDay(today) && new Date(p.date) <= endOfDay(today)
   );
   const todayPurchasesTotal = todayPurchases.reduce((sum, p) => sum + (p.price || 0), 0);
+  
+  // Add today's bills total to purchases
+  const todayBills = bills.filter(
+    (b) => new Date(b.date) >= startOfDay(today) && new Date(b.date) <= endOfDay(today)
+  );
+  const todayBillsTotal = todayBills.reduce((sum, b) => sum + (b.total || 0), 0);
+  const totalTodaySales = todayPurchasesTotal + todayBillsTotal;
   const monthExpenses = getTotalByPeriod(startOfMonth(today), endOfMonth(today));
 
   const recentPurchases = purchases.slice(0, 5).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -89,9 +98,12 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">
-            {language === 'ur' ? 'کل مصنوعات' : 'Total Products'}
+            {language === 'ur' ? 'مصنوعات کی تعداد' : 'Total Products'}
           </div>
           <div className="text-3xl font-bold text-gray-900">{productions.length}</div>
+          <div className="text-xs text-gray-500 mt-1">
+            {language === 'ur' ? 'پروڈکشنز' : 'productions'}
+          </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">
@@ -101,9 +113,14 @@ export default function Dashboard() {
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">
-            {language === 'ur' ? 'آج کی خریداری' : "Today's Purchases"}
+            {language === 'ur' ? 'آج کی فروخت' : "Today's Sales"}
           </div>
-          <div className="text-3xl font-bold text-green-600">{formatCurrency(todayPurchasesTotal)}</div>
+          <div className="text-3xl font-bold text-green-600">{formatCurrency(totalTodaySales)}</div>
+          <div className="text-xs text-gray-500 mt-1">
+            {language === 'ur' ? 
+              `(${todayPurchases.length} خریداری + ${todayBills.length} بل)` : 
+              `(${todayPurchases.length} purchases + ${todayBills.length} bills)`}
+          </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-sm text-gray-600">
@@ -212,9 +229,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="text-sm text-gray-600">
-              {language === 'ur' ? 'مصنوعات کی تعداد' : 'Number of Products'}
+              {language === 'ur' ? 'دستیاب مصنوعات' : 'Available Products'}
             </div>
             <div className="text-2xl font-bold text-brand-orange">{availableProductsCount}</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {language === 'ur' ? 'منفرد مصنوعات' : 'unique products'}
+            </div>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="text-sm text-gray-600">

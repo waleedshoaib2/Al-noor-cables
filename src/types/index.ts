@@ -208,3 +208,24 @@ export interface CustomPVCMaterial {
   name: string; // Custom PVC material name
   createdAt: Date;
 }
+
+export interface BillItem {
+  bundle: number;
+  name: string; // Size in mm (e.g., "20 mm")
+  wire: string; // Wire/Cable description (e.g., "180 تارا و تمبر")
+  feet: number;
+  totalFeet: number;
+  price: number; // Price/Amount in rupees (manually entered)
+}
+
+export interface Bill {
+  id: number;
+  billNumber: string; // Document number (e.g., "No.002")
+  customerName: string;
+  date: Date;
+  items: BillItem[];
+  total: number; // Total amount in rupees
+  address?: string;
+  notes?: string;
+  createdAt: Date;
+}

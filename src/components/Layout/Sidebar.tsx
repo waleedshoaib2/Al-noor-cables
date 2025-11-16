@@ -9,6 +9,7 @@ export default function Sidebar() {
     { path: '/processed-materials', label: 'Processed Materials', icon: '🔧' },
     { path: '/products', label: 'Products', icon: '📦' },
     { path: '/customers', label: 'Customers', icon: '👥' },
+    { path: '/billing', label: 'Billing', icon: '🧾' },
     { path: '/expenses', label: 'Expenses', icon: '💰' },
     { path: '/employees', label: 'Employee Management', icon: '👔' },
     { path: '/scrap', label: 'Scrap', icon: '🗑️' },

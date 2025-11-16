@@ -12,6 +12,7 @@ import Reports from './pages/Reports';
 import EmployeeManagement from './pages/EmployeeManagement';
 import Scrap from './pages/Scrap';
 import PVCMaterials from './pages/PVCMaterials';
+import Billing from './pages/Billing';
 import MainLayout from './components/Layout/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -189,6 +190,18 @@ function App() {
             isAuthenticated ? (
               <MainLayout>
                 <PVCMaterials />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/billing"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <Billing />
               </MainLayout>
             ) : (
               <Navigate to="/login" replace />
