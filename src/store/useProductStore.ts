@@ -378,3 +378,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 }));
 
+// Listen for stock updates from customer purchases
+if (typeof window !== 'undefined') {
+  window.addEventListener('product-stock-updated', () => {
+    useProductStore.getState().loadFromStorage();
+  });
+}
+

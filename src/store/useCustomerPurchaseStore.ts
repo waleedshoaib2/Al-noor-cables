@@ -55,6 +55,31 @@ const saveToStorage = (purchases: CustomerPurchase[]) => {
   }
 };
 
+// Helper function to update product stock
+const updateProductStock = (productName: string, bundlesDelta: number, footDelta: number = 0) => {
+  try {
+    const productStorage = localStorage.getItem('product-storage');
+    if (productStorage) {
+      const productData = JSON.parse(productStorage);
+      if (productData.stock && productData.stock[productName]) {
+        productData.stock[productName].bundles += bundlesDelta;
+        productData.stock[productName].foot += footDelta;
+        
+        // Ensure stock doesn't go negative
+        productData.stock[productName].bundles = Math.max(0, productData.stock[productName].bundles);
+        productData.stock[productName].foot = Math.max(0, productData.stock[productName].foot);
+        
+        localStorage.setItem('product-storage', JSON.stringify(productData));
+        
+        // Trigger a custom event to notify ProductStore to reload
+        window.dispatchEvent(new CustomEvent('product-stock-updated'));
+      }
+    }
+  } catch (error) {
+    console.error('Error updating product stock:', error);
+  }
+};
+
 const initialData = loadFromStorage();
 
 export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get) => ({
@@ -66,6 +91,9 @@ export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get)
       id: Date.now(),
       createdAt: new Date(),
     };
+
+    // Update product stock (decrease by purchase quantity)
+    updateProductStock(purchase.productName, -purchase.quantityBundles);
 
     set((state) => {
       const newState = {
@@ -79,6 +107,14 @@ export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get)
 
   updatePurchase: (id, purchase) => {
     set((state) => {
+      const existingPurchase = state.purchases.find(p => p.id === id);
+      
+      // If quantity changed, adjust stock
+      if (existingPurchase && purchase.quantityBundles !== undefined) {
+        const quantityDelta = existingPurchase.quantityBundles - purchase.quantityBundles;
+        updateProductStock(existingPurchase.productName, quantityDelta);
+      }
+      
       const updated = state.purchases.map((p) =>
         p.id === id ? { ...p, ...purchase } : p
       );
@@ -90,6 +126,13 @@ export const useCustomerPurchaseStore = create<CustomerPurchaseState>((set, get)
 
   deletePurchase: (id) => {
     set((state) => {
+      const purchase = state.purchases.find(p => p.id === id);
+      
+      // Restore stock when deleting purchase
+      if (purchase) {
+        updateProductStock(purchase.productName, purchase.quantityBundles);
+      }
+      
       const newState = {
         purchases: state.purchases.filter((p) => p.id !== id),
       };
