@@ -13,6 +13,7 @@ import EmployeeManagement from './pages/EmployeeManagement';
 import Scrap from './pages/Scrap';
 import PVCMaterials from './pages/PVCMaterials';
 import Billing from './pages/Billing';
+import CustomKhata from './pages/CustomKhata';
 import MainLayout from './components/Layout/MainLayout';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -202,6 +203,18 @@ function App() {
             isAuthenticated ? (
               <MainLayout>
                 <Billing />
+              </MainLayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/custom-khata"
+          element={
+            isAuthenticated ? (
+              <MainLayout>
+                <CustomKhata />
               </MainLayout>
             ) : (
               <Navigate to="/login" replace />

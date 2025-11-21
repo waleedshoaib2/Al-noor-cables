@@ -229,3 +229,13 @@ export interface Bill {
   notes?: string;
   createdAt: Date;
 }
+
+export interface CustomKhata {
+  id: number;
+  idNumber: string; // ID number (e.g., "1554209", "1291209")
+  amount: number; // Amount value
+  amountColor: 'red' | 'black'; // Color for amount display
+  details: string; // Details/Description in Urdu
+  date: Date;
+  createdAt: Date;
+}

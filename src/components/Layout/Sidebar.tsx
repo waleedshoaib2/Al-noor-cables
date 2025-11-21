@@ -14,15 +14,16 @@ export default function Sidebar() {
     { path: '/employees', label: 'Employee Management', icon: '👔' },
     { path: '/scrap', label: 'Scrap', icon: '🗑️' },
     { path: '/pvc-materials', label: 'PVC Materials', icon: '🧪' },
+    { path: '/custom-khata', label: 'Custom Khata', icon: '📝' },
     { path: '/reports', label: 'Reports', icon: '📄' },
   ];
 
   return (
-    <aside className="w-64 bg-brand-blue border-r border-brand-blue-dark min-h-screen">
-      <nav className="p-4">
+    <aside className="w-64 bg-brand-blue border-r border-brand-blue-dark h-full">
+      <nav className="p-4 h-full overflow-y-auto">
         <ul className="space-y-2">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || location.hash === `#${item.path}`;
             return (
               <li key={item.path}>
                 <Link
@@ -33,8 +34,8 @@ export default function Sidebar() {
                       : 'text-gray-200 hover:bg-brand-blue-dark hover:text-white'
                   }`}
                 >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.label}
+                  <span className={`mr-3 ${isActive ? 'text-white' : 'text-gray-200'}`}>{item.icon}</span>
+                  <span className={isActive ? 'text-white' : 'text-gray-200'}>{item.label}</span>
                 </Link>
               </li>
             );
