@@ -74,7 +74,9 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
           <div className="text-sm text-gray-600">
             {language === 'ur' ? 'کل مقدار' : 'Total Quantity'}
           </div>
-          <div className="text-xl font-bold text-gray-900">{Math.round(totalQuantity)} kgs</div>
+          <div className="text-xl font-bold text-gray-900">
+            {Math.round(totalQuantity)} {materials.some(m => m.materialType === 'Steel') ? 'foot' : 'kgs'}
+          </div>
         </div>
         <div className="border border-gray-300 p-3">
           <div className="text-sm text-gray-600">
@@ -94,7 +96,7 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
             {Object.entries(totalByMaterial).map(([type, qty]) => (
               <div key={type} className="border border-gray-300 p-3">
                 <div className="text-sm text-gray-600">{type}</div>
-                <div className="text-lg font-bold text-gray-900">{Math.round(qty)} kgs</div>
+                <div className="text-lg font-bold text-gray-900">{Math.round(qty)} {type === 'Steel' ? 'foot' : 'kgs'}</div>
               </div>
             ))}
           </div>
@@ -122,10 +124,10 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
                 {language === 'ur' ? 'تاریخ' : 'Date'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                {language === 'ur' ? 'مقدار (کلوگرام)' : 'Quantity (kgs)'}
+                {language === 'ur' ? 'مقدار' : 'Quantity'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-right text-sm font-semibold text-gray-900">
-                {language === 'ur' ? 'دستیاب (کلوگرام)' : 'Available (kgs)'}
+                {language === 'ur' ? 'دستیاب' : 'Available'}
               </th>
               <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold text-gray-900">
                 {language === 'ur' ? 'نوٹس' : 'Notes'}
@@ -148,10 +150,10 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
                   {formatDate(material.date)}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                  {Math.round(material.originalQuantity)}
+                  {Math.round(material.originalQuantity)} {material.materialType === 'Steel' ? 'foot' : 'kgs'}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                  {Math.round(material.quantity)}
+                  {Math.round(material.quantity)} {material.materialType === 'Steel' ? 'foot' : 'kgs'}
                 </td>
                 <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900">
                   {material.notes || '-'}
@@ -165,10 +167,10 @@ export default function RawMaterialPrintView({ materials, filters }: RawMaterial
                 {language === 'ur' ? 'کل:' : 'Total:'}
               </td>
               <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                {Math.round(totalQuantity)} kgs
+                {Math.round(totalQuantity)} {materials.some(m => m.materialType === 'Steel') ? 'foot' : 'kgs'}
               </td>
               <td className="border border-gray-300 px-3 py-2 text-sm text-gray-900 text-right">
-                {Math.round(totalAvailable)} kgs
+                {Math.round(totalAvailable)} {materials.some(m => m.materialType === 'Steel') ? 'foot' : 'kgs'}
               </td>
               <td className="border border-gray-300 px-3 py-2"></td>
             </tr>

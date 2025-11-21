@@ -46,6 +46,7 @@ export default function RawMaterials() {
 
   const totalCopper = getTotalByMaterialType('Copper');
   const totalSilver = getTotalByMaterialType('Silver');
+  const totalSteel = getTotalByMaterialType('Steel');
   const totalAll = rawMaterials.reduce((sum, m) => sum + m.quantity, 0);
 
   // Get unique material types and suppliers for filter
@@ -142,9 +143,9 @@ export default function RawMaterials() {
         <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
           <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              {t('totalAllMaterials')}
+              Steel
             </div>
-            <div className="text-3xl font-bold text-gray-900">{Math.round(totalAll)} <span className="font-bold">kgs</span></div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(totalSteel)} <span className="font-bold">foot</span></div>
           </div>
         </div>
       </div>

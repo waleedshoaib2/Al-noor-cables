@@ -61,8 +61,8 @@ export interface RawMaterial {
   materialType: string;
   supplier: string;
   date: Date;
-  quantity: number; // in kgs (available/remaining quantity - gets reduced when used)
-  originalQuantity: number; // in kgs (original quantity when added - never changes)
+  quantity: number; // in foot (available/remaining quantity - gets reduced when used)
+  originalQuantity: number; // in foot (original quantity when added - never changes)
   batchId: string;
   notes?: string;
   createdAt: Date;

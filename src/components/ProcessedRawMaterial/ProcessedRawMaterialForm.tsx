@@ -93,8 +93,11 @@ export default function ProcessedRawMaterialForm({
         {
           name: material.name,
           numberOfBundles: material.numberOfBundles.toString(),
-          // Display total safi weight (weightPerBundle * numberOfBundles) when editing
-          weightPerBundle: (material.weightPerBundle * material.numberOfBundles).toString(),
+          // For Steel: weightPerBundle is already per bundle, use as-is
+          // For others: display total safi weight (weightPerBundle * numberOfBundles) when editing
+          weightPerBundle: material.materialType === 'Steel'
+            ? material.weightPerBundle.toString()
+            : (material.weightPerBundle * material.numberOfBundles).toString(),
           grossWeightPerBundle: material.grossWeightPerBundle?.toString() || '',
           weight: material.weight?.toString() || '',
         },
@@ -102,10 +105,18 @@ export default function ProcessedRawMaterialForm({
     }
   }, [material]);
 
-  // Calculate total output for stock checking (weightPerBundle now stores total safi weight)
+  // Calculate total output for stock checking
+  // For Steel: total = numberOfBundles * weightPerBundle
+  // For others: weightPerBundle stores total safi weight
   const totalOutput = processedMaterials.reduce((sum, pm) => {
-    const totalWeight = parseFloat(pm.weightPerBundle) || 0;
-    return sum + totalWeight;
+    if (formData.materialType === 'Steel') {
+      const bundles = parseInt(pm.numberOfBundles, 10) || 0;
+      const weightPerBundle = parseFloat(pm.weightPerBundle) || 0;
+      return sum + (bundles * weightPerBundle);
+    } else {
+      const totalWeight = parseFloat(pm.weightPerBundle) || 0;
+      return sum + totalWeight;
+    }
   }, 0);
 
   useEffect(() => {
@@ -159,10 +170,18 @@ export default function ProcessedRawMaterialForm({
       newErrors.date = language === 'ur' ? 'تاریخ درکار ہے' : 'Date is required';
     }
 
-    // Calculate total output (weightPerBundle now stores total safi weight)
+    // Calculate total output
+    // For Steel: total = numberOfBundles * weightPerBundle
+    // For others: weightPerBundle stores total safi weight
     const totalOutput = processedMaterials.reduce((sum, pm) => {
-      const totalWeight = parseFloat(pm.weightPerBundle) || 0;
-      return sum + totalWeight;
+      if (formData.materialType === 'Steel') {
+        const bundles = parseInt(pm.numberOfBundles, 10) || 0;
+        const weightPerBundle = parseFloat(pm.weightPerBundle) || 0;
+        return sum + (bundles * weightPerBundle);
+      } else {
+        const totalWeight = parseFloat(pm.weightPerBundle) || 0;
+        return sum + totalWeight;
+      }
     }, 0);
 
     if (totalOutput <= 0) {
@@ -186,9 +205,9 @@ export default function ProcessedRawMaterialForm({
       }
       if (!pm.weightPerBundle || parseFloat(pm.weightPerBundle) <= 0) {
         rowErrors.weightPerBundle =
-          language === 'ur'
-            ? 'کل صافی وزن 0 سے زیادہ ہونا چاہیے'
-            : 'Total safi weight must be greater than 0';
+          formData.materialType === 'Steel'
+            ? (language === 'ur' ? 'فی بنڈل وزن 0 سے زیادہ ہونا چاہیے' : 'Weight per bundle must be greater than 0')
+            : (language === 'ur' ? 'کل صافی وزن 0 سے زیادہ ہونا چاہیے' : 'Total safi weight must be greater than 0');
       }
       if (Object.keys(rowErrors).length > 0) {
         newMaterialErrors[index] = rowErrors;
@@ -200,8 +219,8 @@ export default function ProcessedRawMaterialForm({
       if (totalOutput > availableStock) {
         newErrors.totalOutput =
           language === 'ur'
-            ? `دستیاب اسٹاک: ${availableStock.toFixed(2)} کلوگرام`
-            : `Available stock: ${availableStock.toFixed(2)} kgs`;
+            ? `دستیاب اسٹاک: ${availableStock.toFixed(2)} ${formData.materialType === 'Steel' ? 'فٹ' : 'کلوگرام'}`
+            : `Available stock: ${availableStock.toFixed(2)} ${formData.materialType === 'Steel' ? 'foot' : 'kgs'}`;
       }
     }
 
@@ -220,10 +239,18 @@ export default function ProcessedRawMaterialForm({
     setLoading(true);
 
     try {
-      // Calculate input quantity from total output (weightPerBundle now stores total safi weight)
+      // Calculate input quantity from total output
+      // For Steel: total = numberOfBundles * weightPerBundle
+      // For others: weightPerBundle stores total safi weight
       const totalOutput = processedMaterials.reduce((sum, pm) => {
-        const totalWeight = parseFloat(pm.weightPerBundle) || 0;
-        return sum + totalWeight;
+        if (formData.materialType === 'Steel') {
+          const bundles = parseInt(pm.numberOfBundles, 10) || 0;
+          const weightPerBundle = parseFloat(pm.weightPerBundle) || 0;
+          return sum + (bundles * weightPerBundle);
+        } else {
+          const totalWeight = parseFloat(pm.weightPerBundle) || 0;
+          return sum + totalWeight;
+        }
       }, 0);
       const inputQty = totalOutput; // Input equals total output
       
@@ -242,9 +269,11 @@ export default function ProcessedRawMaterialForm({
         // Legacy: update single material
         const pm = processedMaterials[0];
         const numBundles = parseInt(pm.numberOfBundles, 10);
-        const totalSafiWeight = parseFloat(pm.weightPerBundle);
-        // Calculate weightPerBundle from total safi weight
-        const weightPerBundle = numBundles > 0 ? totalSafiWeight / numBundles : 0;
+        // For Steel: weightPerBundle is already per bundle, use as-is
+        // For others: weightPerBundle stores total, calculate per bundle
+        const weightPerBundle = formData.materialType === 'Steel' 
+          ? parseFloat(pm.weightPerBundle) || 0
+          : (numBundles > 0 ? parseFloat(pm.weightPerBundle) / numBundles : 0);
         updateProcessedMaterial(material.id, {
           name: pm.name.trim(),
           materialType: formData.materialType.trim(),
@@ -262,9 +291,11 @@ export default function ProcessedRawMaterialForm({
         // New: add batch with multiple processed materials
         const materialsData = processedMaterials.map((pm) => {
           const numBundles = parseInt(pm.numberOfBundles, 10);
-          const totalSafiWeight = parseFloat(pm.weightPerBundle);
-          // Calculate weightPerBundle from total safi weight
-          const weightPerBundle = numBundles > 0 ? totalSafiWeight / numBundles : 0;
+          // For Steel: weightPerBundle is already per bundle, use as-is
+          // For others: weightPerBundle stores total, calculate per bundle
+          const weightPerBundle = formData.materialType === 'Steel'
+            ? parseFloat(pm.weightPerBundle) || 0
+            : (numBundles > 0 ? parseFloat(pm.weightPerBundle) / numBundles : 0);
           return {
             name: pm.name.trim(),
             numberOfBundles: numBundles,
@@ -316,6 +347,7 @@ export default function ProcessedRawMaterialForm({
           <option value="">{t('selectMaterialType', 'processedMaterial')}</option>
           <option value="Copper">Copper</option>
           <option value="Silver">Silver</option>
+          <option value="Steel">Steel</option>
         </select>
         {formData.materialType && (
           <p className="mt-1 text-xs text-gray-500">
@@ -461,38 +493,89 @@ export default function ProcessedRawMaterialForm({
               </div>
 
               <div className="mt-4 space-y-4">
-                {/* Total Safi Weight (Net Weight) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('totalSafiWeight', 'processedMaterial')} (kgs) *
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={pm.weightPerBundle}
-                    onChange={(e) => {
-                      // Allow numbers and one decimal point
-                      const value = e.target.value.replace(/[^0-9.]/g, '');
-                      // Ensure only one decimal point
-                      const parts = value.split('.');
-                      const filteredValue = parts.length > 2 
-                        ? parts[0] + '.' + parts.slice(1).join('')
-                        : value;
-                      updateProcessedMaterialRow(index, 'weightPerBundle', filteredValue);
-                    }}
-                    className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
-                      materialErrors[index]?.weightPerBundle ? 'border-red-500' : ''
-                    }`}
-                    placeholder="0.00"
-                  />
-                  {materialErrors[index]?.weightPerBundle && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {materialErrors[index].weightPerBundle}
-                    </p>
-                  )}
-                </div>
+                {/* Weight Per Bundle */}
+                {formData.materialType === 'Steel' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {language === 'ur' ? 'فی بنڈل وزن فٹ' : 'Weight per Bundle foot'} *
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={pm.weightPerBundle}
+                        onChange={(e) => {
+                          // Allow numbers and one decimal point
+                          const value = e.target.value.replace(/[^0-9.]/g, '');
+                          // Ensure only one decimal point
+                          const parts = value.split('.');
+                          const filteredValue = parts.length > 2 
+                            ? parts[0] + '.' + parts.slice(1).join('')
+                            : value;
+                          updateProcessedMaterialRow(index, 'weightPerBundle', filteredValue);
+                        }}
+                        className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                          materialErrors[index]?.weightPerBundle ? 'border-red-500' : ''
+                        }`}
+                        placeholder="0.00"
+                      />
+                      {materialErrors[index]?.weightPerBundle && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {materialErrors[index].weightPerBundle}
+                        </p>
+                      )}
+                    </div>
+                    {/* Total Weight (calculated) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {language === 'ur' ? 'کل وزن فٹ' : 'Total Weight foot'} *
+                      </label>
+                      <input
+                        type="text"
+                        value={(() => {
+                          const bundles = parseInt(pm.numberOfBundles, 10) || 0;
+                          const weightPerBundle = parseFloat(pm.weightPerBundle) || 0;
+                          return (bundles * weightPerBundle).toFixed(2);
+                        })()}
+                        readOnly
+                        className="border border-gray-300 rounded-md px-3 py-2 w-full bg-gray-50 text-gray-600 cursor-not-allowed"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('totalSafiWeight', 'processedMaterial')} (kgs) *
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={pm.weightPerBundle}
+                      onChange={(e) => {
+                        // Allow numbers and one decimal point
+                        const value = e.target.value.replace(/[^0-9.]/g, '');
+                        // Ensure only one decimal point
+                        const parts = value.split('.');
+                        const filteredValue = parts.length > 2 
+                          ? parts[0] + '.' + parts.slice(1).join('')
+                          : value;
+                        updateProcessedMaterialRow(index, 'weightPerBundle', filteredValue);
+                      }}
+                      className={`border border-gray-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors ${
+                        materialErrors[index]?.weightPerBundle ? 'border-red-500' : ''
+                      }`}
+                      placeholder="0.00"
+                    />
+                    {materialErrors[index]?.weightPerBundle && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {materialErrors[index].weightPerBundle}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Weight */}
+                {formData.materialType !== 'Steel' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Weight (kgs)
@@ -522,14 +605,17 @@ export default function ProcessedRawMaterialForm({
                     </p>
                   )}
                 </div>
+                )}
               </div>
 
               {/* Individual Output */}
               {parseInt(pm.numberOfBundles, 10) > 0 && parseFloat(pm.weightPerBundle) > 0 && (
                 <div className="mt-2 text-sm text-gray-600">
                   {t('output', 'processedMaterial')}:{' '}
-                  {parseFloat(pm.weightPerBundle).toFixed(2)}{' '}
-                  kgs ({pm.numberOfBundles} {t('bundles', 'processedMaterial')})
+                  {formData.materialType === 'Steel' 
+                    ? ((parseInt(pm.numberOfBundles, 10) || 0) * (parseFloat(pm.weightPerBundle) || 0)).toFixed(2)
+                    : parseFloat(pm.weightPerBundle).toFixed(2)}{' '}
+                  {formData.materialType === 'Steel' ? 'foot' : 'kgs'} ({pm.numberOfBundles} {t('bundles', 'processedMaterial')})
                 </div>
               )}
             </div>
@@ -544,25 +630,29 @@ export default function ProcessedRawMaterialForm({
             <div className="flex justify-between">
               <span className="text-sm text-gray-600">
                 {language === 'ur' 
-                  ? `دستیاب ${formData.materialType === 'Copper' ? 'تانبے' : 'چاندی'} کا اسٹاک`
+                  ? `دستیاب ${formData.materialType === 'Copper' ? 'تانبے' : formData.materialType === 'Silver' ? 'چاندی' : 'اسٹیل'} کا اسٹاک`
                   : `Available ${formData.materialType} Stock`}:
               </span>
               <span className={`text-sm font-semibold ${totalOutput > availableStock ? 'text-red-600' : 'text-gray-900'}`}>
-                {availableStock.toFixed(2)} kgs
+                {availableStock.toFixed(2)} {formData.materialType === 'Steel' ? 'foot' : 'kgs'}
               </span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-sm text-gray-600">{language === 'ur' ? 'تیار شدہ صافی وزن' : 'Safi Weight Produced'}:</span>
+            <span className="text-sm text-gray-600">
+              {formData.materialType === 'Steel' 
+                ? (language === 'ur' ? 'تیار شدہ کل وزن' : 'Total Weight Produced')
+                : (language === 'ur' ? 'تیار شدہ صافی وزن' : 'Safi Weight Produced')}:
+            </span>
             <span className="text-sm font-semibold text-brand-blue">
-              {totalOutput.toFixed(2)} kgs
+              {totalOutput.toFixed(2)} {formData.materialType === 'Steel' ? 'foot' : 'kgs'}
             </span>
           </div>
           {formData.materialType && (
             <div className="flex justify-between border-t pt-2 mt-2">
               <span className="text-xs text-gray-500">{t('availableStock', 'processedMaterial')}:</span>
               <span className={`text-xs font-medium ${totalOutput > availableStock ? 'text-red-600' : 'text-gray-600'}`}>
-                {Math.max(0, availableStock - totalOutput).toFixed(2)} kgs
+                {Math.max(0, availableStock - totalOutput).toFixed(2)} {formData.materialType === 'Steel' ? 'foot' : 'kgs'}
               </span>
             </div>
           )}

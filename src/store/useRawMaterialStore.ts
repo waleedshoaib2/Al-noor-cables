@@ -37,7 +37,7 @@ const loadFromStorage = (): { rawMaterials: RawMaterial[]; materialTypes: string
           // Migration: if originalQuantity doesn't exist, set it to quantity
           originalQuantity: m.originalQuantity ?? m.quantity,
         })) || [],
-        materialTypes: parsed.materialTypes || ['Copper', 'Silver'],
+        materialTypes: parsed.materialTypes || ['Copper', 'Silver', 'Steel'],
         suppliers: parsed.suppliers || [],
       };
     }
@@ -46,7 +46,7 @@ const loadFromStorage = (): { rawMaterials: RawMaterial[]; materialTypes: string
   }
   return {
     rawMaterials: [],
-    materialTypes: ['Copper', 'Silver'],
+    materialTypes: ['Copper', 'Silver', 'Steel'],
     suppliers: [],
   };
 };

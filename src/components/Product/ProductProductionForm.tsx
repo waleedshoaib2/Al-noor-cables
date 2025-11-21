@@ -137,10 +137,11 @@ export default function ProductProductionForm({
         const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
         
         if (weightUsed > availableWeight) {
+          const unit = selectedMaterial.materialType === 'Steel' ? 'foot' : 'kgs';
           newErrors.weightUsed =
             language === 'ur' 
-              ? `دستیاب صافی وزن: ${availableWeight.toFixed(2)} کلوگرام`
-              : `Available safi weight: ${availableWeight.toFixed(2)} kgs`;
+              ? `دستیاب صافی وزن: ${availableWeight.toFixed(2)} ${selectedMaterial.materialType === 'Steel' ? 'فٹ' : 'کلوگرام'}`
+              : `Available safi weight: ${availableWeight.toFixed(2)} ${unit}`;
         }
       }
     }
@@ -181,10 +182,11 @@ export default function ProductProductionForm({
       if (material) {
         const stock = getStockByName(material.name);
         if (stock <= 0) {
+          const unit = material.materialType === 'Steel' ? 'foot' : 'kgs';
           newErrors.processedMaterialId =
             language === 'ur'
-              ? `کوئی اسٹاک دستیاب نہیں: ${stock.toFixed(2)} کلوگرام`
-              : `No stock available: ${stock.toFixed(2)} kgs`;
+              ? `کوئی اسٹاک دستیاب نہیں: ${stock.toFixed(2)} ${material.materialType === 'Steel' ? 'فٹ' : 'کلوگرام'}`
+              : `No stock available: ${stock.toFixed(2)} ${unit}`;
         }
       }
     }
@@ -223,8 +225,9 @@ export default function ProductProductionForm({
       const availableBundles = processedMaterial.numberOfBundles - ((processedMaterial.usedQuantity || 0) / processedMaterial.weightPerBundle);
       const availableWeight = availableBundles * processedMaterial.weightPerBundle;
       if (weightUsed > availableWeight) {
+        const unit = processedMaterial.materialType === 'Steel' ? 'foot' : 'kgs';
         throw new Error(
-          `Insufficient safi weight for ${processedMaterial.name}. Available: ${availableWeight.toFixed(2)} kgs, Required: ${weightUsed.toFixed(2)} kgs`
+          `Insufficient safi weight for ${processedMaterial.name}. Available: ${availableWeight.toFixed(2)} ${unit}, Required: ${weightUsed.toFixed(2)} ${unit}`
         );
       }
 
@@ -280,8 +283,9 @@ export default function ProductProductionForm({
             const oldMaterial = oldProduction.processedMaterialSnapshot;
             deductStockForProduct(oldMaterial.id, oldQuantityUsedKgs);
           }
+          const unit = processedMaterial.materialType === 'Steel' ? 'foot' : 'kgs';
           throw new Error(
-            `Insufficient safi weight for ${processedMaterial.name}. Available: ${availableWeight.toFixed(2)} kgs, Required: ${weightUsed.toFixed(2)} kgs`
+            `Insufficient safi weight for ${processedMaterial.name}. Available: ${availableWeight.toFixed(2)} ${unit}, Required: ${weightUsed.toFixed(2)} ${unit}`
           );
         }
         
@@ -402,7 +406,7 @@ export default function ProductProductionForm({
             const availableBundles = m.numberOfBundles - ((m.usedQuantity || 0) / m.weightPerBundle);
             return (
               <option key={m.id} value={m.id}>
-                {m.name} ({m.materialType}) - {Math.round(getStockByName(m.name))} kgs ({availableBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
+                {m.name} ({m.materialType}) - {Math.round(getStockByName(m.name))} {m.materialType === 'Steel' ? 'foot' : 'kgs'} ({availableBundles.toFixed(2)} {language === 'ur' ? 'بنڈلز' : 'bundles'})
               </option>
             );
           })}
@@ -415,7 +419,7 @@ export default function ProductProductionForm({
       {/* Safi Weight - Always visible, right after Processed Material */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {language === 'ur' ? 'صافی وزن' : 'Safi Weight'} (kgs) *
+          {language === 'ur' ? 'صافی وزن' : 'Safi Weight'} ({selectedMaterial?.materialType === 'Steel' ? 'foot' : 'kgs'}) *
         </label>
         <input
           type="text"
@@ -447,17 +451,18 @@ export default function ProductProductionForm({
             const availableWeight = availableBundles * selectedMaterial.weightPerBundle;
             const weightUsed = parseFloat(formData.weightUsed) || 0;
             const stockLeft = Math.max(0, Math.round(availableWeight - weightUsed));
+            const unit = selectedMaterial.materialType === 'Steel' ? 'foot' : 'kgs';
             return (
               <div className="mt-1 space-y-1">
                 <p className="text-sm text-gray-500">
                   {language === 'ur' 
-                    ? `دستیاب: ${Math.round(availableWeight)} کلوگرام`
-                    : `Available: ${Math.round(availableWeight)} kgs`}
+                    ? `دستیاب: ${Math.round(availableWeight)} ${selectedMaterial.materialType === 'Steel' ? 'فٹ' : 'کلوگرام'}`
+                    : `Available: ${Math.round(availableWeight)} ${unit}`}
                 </p>
                 <p className="text-sm text-gray-500">
                   {language === 'ur' 
-                    ? `باقی اسٹاک: ${stockLeft} کلوگرام`
-                    : `Stock Left: ${stockLeft} kgs`}
+                    ? `باقی اسٹاک: ${stockLeft} ${selectedMaterial.materialType === 'Steel' ? 'فٹ' : 'کلوگرام'}`
+                    : `Stock Left: ${stockLeft} ${unit}`}
                 </p>
               </div>
             );

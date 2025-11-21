@@ -95,6 +95,7 @@ export default function ProcessedRawMaterials() {
   // Calculate totals by material type from ALL batches (unfiltered)
   const allCopperBatches = Object.values(allBatchGroups).filter((b) => b.materialType.toLowerCase() === 'copper');
   const allSilverBatches = Object.values(allBatchGroups).filter((b) => b.materialType.toLowerCase() === 'silver');
+  const allSteelBatches = Object.values(allBatchGroups).filter((b) => b.materialType.toLowerCase() === 'steel');
   
   const copperInput = allCopperBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
   // Calculate available stock from all copper materials (sum of outputQuantity - usedQuantity)
@@ -107,10 +108,17 @@ export default function ProcessedRawMaterials() {
   const silverOutput = allSilverBatches.reduce((sum, batch) => 
     sum + batch.materials.reduce((mSum, m) => mSum + (m.outputQuantity - (m.usedQuantity || 0)), 0), 0
   );
+  
+  const steelInput = allSteelBatches.reduce((sum, batch) => sum + batch.inputQuantity, 0);
+  // Calculate available stock from all steel materials (sum of outputQuantity - usedQuantity)
+  const steelOutput = allSteelBatches.reduce((sum, batch) => 
+    sum + batch.materials.reduce((mSum, m) => mSum + (m.outputQuantity - (m.usedQuantity || 0)), 0), 0
+  );
 
   // Get available raw material stock by type
   const copperRawMaterialAvailable = getAvailableStockByType('Copper');
   const silverRawMaterialAvailable = getAvailableStockByType('Silver');
+  const steelRawMaterialAvailable = getAvailableStockByType('Steel');
 
   // Filter materials for the list display only
   const filteredMaterials = processedMaterials.filter((m) => {
@@ -255,6 +263,31 @@ export default function ProcessedRawMaterials() {
         </div>
       </div>
 
+      {/* Summary Stats - Steel */}
+      <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Steel</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'کل پروسیس شدہ خام مال' : 'Total Processed Raw Material'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(steelInput)} <span className="font-bold">foot</span></div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'دستیاب خام مال' : 'Raw Material Available'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(steelRawMaterialAvailable)} <span className="font-bold">foot</span></div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {language === 'ur' ? 'دستیاب صافی وزن' : 'Safi Weight Available'}
+            </div>
+            <div className="text-3xl font-bold text-gray-900">{Math.round(steelOutput)} <span className="font-bold">foot</span></div>
+          </div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex items-center justify-between mb-4">
@@ -277,6 +310,7 @@ export default function ProcessedRawMaterials() {
               <option value="all">{t('allMaterials', 'processedMaterial')}</option>
               <option value="Copper">Copper</option>
               <option value="Silver">Silver</option>
+              <option value="Steel">Steel</option>
             </select>
           </div>
 

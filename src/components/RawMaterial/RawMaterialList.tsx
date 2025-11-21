@@ -64,7 +64,7 @@ export default function RawMaterialList({ materials, onEdit, onDelete, limit }: 
             <div className="flex items-center gap-4 ml-4">
               <div className="text-right">
                 <div className="text-lg font-bold text-gray-900">
-                  {Math.round(material.originalQuantity)} <span className="font-bold">kgs</span>
+                  {Math.round(material.originalQuantity)} <span className="font-bold">{material.materialType === 'Steel' ? 'foot' : 'kgs'}</span>
                 </div>
               </div>
               <div className="flex gap-2">

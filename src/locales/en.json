@@ -68,7 +68,7 @@
     "materialType": "Material Type",
     "supplier": "Supplier",
     "date": "Date",
-    "quantity": "Quantity (kgs)",
+    "quantity": "Quantity (foot)",
     "batchId": "Batch ID",
     "notes": "Notes",
     "totalCopper": "Total Copper",

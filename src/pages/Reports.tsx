@@ -515,7 +515,7 @@ export default function Reports() {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-700 font-medium">{language === 'ur' ? 'کل مقدار:' : 'Total Quantity:'}</span>
-                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.total)} <span className="font-semibold">kgs</span></span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.total)} <span className="font-semibold">{type === 'Steel' ? 'foot' : 'kgs'}</span></span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-700 font-medium">{language === 'ur' ? 'بیچز:' : 'Batches:'}</span>
@@ -523,7 +523,7 @@ export default function Reports() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-700 font-medium">{language === 'ur' ? 'اوسط فی بیچ:' : 'Avg per Batch:'}</span>
-                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.avgPerBatch)} <span className="font-semibold">kgs</span></span>
+                      <span className="font-bold text-gray-900 text-base">{Math.round(stats.avgPerBatch)} <span className="font-semibold">{type === 'Steel' ? 'foot' : 'kgs'}</span></span>
                     </div>
                   </div>
                 </div>
@@ -625,7 +625,7 @@ export default function Reports() {
                       <td className="py-3 px-6">{m.batchId}</td>
                       <td className="py-3 px-6">{m.materialType}</td>
                       <td className="py-3 px-6">{m.supplier}</td>
-                      <td className="py-3 px-6 font-semibold">{m.quantity.toFixed(2)} kgs</td>
+                      <td className="py-3 px-6 font-semibold">{m.quantity.toFixed(2)} {m.materialType === 'Steel' ? 'foot' : 'kgs'}</td>
                       <td className="py-3 px-6">{formatDate(m.date)}</td>
                     </tr>
                   ))}

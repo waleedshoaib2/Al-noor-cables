@@ -116,6 +116,7 @@ export default function CustomProcessedRawMaterialForm({
           <option value="">{language === 'ur' ? 'منتخب کریں' : 'Select'}</option>
           <option value="Copper">Copper</option>
           <option value="Silver">Silver</option>
+          <option value="Steel">Steel</option>
         </select>
         {errors.priorRawMaterial && (
           <p className="mt-1 text-sm text-red-600">{errors.priorRawMaterial}</p>
